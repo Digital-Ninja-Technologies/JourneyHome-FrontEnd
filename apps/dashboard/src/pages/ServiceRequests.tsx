@@ -80,11 +80,11 @@ export default function ServiceRequests() {
   const canRequest = (plansQ.data ?? []).some((p) => ELIGIBLE_PLAN.has(p.status));
 
   return (
-    <main className="flex max-w-[1200px] flex-col gap-8 p-10">
+    <main className="flex max-w-[1200px] flex-col gap-8 p-5 md:p-10">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="text-sm text-muted"><Link to="/app" className="hover:underline">Dashboard</Link> / Service requests</div>
-          <h1 className="font-serif text-[56px] font-normal leading-[1.05]">Service <span className="italic">requests</span></h1>
+          <h1 className="font-serif text-[36px] font-normal leading-[1.05] sm:text-[44px] md:text-[56px]">Service <span className="italic">requests</span></h1>
         </div>
         {active.length === 0 && canRequest && (
           <Link to="/app/service-requests/new" className="inline-flex h-[52px] items-center rounded-2xl bg-foreground px-6 text-sm font-semibold text-canvas">Request service</Link>

@@ -122,7 +122,7 @@ export default function RequestService() {
   const partial = !!created.current && submit.isError;
 
   return (
-    <main className="flex max-w-[660px] flex-col gap-6 p-10">
+    <main className="flex max-w-[660px] flex-col gap-6 p-5 md:p-10">
       <header className="flex flex-col gap-2">
         <div className="text-sm text-muted">
           <Link to="/app/service-requests" className="hover:underline">Service requests</Link> / New request

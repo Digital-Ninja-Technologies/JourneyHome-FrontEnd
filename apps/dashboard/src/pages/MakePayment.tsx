@@ -10,7 +10,7 @@ import type { Plan } from "../lib/types";
 
 function Shell({ crumb, children }: { crumb?: string; children: React.ReactNode }) {
   return (
-    <main className="flex max-w-[540px] flex-col gap-6 p-10">
+    <main className="flex max-w-[540px] flex-col gap-6 p-5 md:p-10">
       <header>
         <div className="text-sm text-muted">
           <Link to="/app/plans" className="hover:underline">My plans</Link> / {crumb ?? "Make a payment"}

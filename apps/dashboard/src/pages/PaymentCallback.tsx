@@ -72,7 +72,7 @@ export default function PaymentCallback() {
   }
 
   return (
-    <main className="flex max-w-[540px] flex-col items-start gap-4 p-10 pt-24" aria-live="polite">
+    <main className="flex max-w-[540px] flex-col items-start gap-4 p-5 md:p-10 pt-24" aria-live="polite">
       {icon}
       <h1 className="font-serif text-[40px] font-normal leading-tight">{title}</h1>
       <p className="text-muted">{body}</p>

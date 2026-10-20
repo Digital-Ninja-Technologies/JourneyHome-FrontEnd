@@ -34,7 +34,7 @@ export default function HowItWorks() {
         <Photo
           src={images.howStep1}
           alt="A family together, planning ahead with care"
-          className="h-[581px] w-full rounded-[32px]"
+          className="h-[320px] w-full rounded-[32px] md:h-[581px]"
           style={{ objectPosition: "50% 18%" }}
         />
       </Container>
@@ -81,7 +81,7 @@ export default function HowItWorks() {
         </div>
 
         <div className="grid items-center gap-12 md:grid-cols-2">
-          <Photo src={images.howStep4} alt="" className="min-h-[340px] w-full rounded-[32px]" />
+          <Photo src={images.howStep4} alt="" className="min-h-[220px] w-full rounded-[32px] md:min-h-[340px]" />
           <Step n="04" title="We capture the day">
             Full-day photography and videography, delivered as an edited keepsake film and a printed album, so your family can be present, not managing logistics.
           </Step>

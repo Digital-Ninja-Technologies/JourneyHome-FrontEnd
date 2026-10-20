@@ -40,11 +40,14 @@ export function SiteHeader() {
           );
         })}
       </nav>
-      <div className="flex items-center gap-3.5">
-        <a href={LOGIN_URL} className="text-sm font-bold">
+      <div className="flex items-center gap-2 sm:gap-3.5">
+        <a href={LOGIN_URL} className="hidden text-sm font-bold sm:inline">
           Log in
         </a>
-        <a href={SIGNUP_URL} className="inline-flex h-12 items-center rounded-full bg-accent px-6 text-sm font-extrabold text-foreground">
+        <a
+          href={SIGNUP_URL}
+          className="inline-flex h-11 items-center rounded-full bg-accent px-4 text-sm font-extrabold text-foreground sm:h-12 sm:px-6"
+        >
           Get started →
         </a>
       </div>

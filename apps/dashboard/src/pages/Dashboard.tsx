@@ -117,22 +117,22 @@ export default function Dashboard() {
   const dueNow = live.find(isDue);
 
   return (
-    <main className="flex flex-col gap-8 p-10">
+    <main className="flex flex-col gap-8 p-5 md:p-10">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="text-sm text-muted">{formatToday(now)}</div>
-          <h1 className="font-serif text-[56px] font-normal leading-[1.05]">
+          <h1 className="font-serif text-[36px] font-normal leading-[1.05] sm:text-[44px] md:text-[56px]">
             {greeting(now)}, <span className="italic">{user ? firstName(user.name) : ""}</span>
           </h1>
         </div>
-        <div className="flex items-center gap-3">
-          <Link to="/app/plans?new=1" className="inline-flex h-[52px] items-center gap-2 rounded-2xl bg-foreground px-6 text-sm font-semibold text-canvas">
-            <Plus className="size-4" /> Create new plan
+        <div className="flex flex-wrap items-center gap-3">
+          <Link to="/app/plans?new=1" className="inline-flex h-[52px] items-center gap-2 rounded-2xl bg-foreground px-4 text-sm font-semibold text-canvas sm:px-6">
+            <Plus className="size-4" /> <span className="whitespace-nowrap">Create new plan</span>
           </Link>
-          <Link to="/app/notifications" aria-label="Notifications" className="grid size-[52px] place-items-center rounded-2xl border border-border bg-white">
+          <Link to="/app/notifications" aria-label="Notifications" className="grid size-[52px] shrink-0 place-items-center rounded-2xl border border-border bg-white">
             <Bell className="size-[18px]" />
           </Link>
-          <Link to="/app/profile" aria-label={user?.name} className="grid size-[52px] place-items-center rounded-full bg-[#A9C4B0] text-sm font-bold text-foreground">
+          <Link to="/app/profile" aria-label={user?.name} className="grid size-[52px] shrink-0 place-items-center rounded-full bg-[#A9C4B0] text-sm font-bold text-foreground">
             {user ? initials(user.name) : ""}
           </Link>
         </div>

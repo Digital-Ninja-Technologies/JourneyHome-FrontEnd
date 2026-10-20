@@ -249,10 +249,10 @@ function CloseAccount() {
 export default function Profile() {
   const meQ = useMe();
   return (
-    <main className="flex max-w-[820px] flex-col gap-6 p-10">
+    <main className="flex max-w-[820px] flex-col gap-6 p-5 md:p-10">
       <header>
         <div className="text-sm text-muted"><Link to="/app" className="hover:underline">Dashboard</Link> / Profile &amp; settings</div>
-        <h1 className="font-serif text-[56px] font-normal leading-[1.05]">Profile &amp; <span className="italic">settings</span></h1>
+        <h1 className="font-serif text-[36px] font-normal leading-[1.05] sm:text-[44px] md:text-[56px]">Profile &amp; <span className="italic">settings</span></h1>
       </header>
       <DemoNotice>Changes are saved in this browser only.</DemoNotice>
       {meQ.isError && isUnsupported(meQ.error) && (

@@ -43,7 +43,7 @@ export default async function Home() {
             <span className="size-1.5 rounded-full bg-status-active" />
             Now serving 24 states
           </span>
-          <h1 className="text-6xl font-extrabold leading-none tracking-[-2px] md:text-[72px]">
+          <h1 className="text-[44px] font-extrabold leading-none tracking-[-1px] sm:text-6xl sm:tracking-[-2px] md:text-[72px]">
             Save ahead.
             <br />
             Prepare with <Accent className="whitespace-nowrap text-[1.1em]">dignity.</Accent>
@@ -71,7 +71,7 @@ export default async function Home() {
             </div>
           </div>
         </div>
-        <div className="relative min-h-[600px] overflow-hidden rounded-[32px] shadow-2xl">
+        <div className="relative min-h-[320px] overflow-hidden rounded-[32px] shadow-2xl md:min-h-[600px]">
           <Photo src={images.hero} alt="A Nigerian family together, smiling" className="absolute inset-0 size-full" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-foreground/70" />
           <span className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-white/90 px-3.5 py-1.5 text-xs font-bold text-status-active">
@@ -100,7 +100,7 @@ export default async function Home() {
       <Container className="grid grid-cols-2 gap-8 py-14 md:grid-cols-4">
         {STATS.map(([n, label]) => (
           <div key={label}>
-            <div className="text-[44px] font-extrabold tracking-tight">{n}</div>
+            <div className="text-[32px] font-extrabold tracking-tight md:text-[44px]">{n}</div>
             <div className="text-sm text-muted">{label}</div>
           </div>
         ))}
@@ -110,7 +110,7 @@ export default async function Home() {
       <Container className="flex flex-col gap-8 py-16">
         <div className="flex flex-col gap-3">
           <Eyebrow>Why families choose us</Eyebrow>
-          <h2 className="max-w-2xl text-[44px] font-extrabold leading-[1.1] tracking-tight">Built for peace of mind, not paperwork.</h2>
+          <h2 className="max-w-2xl text-[32px] font-extrabold leading-[1.1] tracking-tight md:text-[44px]">Built for peace of mind, not paperwork.</h2>
         </div>
         <div className="grid gap-5 md:grid-cols-[1.4fr_1fr] md:grid-rows-2">
           <div className="flex flex-col justify-between gap-10 rounded-[32px] bg-foreground p-10 md:row-span-2">
@@ -154,7 +154,7 @@ export default async function Home() {
       <Container className="flex flex-col gap-10 py-16">
         <div className="flex flex-col gap-3">
           <Eyebrow className="text-status-active">Features</Eyebrow>
-          <h2 className="max-w-xl text-[44px] font-extrabold leading-[1.1] tracking-tight">Everything you need, in one place.</h2>
+          <h2 className="max-w-xl text-[32px] font-extrabold leading-[1.1] tracking-tight md:text-[44px]">Everything you need, in one place.</h2>
           <p className="max-w-lg text-base leading-relaxed text-muted">
             From the first contribution to the final keepsake, Journey Home handles the logistics so your family doesn&rsquo;t have to.
           </p>
@@ -175,12 +175,12 @@ export default async function Home() {
       </Container>
 
       {/* HOW IT WORKS TEASER */}
-      <section className="bg-foreground py-20">
+      <section className="bg-foreground py-14 md:py-20">
         <Container className="flex flex-col gap-10">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="flex flex-col gap-3">
               <Eyebrow className="text-accent">How it works</Eyebrow>
-              <h2 className="text-[44px] font-extrabold tracking-tight text-canvas">Four steps, taken gently.</h2>
+              <h2 className="text-[32px] font-extrabold tracking-tight text-canvas md:text-[44px]">Four steps, taken gently.</h2>
             </div>
             <Link href="/how-it-works" className="text-sm font-bold text-accent">
               See the full walkthrough →
@@ -208,7 +208,7 @@ export default async function Home() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-3">
             <Eyebrow>Pricing</Eyebrow>
-            <h2 className="max-w-xl text-[44px] font-extrabold leading-[1.1] tracking-tight">Save at whatever pace suits your family.</h2>
+            <h2 className="max-w-xl text-[32px] font-extrabold leading-[1.1] tracking-tight md:text-[44px]">Save at whatever pace suits your family.</h2>
           </div>
           <Link href="/pricing" className="text-sm font-bold">
             Compare all packages →
@@ -218,9 +218,9 @@ export default async function Home() {
       </Container>
 
       {/* TESTIMONIAL */}
-      <section className="bg-cream py-24">
+      <section className="bg-cream py-16 md:py-24">
         <Container className="flex flex-col items-center gap-8 text-center">
-          <blockquote className="max-w-3xl font-serif text-[38px] leading-[1.2] text-[#2A1B07]">
+          <blockquote className="max-w-3xl font-serif text-[26px] leading-[1.3] text-[#2A1B07] md:text-[38px] md:leading-[1.2]">
             &ldquo;We had been saving for two years without really knowing what for. When the day came, Journey Home just{" "}
             <Accent>showed up</Accent> — the film they gave us is the thing my children watch every year.&rdquo;
           </blockquote>
@@ -235,10 +235,10 @@ export default async function Home() {
       </section>
 
       {/* CLOSING CTA */}
-      <Container className="py-24">
-        <div className="relative flex flex-col items-center gap-5 overflow-hidden rounded-[40px] bg-foreground px-8 py-20 text-center">
+      <Container className="py-14 md:py-24">
+        <div className="relative flex flex-col items-center gap-5 overflow-hidden rounded-[40px] bg-foreground px-6 py-14 text-center sm:px-8 md:py-20">
           <div className="absolute -bottom-40 left-1/2 size-[380px] -translate-x-1/2 rounded-full bg-forest/60" aria-hidden />
-          <h2 className="relative text-5xl font-extrabold tracking-tight text-canvas">
+          <h2 className="relative text-4xl font-extrabold tracking-tight text-canvas md:text-5xl">
             Start your family&rsquo;s plan <Accent className="text-accent">today.</Accent>
           </h2>
           <p className="relative max-w-md text-base leading-relaxed text-canvas/80">

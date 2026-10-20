@@ -67,7 +67,7 @@ export default function About() {
       <Container className="grid gap-10 border-y border-border py-14 md:grid-cols-[1fr_1.6fr]">
         <div>
           <div className="text-xs font-extrabold uppercase tracking-[2px] text-link">Founded</div>
-          <div className="mt-2 text-6xl font-extrabold tracking-tight">2026</div>
+          <div className="mt-2 text-[40px] font-extrabold tracking-tight md:text-6xl">2026</div>
         </div>
         <div>
           <div className="text-xs font-extrabold uppercase tracking-[2px] text-link">Our mission</div>
@@ -97,7 +97,7 @@ export default function About() {
             what the day requires — so no family has to find one from scratch while grieving.
           </p>
         </div>
-        <div className="relative min-h-[360px] overflow-hidden rounded-[32px]">
+        <div className="relative min-h-[240px] overflow-hidden rounded-[32px] md:min-h-[360px]">
           <Photo
             src={images.aboutOrigin}
             alt="The Journey Home team"
@@ -108,12 +108,12 @@ export default function About() {
       </Container>
 
       {/* VISION */}
-      <section className="bg-foreground py-24">
+      <section className="bg-foreground py-16 md:py-24">
         <Container className="flex flex-col items-center gap-6 text-center">
           <div className="flex size-14 items-center justify-center rounded-2xl bg-canvas/10 text-accent">
             <Heart className="size-7" />
           </div>
-          <h2 className="max-w-3xl font-serif text-[40px] font-normal italic leading-[1.25] text-canvas">
+          <h2 className="max-w-3xl font-serif text-[28px] font-normal italic leading-[1.3] text-canvas md:text-[40px] md:leading-[1.25]">
             We believe a family&rsquo;s last gift to someone they loved should be presence, not paperwork.
           </h2>
         </Container>
@@ -123,7 +123,7 @@ export default function About() {
       <Container className="flex flex-col gap-10 py-20">
         <div className="flex flex-col gap-3">
           <Eyebrow>What we stand for</Eyebrow>
-          <h2 className="max-w-xl text-[44px] font-extrabold leading-[1.1] tracking-tight">Five things we don&rsquo;t compromise on.</h2>
+          <h2 className="max-w-xl text-[32px] font-extrabold leading-[1.1] tracking-tight md:text-[44px]">Five things we don&rsquo;t compromise on.</h2>
         </div>
         <div className="flex flex-col gap-4">
           {VALUES.map(({ n, icon: Icon, title, body }) => (
@@ -160,9 +160,9 @@ export default function About() {
       </Container>
 
       {/* IMPACT */}
-      <section className="bg-cream py-24">
+      <section className="bg-cream py-16 md:py-24">
         <Container className="grid gap-12 md:grid-cols-[1fr_1fr] md:items-center">
-          <div className="relative min-h-[320px] overflow-hidden rounded-[32px] md:order-2">
+          <div className="relative min-h-[240px] overflow-hidden rounded-[32px] md:order-2 md:min-h-[320px]">
             <Photo src={images.photographer} alt="One of our network photographers" className="absolute inset-0 size-full" />
           </div>
           <div className="flex flex-col gap-5 md:order-1">
@@ -183,7 +183,7 @@ export default function About() {
         <div className="grid gap-8 border-t border-border pt-10 md:grid-cols-3">
           {MILESTONES.map(([n, label]) => (
             <div key={label}>
-              <div className="text-[44px] font-extrabold tracking-tight">{n}</div>
+              <div className="text-[32px] font-extrabold tracking-tight md:text-[44px]">{n}</div>
               <div className="text-sm text-muted">{label}</div>
             </div>
           ))}

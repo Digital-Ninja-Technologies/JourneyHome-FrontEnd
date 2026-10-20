@@ -23,11 +23,11 @@ export default function PlanDetail() {
   const paymentsQ = usePayments();
   const plan = planQ.data;
 
-  if (planQ.isPending) return <main className="p-10 text-muted">Loading plan…</main>;
+  if (planQ.isPending) return <main className="p-5 md:p-10 text-muted">Loading plan…</main>;
   if (planQ.isError || !plan) {
     const missing = planQ.error instanceof ApiError && (planQ.error.status === 404 || planQ.error.status === 400);
     return (
-      <main className="flex flex-col items-start gap-3 p-10">
+      <main className="flex flex-col items-start gap-3 p-5 md:p-10">
         <h1 className="font-serif text-4xl">{missing ? "We couldn’t find that plan" : "Something went wrong"}</h1>
         <p className="text-muted">{missing ? "It may have been removed, or it belongs to a different account." : planQ.error?.message}</p>
         <div className="flex gap-4 text-sm font-bold text-link">
@@ -47,7 +47,7 @@ export default function PlanDetail() {
   const canPay = canPayNow(plan);
 
   return (
-    <main className="flex max-w-[800px] flex-col gap-6 p-10">
+    <main className="flex max-w-[800px] flex-col gap-6 p-5 md:p-10">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <div className="text-sm text-muted">

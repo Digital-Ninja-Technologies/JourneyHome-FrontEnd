@@ -72,13 +72,13 @@ export default function Payments() {
   const error = plansQ.error ?? paymentsQ.error;
 
   return (
-    <main className="flex max-w-[1200px] flex-col gap-6 p-10">
+    <main className="flex max-w-[1200px] flex-col gap-6 p-5 md:p-10">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="text-sm text-muted">
             <Link to="/app" className="hover:underline">Dashboard</Link> / Payments
           </div>
-          <h1 className="font-serif text-[56px] font-normal leading-[1.05]">Payments</h1>
+          <h1 className="font-serif text-[36px] font-normal leading-[1.05] sm:text-[44px] md:text-[56px]">Payments</h1>
         </div>
         {plans.some(canPayNow) && (
           <Link to="/app/payments/new" className="inline-flex h-[52px] items-center rounded-2xl bg-foreground px-6 text-sm font-semibold text-canvas">
