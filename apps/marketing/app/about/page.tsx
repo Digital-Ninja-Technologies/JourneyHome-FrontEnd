@@ -41,7 +41,6 @@ const VALUES = [
 ];
 
 const MILESTONES = [
-  ["12,400+", "Families saving with us"],
   ["380+", "Verified photographers & videographers"],
   ["24", "States covered"],
 ];
@@ -180,7 +179,7 @@ export default function About() {
       {/* MILESTONES */}
       <Container className="flex flex-col gap-10 py-20">
         <h2 className="max-w-lg text-[36px] font-extrabold leading-[1.15] tracking-tight">We&rsquo;re just getting started.</h2>
-        <div className="grid gap-8 border-t border-border pt-10 md:grid-cols-3">
+        <div className="grid gap-8 border-t border-border pt-10 md:grid-cols-2">
           {MILESTONES.map(([n, label]) => (
             <div key={label}>
               <div className="text-[32px] font-extrabold tracking-tight md:text-[44px]">{n}</div>
