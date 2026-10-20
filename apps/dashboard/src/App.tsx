@@ -1,26 +1,20 @@
-import { Route, Routes } from "react-router-dom";
-import { Button } from "@journeyhome/ui/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@journeyhome/ui/components/card";
-
-function Home() {
-  return (
-    <main className="mx-auto max-w-3xl p-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Welcome back</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Button variant="accent">Get started</Button>
-        </CardContent>
-      </Card>
-    </main>
-  );
-}
+import { Navigate, Route, Routes } from "react-router-dom";
+import { GuestOnly, RequireAuth } from "./components/RequireAuth";
+import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route element={<GuestOnly />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+      </Route>
+      <Route element={<RequireAuth />}>
+        <Route path="/app" element={<Dashboard />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/app" replace />} />
     </Routes>
   );
 }

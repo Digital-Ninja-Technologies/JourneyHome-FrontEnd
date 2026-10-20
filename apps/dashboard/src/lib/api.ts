@@ -1,0 +1,38 @@
+const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3043/api/v1";
+
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
+
+let getToken: () => string | null = () => null;
+let onUnauthorized: () => void = () => {};
+
+export function configureApi(opts: { getToken: () => string | null; onUnauthorized: () => void }) {
+  getToken = opts.getToken;
+  onUnauthorized = opts.onUnauthorized;
+}
+
+export async function api<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
+  const token = getToken();
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      method: init.method ?? (init.body ? "POST" : "GET"),
+      headers: {
+        ...(init.body ? { "Content-Type": "application/json" } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: init.body ? JSON.stringify(init.body) : undefined,
+    });
+  } catch {
+    throw new ApiError(0, "Can't reach the server. Check your connection and try again.");
+  }
+  const json = await res.json().catch(() => null);
+  if (!res.ok) {
+    if (res.status === 401 && token) onUnauthorized();
+    throw new ApiError(res.status, json?.message ?? "Something went wrong. Please try again.");
+  }
+  return json.data as T;
+}
