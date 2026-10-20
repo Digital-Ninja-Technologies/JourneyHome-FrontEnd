@@ -12,12 +12,23 @@ export function Accent({ className, ...props }: React.ComponentProps<"span">) {
   return <span className={cn("font-serif font-normal italic text-link", className)} {...props} />;
 }
 
-export function PageHero({ eyebrow, children, intro }: { eyebrow: string; children: React.ReactNode; intro?: string }) {
+export function PageHero({
+  eyebrow,
+  children,
+  intro,
+  center = true,
+}: {
+  eyebrow: string;
+  children: React.ReactNode;
+  intro?: string;
+  /** Mockups center every page hero except About's (which pairs with left-aligned intro prose). */
+  center?: boolean;
+}) {
   return (
-    <Container className="flex flex-col gap-4 pb-12 pt-14">
+    <Container className={cn("flex flex-col gap-4 pb-12 pt-14", center && "items-center text-center")}>
       <Eyebrow>{eyebrow}</Eyebrow>
-      <h1 className="max-w-3xl text-5xl font-extrabold leading-[1.05] tracking-tight md:text-[56px]">{children}</h1>
-      {intro && <p className="max-w-xl text-lg leading-relaxed text-muted">{intro}</p>}
+      <h1 className={cn("max-w-3xl text-5xl font-extrabold leading-[1.05] tracking-tight md:text-[56px]", center && "mx-auto")}>{children}</h1>
+      {intro && <p className={cn("max-w-xl text-lg leading-relaxed text-muted", center && "mx-auto")}>{intro}</p>}
     </Container>
   );
 }

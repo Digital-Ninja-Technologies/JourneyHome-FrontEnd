@@ -50,7 +50,11 @@ export default function About() {
   return (
     <main>
       {/* HERO */}
-      <PageHero eyebrow="About us" intro="Journey Home exists so that when the hardest day comes, your family's only job is to grieve — not to scramble for money, a photographer, or a plan.">
+      <PageHero
+        eyebrow="About us"
+        intro="Journey Home exists so that when the hardest day comes, your family's only job is to grieve — not to scramble for money, a photographer, or a plan."
+        center={false}
+      >
         Grief shouldn&rsquo;t come with <Accent>guesswork.</Accent>
       </PageHero>
 
