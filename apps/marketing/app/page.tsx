@@ -198,7 +198,7 @@ export default async function Home() {
                 </div>
               ))}
             </div>
-            <Photo src={images.howItWorks} alt="A photographer capturing a multi-generational family portrait at home" className="min-h-[360px] w-full rounded-[32px]" />
+            <Photo src={images.howItWorks} alt="A photographer capturing a multi-generational family portrait at home" className="h-full max-h-[460px] min-h-[280px] w-full rounded-[32px]" />
           </div>
         </Container>
       </section>
