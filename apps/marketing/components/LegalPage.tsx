@@ -6,7 +6,7 @@ export function LegalPage({ title, accent, updated, sections }: { title: string;
       <PageHero eyebrow="Legal" intro={`Last updated: ${updated}`}>
         {title} <Accent>{accent}</Accent>
       </PageHero>
-      <Container className="max-w-3xl pb-24 md:mx-0 md:ml-[max(0px,calc((100%-1440px)/2))]">
+      <Container className="max-w-3xl pb-24">
         <div className="flex flex-col gap-9">
           {sections.map((s) => (
             <section key={s.heading} className="flex flex-col gap-2.5">
