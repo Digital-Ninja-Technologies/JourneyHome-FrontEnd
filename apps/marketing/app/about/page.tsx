@@ -63,7 +63,7 @@ export default function About() {
       <Container className="grid gap-10 border-y border-border py-14 md:grid-cols-[1fr_1.6fr]">
         <div>
           <div className="text-xs font-extrabold uppercase tracking-[2px] text-link">Founded</div>
-          <div className="mt-2 text-6xl font-extrabold tracking-tight">2025</div>
+          <div className="mt-2 text-6xl font-extrabold tracking-tight">2026</div>
         </div>
         <div>
           <div className="text-xs font-extrabold uppercase tracking-[2px] text-link">Our mission</div>
