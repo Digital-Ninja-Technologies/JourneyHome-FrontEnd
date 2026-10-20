@@ -213,3 +213,21 @@ and the admin Payments, Audit log, preferences and session-revoke screens are bu
 (`apps/*/src/mocks`): verification code `123456`, reset link `/reset-password?token=demo-token`, and so on. Set
 `VITE_USE_MOCKS=false` to turn it off in dev (or `true` to force it on in a build). Production builds have it off by
 default, and a server that returns 404 for one of these endpoints produces a clear "not available yet" message.
+
+## Deploying to Vercel
+
+Three Vercel projects, one per app, all linked to this repo with a different **Root Directory**:
+
+| Project | Root Directory | Framework |
+|---|---|---|
+| `journeyhome-marketing` | `apps/marketing` | Next.js |
+| `journeyhome-dashboard` | `apps/dashboard` | Vite (SPA rewrite in `vercel.json`) |
+| `journeyhome-admin` | `apps/admin` | Vite (SPA rewrite in `vercel.json`) |
+
+Environment variables are baked in at build time, so **redeploy after changing them**:
+
+- marketing: `NEXT_PUBLIC_API_URL` (backend, ending in `/api/v1`), `NEXT_PUBLIC_APP_URL` (dashboard URL)
+- dashboard: `VITE_API_URL`, `VITE_MARKETING_URL`
+- admin: `VITE_API_URL`, `VITE_MARKETING_URL`
+
+Demo mode is off in these builds, so screens whose endpoints the backend lacks show a "not available yet" message.
