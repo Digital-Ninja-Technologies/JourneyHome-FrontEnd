@@ -5,7 +5,7 @@ import { NoticeBanner } from "../components/NoticeBanner";
 import { PAYMENT_TEXT, StatusPill } from "../components/StatusPill";
 import { ApiError } from "../lib/api";
 import { capitalise, formatDay, formatMoney, formatMonthYear } from "../lib/format";
-import { MARKETING_URL, contributionCount, nextCell, payLink, planNotice, PAYABLE, startedLabel } from "../lib/plans";
+import { MARKETING_URL, canPayNow, contributionCount, nextCell, payLink, planNotice, startedLabel } from "../lib/plans";
 import { usePayments, usePlan } from "../lib/queries";
 
 function Detail({ label, value, wide }: { label: string; value?: string; wide?: boolean }) {
@@ -44,7 +44,7 @@ export default function PlanDetail() {
   const notice = planNotice(plan);
   const person = plan.coveredPerson;
   const history = (paymentsQ.data ?? []).filter((p) => p.plan === plan._id && p.status !== "Pending");
-  const canPay = PAYABLE.has(plan.status) || plan.status === "Pending";
+  const canPay = canPayNow(plan);
 
   return (
     <main className="flex max-w-[800px] flex-col gap-6 p-10">
@@ -63,7 +63,7 @@ export default function PlanDetail() {
         </div>
         {canPay && (
           <Link to={payLink(plan)} className="inline-flex h-12 items-center rounded-2xl bg-accent px-6 text-sm font-bold text-foreground">
-            {plan.status === "Pending" ? "Complete payment" : "Make a payment"}
+            Complete payment
           </Link>
         )}
       </header>

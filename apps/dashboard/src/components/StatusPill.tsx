@@ -40,10 +40,10 @@ export function StatusPill({ status, className }: { status: PlanStatus; classNam
 }
 
 export const PAYMENT_TEXT: Record<PaymentStatus, string> = {
-  Pending: "text-status-paused",
+  Pending: "text-status-due",
   Processing: "text-status-due",
   Successful: "text-status-active",
   Failed: "text-status-cancelled",
-  Refunded: "text-status-review",
-  Cancelled: "text-status-cancelled",
+  Refunded: "text-muted",
+  Cancelled: "text-muted",
 };

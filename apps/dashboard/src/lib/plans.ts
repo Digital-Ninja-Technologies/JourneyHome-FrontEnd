@@ -8,8 +8,15 @@ export const contributionCount = (p: Plan) => Math.round(p.totalContributedMinor
 export const relationshipLabel = (p: Plan) => capitalise(p.coveredPerson.relationship);
 export const startedLabel = (p: Plan) => formatMonthYear(p.startDate);
 
-/** Statuses where the customer can pay a contribution. */
-export const PAYABLE = new Set<Plan["status"]>(["Active", "Payment_Due", "Overdue"]);
+/** Plans that are making monthly contributions. */
+export const LIVE = new Set<Plan["status"]>(["Active", "Payment_Due", "Overdue"]);
+export const isDue = (p: Plan) => p.status === "Payment_Due" || p.status === "Overdue" || daysUntil(p.nextPaymentDate) <= 0;
+
+/**
+ * The backend only lets a customer start a checkout for a plan's first contribution (Pending plans).
+ * Every later contribution is charged automatically, so there is nothing to pay manually.
+ */
+export const canPayNow = (p: Plan) => p.status === "Pending";
 export const payLink = (p: Plan) => `/app/payments/new?plan=${p._id}`;
 
 export type Notice = { tone: "due" | "review" | "neutral"; text: string; policy?: boolean };

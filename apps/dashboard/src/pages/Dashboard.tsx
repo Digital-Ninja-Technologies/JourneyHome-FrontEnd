@@ -7,13 +7,12 @@ import {
   capitalise, daysUntil, firstName, formatDay, formatDayLong, formatMoney, formatMonthYear, formatToday,
   greeting, initials, nextBirthday,
 } from "../lib/format";
+import { LIVE, canPayNow, isDue, payLink } from "../lib/plans";
 import { usePayments, usePlans } from "../lib/queries";
 import type { Payment, Plan } from "../lib/types";
 
 const MARKETING_URL = import.meta.env.VITE_MARKETING_URL ?? "";
-const LIVE = new Set<Plan["status"]>(["Active", "Payment_Due", "Overdue"]);
 const HIDDEN = new Set<Plan["status"]>(["Cancelled", "Expired"]);
-const isDue = (p: Plan) => p.status === "Payment_Due" || p.status === "Overdue" || daysUntil(p.nextPaymentDate) <= 0;
 
 function dueLabel(p: Plan) {
   const d = daysUntil(p.nextPaymentDate);
@@ -33,7 +32,7 @@ function SummaryCard({ label, children, sub, subClass }: { label: string; childr
 
 function PlanCard({ plan }: { plan: Plan }) {
   const dark = plan.status === "Active";
-  const due = plan.status === "Payment_Due" || plan.status === "Overdue";
+  const pay = canPayNow(plan);
   const count = Math.round(plan.totalContributedMinor / plan.contributionAmountMinor);
   const name = capitalise(plan.coveredPerson.relationship) || firstName(plan.coveredPerson.fullName);
   return (
@@ -56,13 +55,13 @@ function PlanCard({ plan }: { plan: Plan }) {
         <span>{dueLabel(plan)}</span>
       </div>
       <Link
-        to={due ? `/app/payments/new?plan=${plan._id}` : `/app/plans/${plan._id}`}
+        to={pay ? payLink(plan) : `/app/plans/${plan._id}`}
         className={cn(
           "inline-flex h-11 items-center justify-center rounded-xl text-sm font-bold",
-          due ? "bg-accent text-foreground" : dark ? "border border-canvas/30 text-canvas" : "border border-foreground",
+          pay ? "bg-accent text-foreground" : dark ? "border border-canvas/30 text-canvas" : "border border-foreground",
         )}
       >
-        {due ? `Pay ${formatMoney(plan.contributionAmountMinor, plan.currency)} now` : "View plan"}
+        {pay ? "Complete payment" : "View plan"}
       </Link>
     </article>
   );

@@ -7,7 +7,7 @@ import { StatusPill } from "../components/StatusPill";
 import { formatMoney } from "../lib/format";
 import {
   contributionCount, fullName, lastPaymentLabel, nextCell, payLink, planNotice, relationshipLabel, startedLabel,
-  PAYABLE,
+  canPayNow,
 } from "../lib/plans";
 import { usePlans } from "../lib/queries";
 import type { Plan } from "../lib/types";
@@ -30,13 +30,7 @@ function PlanSection({ plan }: { plan: Plan }) {
   const next = nextCell(plan);
   const money = (n: number) => formatMoney(n, plan.currency);
   const details = { to: `/app/plans/${plan._id}`, label: "View details" };
-  const primary = plan.status === "Pending"
-    ? { to: payLink(plan), label: "Complete payment" }
-    : plan.status === "Active"
-      ? { to: payLink(plan), label: "Make a payment" }
-      : PAYABLE.has(plan.status)
-        ? { to: payLink(plan), label: `Pay ${money(plan.contributionAmountMinor)} now` }
-        : null;
+  const primary = canPayNow(plan) ? { to: payLink(plan), label: "Complete payment" } : null;
   const meta = `${relationshipLabel(plan)} · ${plan.packageSnapshot.name} package · ${
     plan.status === "Completed" ? "Service completed" : `Started ${startedLabel(plan)}`
   }`;

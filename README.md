@@ -147,3 +147,13 @@ Get started links).
   in `apps/marketing/lib/images.ts`.
 - **Contact form:** there is no contact endpoint on the backend, so "Send message" opens the
   visitor's email client addressed to `hello@journeyhome.ng`.
+
+### Payments (dashboard)
+
+- Only a plan's **first contribution** can be started by the customer (`POST /payments/plans/:id/initialize-initial`,
+  Pending plans only). Every later contribution is charged automatically by the backend's billing job, so "Make a
+  payment" explains that instead of offering a manual payment. A manual pay endpoint would need to be added to the
+  backend first.
+- **Paystack return URL:** the backend does not send a `callback_url` when it initializes checkout, so Paystack sends
+  customers to the callback URL set in the **Paystack dashboard**. Set it to `<dashboard origin>/app/payments/callback`
+  (the page verifies the payment via `POST /payments/verify/:reference`).

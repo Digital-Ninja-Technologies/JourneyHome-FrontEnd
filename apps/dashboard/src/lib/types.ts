@@ -35,6 +35,8 @@ export interface Payment {
   currency: string;
   purpose: "initial_contribution" | "recurring_contribution";
   status: PaymentStatus;
+  reference?: string;
+  failureMessage?: string;
   processedAt?: string;
   createdAt: string;
 }
