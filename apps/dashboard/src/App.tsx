@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
 import { GuestOnly, RequireAuth } from "./components/RequireAuth";
 import Dashboard from "./pages/Dashboard";
+import DemoCheckout from "./pages/DemoCheckout";
 import ForgotPassword from "./pages/ForgotPassword";
 import Login from "./pages/Login";
 import Notifications from "./pages/Notifications";
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="/signup/plan" element={<OnboardingPlan />} />
         <Route path="/signup/payment" element={<OnboardingPayment />} />
         <Route path="/welcome" element={<Welcome />} />
+        <Route path="/demo/checkout" element={<DemoCheckout />} />
         <Route path="/app" element={<AppShell />}>
           <Route index element={<Dashboard />} />
           <Route path="plans" element={<Plans />} />

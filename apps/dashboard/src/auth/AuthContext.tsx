@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import { api, configureApi } from "../lib/api";
 
 export interface User {
@@ -63,9 +63,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSession(null);
   }, []);
 
-  useEffect(() => {
-    configureApi({ getToken: () => session?.token ?? null, onUnauthorized: logout });
-  }, [session, logout]);
+  // Configure the API client during the first render (not in an effect): child components start fetching in their own
+  // effects, which run before this component's, and those first requests must already carry the token.
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
+  const logoutRef = useRef(logout);
+  logoutRef.current = logout;
+  useState(() => {
+    configureApi({ getToken: () => sessionRef.current?.token ?? null, onUnauthorized: () => logoutRef.current() });
+  });
 
   const start = useCallback((result: AuthResult, remember: boolean) => {
     assertCustomer(result.user);

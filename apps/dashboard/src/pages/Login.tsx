@@ -5,6 +5,7 @@ import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
 import { useAuth } from "../auth/AuthContext";
 import { AuthShell } from "../components/AuthShell";
+import { DemoLogin } from "../components/DemoLogin";
 
 export default function Login() {
   const { login } = useAuth();
@@ -29,6 +30,7 @@ export default function Login() {
 
   return (
     <AuthShell title="Welcome" accent="back." subtitle="Log in to see your plans, payments, and upcoming services.">
+      <DemoLogin />
       <form onSubmit={onSubmit} className="flex flex-col gap-8">
         <section className="flex flex-col gap-4 rounded-[20px] bg-card p-7 shadow-sm">
           <div className="flex flex-col gap-1.5">

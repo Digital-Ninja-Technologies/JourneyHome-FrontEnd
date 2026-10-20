@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { api, uploadToStorage } from "./api";
 import type { DocumentType, Plan, ServiceDocument, ServiceRequest } from "./types";
 import type { Tone } from "../components/StatusPill";
 
@@ -58,13 +58,13 @@ export async function uploadServiceDocument(requestId: string, file: File, docum
   const init = await api<{ fileId: string; uploadUrl: string; uploadToken: string }>(`/service-requests/${requestId}/documents/upload-url`, {
     body: { documentType, fileName: file.name, contentType: file.type, size: file.size },
   });
-  let res: Response;
+  let res: Response | null;
   try {
-    res = await fetch(init.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
+    res = await uploadToStorage(init.uploadUrl, file);
   } catch {
     throw new Error(`Couldn't upload ${file.name}. Check your connection and try again.`);
   }
-  if (!res.ok) throw new Error(`Couldn't upload ${file.name} (storage returned ${res.status}).`);
+  if (res && !res.ok) throw new Error(`Couldn't upload ${file.name} (storage returned ${res.status}).`);
   return api<ServiceDocument>(`/service-requests/${requestId}/documents/complete`, {
     body: { fileId: init.fileId, uploadToken: init.uploadToken, documentType, ...(replacesDocumentId && { replacesDocumentId }) },
   });

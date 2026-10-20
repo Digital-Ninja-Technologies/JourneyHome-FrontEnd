@@ -205,14 +205,24 @@ Signup → Verify (`/signup/verify`) → First plan (`/signup/plan`) → Payment
 - After Paystack, the return page (`/app/payments/callback`) sends new customers to the welcome screen using a
   `sessionStorage` flag set at the payment step; any other first payment shows the normal "Payment received" page.
 
-### Demo mode (screens whose backend endpoints don't exist yet)
+### Demo mode (works with no backend)
 
-Verification code, forgot/reset password, Profile & settings (including saved cards and notification preferences),
-and the admin Payments, Audit log, preferences and session-revoke screens are built against the contract in
-`docs/BACKEND_CONTRACT.md`. In dev (`pnpm dev`) they talk to a **simulated server** kept in the browser
-(`apps/*/src/mocks`): verification code `123456`, reset link `/reset-password?token=demo-token`, and so on. Set
-`VITE_USE_MOCKS=false` to turn it off in dev (or `true` to force it on in a build). Production builds have it off by
-default, and a server that returns 404 for one of these endpoints produces a clear "not available yet" message.
+Both apps ship with a complete **simulated backend** (`packages/mock-api`) that runs in the browser and keeps its data in
+`localStorage`. With it on, every screen works end to end — sign up, verify (code `123456`), create plans, pay through a
+simulated Paystack page, request a service and upload documents, and, in the admin console, review requests, change plan
+statuses, edit pricing and manage admins. It is seeded with sample data:
+
+- Customer app: sign in as **demo@journeyhome.ng / demo1234** (or create a new account).
+- Admin console: sign in as **ops@journeyhome.ng / admin123**.
+- Password reset link: `/reset-password?token=demo-token`. Use "Reset demo data" on the sign-in page to start over.
+
+Demo mode is **on** in `pnpm dev` and in the Vercel builds (via the committed `apps/*/.env.production`), and nothing talks to a
+server. To use a real backend instead, set `VITE_USE_MOCKS=false` and `VITE_API_URL` (dashboard/admin) and
+`NEXT_PUBLIC_API_URL` (marketing) in the hosting environment — those override the committed defaults — and redeploy. The
+real-backend contract for endpoints that don't exist yet is in `docs/BACKEND_CONTRACT.md`; a real server that returns 404 for
+one of them gets a clear "not available yet" message.
+
+The marketing site shows sample packages and prices when no API is configured.
 
 ## Deploying to Vercel
 
@@ -230,4 +240,4 @@ Environment variables are baked in at build time, so **redeploy after changing t
 - dashboard: `VITE_API_URL`, `VITE_MARKETING_URL`
 - admin: `VITE_API_URL`, `VITE_MARKETING_URL`
 
-Demo mode is off in these builds, so screens whose endpoints the backend lacks show a "not available yet" message.
+These builds run in demo mode by default (see above); setting `VITE_USE_MOCKS=false` + `VITE_API_URL` switches them to a real backend.
