@@ -84,12 +84,12 @@ export default function About() {
           <h2 className="max-w-lg text-[36px] font-extrabold leading-[1.15] tracking-tight">
             A befitting burial is rarely a shock on cost. It&rsquo;s a shock on timing.
           </h2>
-          <p className="max-w-xl text-[15px] leading-relaxed text-muted">
+          <p className="max-w-xl text-base leading-relaxed text-muted">
             Families who fully intended to prepare well in advance often find themselves negotiating with a
             photographer at the worst possible moment, in the worst possible state of mind — days after a loss, with
             no energy left to vet a stranger or compare quotes.
           </p>
-          <p className="max-w-xl text-[15px] leading-relaxed text-muted">
+          <p className="max-w-xl text-base leading-relaxed text-muted">
             Journey Home started with one honest observation: the money and the memories shouldn&rsquo;t be figured
             out in the same week as the loss. So we built plans that save a little each month, earmarked
             specifically for photography and videography, and a vetted network of professionals who already know
@@ -167,7 +167,7 @@ export default function About() {
           <div className="flex flex-col gap-5 md:order-1">
             <Eyebrow>Making it easier, together</Eyebrow>
             <h2 className="max-w-md text-[36px] font-extrabold leading-[1.15] tracking-tight">A keepsake every relative can share in, wherever they are.</h2>
-            <p className="max-w-md text-[15px] leading-relaxed text-ink-soft">
+            <p className="max-w-md text-base leading-relaxed text-ink-soft">
               Every completed service comes with a shareable digital gallery, so family abroad can view and
               download the photos and keepsake film the same day — no one left out of the goodbye because of
               distance.
