@@ -9,13 +9,6 @@ import { getPackages } from "../lib/packages";
 
 export const revalidate = 300;
 
-const STATS = [
-  ["12,400+", "Families saving"],
-  ["380+", "Photographers & videographers"],
-  ["24", "States covered"],
-  ["98%", "Services delivered on time"],
-];
-
 const FEATURES = [
   { icon: Calendar, title: "Multiple savings plans", body: "Track a separate plan for each loved one, all from one account.", tint: "bg-status-active-bg text-status-active" },
   { icon: MapPin, title: "Verified photographer network", body: "380+ photographers and videographers, vetted and matched across 24 states.", tint: "bg-cream text-link" },
@@ -39,10 +32,6 @@ export default async function Home() {
       {/* HERO */}
       <Container className="grid items-center gap-12 py-12 md:grid-cols-[1.2fr_1fr]">
         <div className="flex flex-col items-start gap-7">
-          <span className="inline-flex items-center gap-2 rounded-full bg-status-active-bg px-4 py-2 text-xs font-bold text-status-active">
-            <span className="size-1.5 rounded-full bg-status-active" />
-            Now serving 24 states
-          </span>
           <h1 className="text-[44px] font-extrabold leading-none tracking-[-1px] sm:text-6xl sm:tracking-[-2px] md:text-[72px]">
             Save ahead.
             <br />
@@ -59,16 +48,6 @@ export default async function Home() {
             <Link href="/how-it-works" className="inline-flex h-14 items-center rounded-full border border-border px-7 text-[15px] font-semibold">
               Watch how it works
             </Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex">
-              <span className="size-9 rounded-full bg-accent" />
-              <span className="-ml-2 size-9 rounded-full bg-[#6BC596]" />
-              <span className="-ml-2 size-9 rounded-full bg-foreground" />
-            </div>
-            <div className="text-[13px] text-muted">
-              <strong className="text-foreground">12,400+</strong> families already saving
-            </div>
           </div>
         </div>
         <div className="relative min-h-[320px] overflow-hidden rounded-[32px] shadow-2xl md:min-h-[600px]">
@@ -94,16 +73,6 @@ export default async function Home() {
             </div>
           </div>
         </div>
-      </Container>
-
-      {/* STATS */}
-      <Container className="grid grid-cols-2 gap-8 py-14 md:grid-cols-4">
-        {STATS.map(([n, label]) => (
-          <div key={label}>
-            <div className="text-[32px] font-extrabold tracking-tight md:text-[44px]">{n}</div>
-            <div className="text-sm text-muted">{label}</div>
-          </div>
-        ))}
       </Container>
 
       {/* BENTO */}
