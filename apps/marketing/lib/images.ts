@@ -1,11 +1,11 @@
-// Photos from the design mockups were not included in the handoff (the mockups reference
-// design-tool blob URLs). Drop the files into public/images/ and set the paths here;
-// until then <Photo> renders a tinted placeholder.
+// Photos from the approved design mockups, downloaded from the design tool's asset
+// store and placed under public/images/. <Photo> falls back to a tinted placeholder
+// for any key left null.
 export const images = {
-  hero: null as string | null,
-  photographer: null as string | null,
-  howItWorks: null as string | null,
-  howStep1: null as string | null,
-  howStep4: null as string | null,
-  testimonial: null as string | null,
+  hero: "/images/hero.webp" as string | null,
+  photographer: "/images/photographer.webp" as string | null,
+  howItWorks: "/images/how-it-works.webp" as string | null,
+  howStep1: "/images/how-step-1.webp" as string | null,
+  howStep4: "/images/how-step-4.webp" as string | null,
+  testimonial: "/images/testimonial.webp" as string | null,
 };
