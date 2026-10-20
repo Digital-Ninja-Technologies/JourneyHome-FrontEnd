@@ -80,3 +80,11 @@ export interface ServiceDocument {
   uploadedAt: string;
   replacedBy?: string;
 }
+
+export interface AppNotification {
+  _id: string;
+  plan?: string;
+  event: string;
+  subject?: string;
+  createdAt: string;
+}

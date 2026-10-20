@@ -189,3 +189,10 @@ Not built because the backend has no endpoint for it (screens show a "Not availa
 | Settings: notification preferences, 2FA, revoke sessions | admin preference, 2FA and session endpoints |
 
 Also not surfaced (not in the design): creating packages and the billing policy / "run due billing" endpoints.
+
+### Notifications (dashboard)
+
+The backend's `GET /notifications` returns event records only (event type, plan, timestamp) — no message text and no
+read/unread state. The dashboard composes the title/body from the event type and the plan (see
+`apps/dashboard/src/lib/notifications.ts`) and tracks "read" per device in `localStorage`, so it won't sync across
+browsers. A `read` flag and a mark-as-read endpoint on the backend would let this be shared.

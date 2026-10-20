@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
 import { api } from "./api";
-import type { Package, Payment, Plan, ServiceDocument, ServiceRequest } from "./types";
+import type { AppNotification, Package, Payment, Plan, ServiceDocument, ServiceRequest } from "./types";
 
 export function usePlans() {
   const { user } = useAuth();
@@ -37,4 +37,9 @@ export function useServiceRequest(id: string) {
     queryKey: ["service-request", user?.id, id],
     queryFn: () => api<{ request: ServiceRequest; documents: ServiceDocument[] }>(`/service-requests/${id}`),
   });
+}
+
+export function useNotifications() {
+  const { user } = useAuth();
+  return useQuery({ queryKey: ["notifications", user?.id], queryFn: () => api<AppNotification[]>("/notifications"), staleTime: 30_000 });
 }

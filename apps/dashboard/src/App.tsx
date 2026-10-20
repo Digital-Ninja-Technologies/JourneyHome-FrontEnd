@@ -4,6 +4,7 @@ import { GuestOnly, RequireAuth } from "./components/RequireAuth";
 import ComingSoon from "./pages/ComingSoon";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import Notifications from "./pages/Notifications";
 import MakePayment from "./pages/MakePayment";
 import PaymentCallback from "./pages/PaymentCallback";
 import Payments from "./pages/Payments";
@@ -14,7 +15,6 @@ import Plans from "./pages/Plans";
 import Signup from "./pages/Signup";
 
 const COMING_SOON: [path: string, title: string][] = [
-  ["notifications", "Notifications"],
   ["profile", "Profile & settings"],
 ];
 
@@ -32,6 +32,7 @@ export default function App() {
           <Route path="plans/:id" element={<PlanDetail />} />
           <Route path="service-requests" element={<ServiceRequests />} />
           <Route path="service-requests/new" element={<RequestService />} />
+          <Route path="notifications" element={<Notifications />} />
           <Route path="payments" element={<Payments />} />
           <Route path="payments/new" element={<MakePayment />} />
           <Route path="payments/callback" element={<PaymentCallback />} />
