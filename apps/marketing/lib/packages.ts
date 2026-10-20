@@ -1,5 +1,3 @@
-import { API_URL } from "./config";
-
 export interface Package {
   _id: string;
   name: string;
@@ -12,17 +10,57 @@ export interface Package {
   currency: string;
 }
 
-/** Returns null when the API is unreachable so pages can render a graceful fallback. */
+/**
+ * Placeholder packages for the marketing site, mirroring the design mockups
+ * (Pricing.dc.html for tiers/features, OnboardingPlan/CreatePlan/Plans.dc.html
+ * for the ₦5,000 / ₦10,000 / ₦18,000 monthly amounts used throughout).
+ * Swap this for a real API call once a packages endpoint is deployed and
+ * reachable from production — see lib/config.ts's API_URL.
+ */
+const DUMMY_PACKAGES: Package[] = [
+  {
+    _id: "basic",
+    name: "Basic",
+    description: "Photography only",
+    photographyIncluded: true,
+    videographyIncluded: false,
+    coverageDetails: "Half-day coverage",
+    deliverables: ["Half-day photography", "Digital gallery", "Dedicated coordinator"],
+    monthlyContributionMinor: 500_000,
+    currency: "NGN",
+  },
+  {
+    _id: "standard",
+    name: "Standard",
+    description: "Photography + videography",
+    photographyIncluded: true,
+    videographyIncluded: true,
+    coverageDetails: "Full-day coverage",
+    deliverables: [
+      "Full-day photography & video",
+      "Edited keepsake film",
+      "Printed album, 40 pages",
+      "Digital gallery for family abroad",
+    ],
+    monthlyContributionMinor: 1_000_000,
+    currency: "NGN",
+  },
+  {
+    _id: "premium",
+    name: "Premium",
+    description: "Full production",
+    photographyIncluded: true,
+    videographyIncluded: true,
+    coverageDetails: "Full-day coverage, full production",
+    deliverables: ["Everything in Standard", "Second videographer", "Drone coverage, where permitted", "Premium leather album"],
+    monthlyContributionMinor: 1_800_000,
+    currency: "NGN",
+  },
+];
+
+/** Returns the packages to display. Static for now — see DUMMY_PACKAGES above. */
 export async function getPackages(): Promise<Package[] | null> {
-  try {
-    const res = await fetch(`${API_URL}/packages`, { next: { revalidate: 300 } });
-    if (!res.ok) return null;
-    const json = await res.json();
-    const list = json.data as Package[];
-    return [...list].sort((a, b) => a.monthlyContributionMinor - b.monthlyContributionMinor);
-  } catch {
-    return null;
-  }
+  return [...DUMMY_PACKAGES].sort((a, b) => a.monthlyContributionMinor - b.monthlyContributionMinor);
 }
 
 /** Money is stored in minor units (kobo for NGN). */
