@@ -3,7 +3,7 @@ import { Logo } from "@journeyhome/ui/components/logo";
 
 const COLUMNS = [
   { title: "Product", links: [["/how-it-works", "How it works"], ["/pricing", "Pricing"], ["/faq", "FAQ"]] },
-  { title: "Company", links: [["/contact", "Contact"]] },
+  { title: "Company", links: [["/about", "About us"], ["/contact", "Contact"]] },
   { title: "Legal", links: [["/terms", "Plan terms & conditions"], ["/privacy", "Privacy policy"]] },
 ];
 
