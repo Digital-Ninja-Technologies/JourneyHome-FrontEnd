@@ -8,12 +8,12 @@ import MakePayment from "./pages/MakePayment";
 import PaymentCallback from "./pages/PaymentCallback";
 import Payments from "./pages/Payments";
 import PlanDetail from "./pages/PlanDetail";
+import RequestService from "./pages/RequestService";
+import ServiceRequests from "./pages/ServiceRequests";
 import Plans from "./pages/Plans";
 import Signup from "./pages/Signup";
 
 const COMING_SOON: [path: string, title: string][] = [
-  ["service-requests", "Service requests"],
-  ["service-requests/new", "Request service"],
   ["notifications", "Notifications"],
   ["profile", "Profile & settings"],
 ];
@@ -30,6 +30,8 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="plans" element={<Plans />} />
           <Route path="plans/:id" element={<PlanDetail />} />
+          <Route path="service-requests" element={<ServiceRequests />} />
+          <Route path="service-requests/new" element={<RequestService />} />
           <Route path="payments" element={<Payments />} />
           <Route path="payments/new" element={<MakePayment />} />
           <Route path="payments/callback" element={<PaymentCallback />} />

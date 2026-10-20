@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
 import { api } from "./api";
-import type { Package, Payment, Plan } from "./types";
+import type { Package, Payment, Plan, ServiceDocument, ServiceRequest } from "./types";
 
 export function usePlans() {
   const { user } = useAuth();
@@ -23,5 +23,18 @@ export function usePackages() {
     queryKey: ["packages"],
     queryFn: async () => (await api<Package[]>("/packages")).sort((a, b) => a.monthlyContributionMinor - b.monthlyContributionMinor),
     staleTime: 5 * 60_000,
+  });
+}
+
+export function useServiceRequests() {
+  const { user } = useAuth();
+  return useQuery({ queryKey: ["service-requests", user?.id], queryFn: () => api<ServiceRequest[]>("/service-requests"), staleTime: 30_000 });
+}
+
+export function useServiceRequest(id: string) {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["service-request", user?.id, id],
+    queryFn: () => api<{ request: ServiceRequest; documents: ServiceDocument[] }>(`/service-requests/${id}`),
   });
 }

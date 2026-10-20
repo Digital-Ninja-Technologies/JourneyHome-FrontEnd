@@ -157,3 +157,12 @@ Get started links).
 - **Paystack return URL:** the backend does not send a `callback_url` when it initializes checkout, so Paystack sends
   customers to the callback URL set in the **Paystack dashboard**. Set it to `<dashboard origin>/app/payments/callback`
   (the page verifies the payment via `POST /payments/verify/:reference`).
+
+### Service requests (dashboard)
+
+- Documents upload straight from the browser to private storage via a presigned `PUT` (the backend's
+  `/service-requests/:id/documents/upload-url` + `/complete` flow), so the **storage bucket's CORS rules must allow
+  `PUT` from the dashboard origin** or uploads will fail with a network error.
+- Request statuses come from the backend (`Submitted`, `Under_Review`, `More_Info_Required`, `Docs_Verified`,
+  `Approved`, `Rejected`, `Cancelled`); "Scheduled" and "Completed" are read from the linked plan's status.
+- Provider (photographer/videographer) assignment is intentionally not shown — see "Known scope decision" above.

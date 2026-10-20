@@ -49,3 +49,34 @@ export interface Package {
   monthlyContributionMinor: number;
   currency: string;
 }
+
+export type ServiceRequestStatus =
+  | "Submitted" | "Under_Review" | "More_Info_Required" | "Docs_Verified" | "Approved" | "Rejected" | "Cancelled";
+
+export type DocumentType = "Death_Certificate" | "Valid_Identification" | "Other_Proof";
+
+export interface ServiceRequest {
+  _id: string;
+  plan: string;
+  coveredPersonSnapshot: CoveredPerson;
+  dateOfDeath: string;
+  burialLocation: string;
+  expectedBurialDate: string;
+  contactPerson: string;
+  contactPhone: string;
+  additionalInformation?: string;
+  status: ServiceRequestStatus;
+  rejectionReason?: string;
+  moreInfoReason?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ServiceDocument {
+  _id: string;
+  documentType: DocumentType;
+  verificationStatus: "Pending" | "Approved" | "Requires_Resubmission";
+  rejectionReason?: string;
+  uploadedAt: string;
+  replacedBy?: string;
+}
