@@ -15,18 +15,24 @@ export function PackagesUnavailable() {
   );
 }
 
-/** With three packages, the middle one is highlighted as "Most chosen" (as in the design). */
+/**
+ * With three packages, the middle one is highlighted as "Most chosen" (as in the design).
+ * The mockup uses slightly different card metrics for the Home teaser (compact, no features)
+ * vs. the full Pricing cards (showFeatures) — padding, inner gap and price size scale up
+ * accordingly to match Home.dc.html vs Pricing.dc.html exactly.
+ */
 export function PackageCards({ packages, showFeatures }: { packages: Package[]; showFeatures?: boolean }) {
   const featuredIndex = packages.length === 3 ? 1 : -1;
   return (
-    <div className="grid items-start gap-5 md:grid-cols-3">
+    <div className="grid items-start gap-6 md:grid-cols-3">
       {packages.map((p, i) => {
         const featured = i === featuredIndex;
         return (
           <div
             key={p._id}
             className={cn(
-              "relative flex flex-col gap-5 rounded-[32px] border p-8",
+              "relative flex flex-col rounded-[28px] border-[1.5px]",
+              showFeatures ? "gap-[22px] p-9" : "gap-[18px] p-8",
               featured ? "border-foreground bg-foreground text-canvas shadow-2xl" : "border-border bg-white",
             )}
           >
@@ -36,10 +42,10 @@ export function PackageCards({ packages, showFeatures }: { packages: Package[]; 
               </span>
             )}
             <div>
-              <div className="text-2xl font-extrabold tracking-tight">{p.name}</div>
-              <div className={cn("text-sm", featured ? "text-canvas/70" : "text-muted")}>{packageSubtitle(p)}</div>
+              <div className={cn("font-extrabold tracking-tight", showFeatures ? "text-[22px]" : "text-[21px]")}>{p.name}</div>
+              <div className={cn("mt-1 text-sm", featured ? "text-canvas/70" : "text-muted")}>{packageSubtitle(p)}</div>
             </div>
-            <div className="text-4xl font-extrabold tracking-tight">
+            <div className={cn("font-extrabold tracking-tight", showFeatures ? "text-[34px]" : "text-[30px]")}>
               {formatMoney(p.monthlyContributionMinor, p.currency)}{" "}
               <span className={cn("text-sm font-medium", featured ? "text-canvas/70" : "text-muted")}>/ month</span>
             </div>
