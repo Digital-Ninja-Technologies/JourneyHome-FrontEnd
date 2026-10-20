@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
 import { PackageCards, PackagesUnavailable } from "../../components/PackageCards";
 import { Accent, Container, PageHero } from "../../components/Section";
-import { getPackages, type Package } from "../../lib/packages";
+import { getPackages } from "../../lib/packages";
 
 export const metadata: Metadata = { title: "Pricing" };
 export const revalidate = 300;
 
-const ROWS: [string, (p: Package) => string][] = [
-  ["Photography", (p) => (p.photographyIncluded ? "✓" : "—")],
-  ["Videography", (p) => (p.videographyIncluded ? "✓" : "—")],
-  ["Coverage", (p) => p.coverageDetails || "—"],
-  ["Deliverables", (p) => p.deliverables.join(", ") || "—"],
+// Mirrors the comparison table in the Design canvas mockup (Pricing.dc.html) for now,
+// rather than deriving rows from live package data.
+const COLUMNS = ["Basic", "Standard", "Premium"];
+const ROWS: [string, string, string, string][] = [
+  ["Photography", "Half-day", "Full-day", "Full-day"],
+  ["Videography", "—", "✓", "✓ + second camera"],
+  ["Printed album", "—", "40 pages", "Premium, leather"],
+  ["Digital gallery", "✓", "✓", "✓"],
+  ["Drone coverage", "—", "—", "Where permitted"],
 ];
 
 export default async function Pricing() {
@@ -24,32 +28,30 @@ export default async function Pricing() {
         Save at whatever pace suits your <Accent>family.</Accent>
       </PageHero>
       <Container className="pb-12">{packages?.length ? <PackageCards packages={packages} showFeatures /> : <PackagesUnavailable />}</Container>
-      {packages && packages.length > 0 && (
-        <Container className="pb-24">
-          <div className="overflow-x-auto rounded-3xl border border-border bg-white">
-            <table className="w-full min-w-[640px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-border text-xs font-extrabold uppercase tracking-wider text-link">
-                  <th className="px-6 py-4">Feature</th>
-                  {packages.map((p) => (
-                    <th key={p._id} className="px-6 py-4">{p.name}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {ROWS.map(([label, cell], i) => (
-                  <tr key={label} className={i % 2 ? "" : "bg-canvas/60"}>
-                    <td className="px-6 py-4 font-bold">{label}</td>
-                    {packages.map((p) => (
-                      <td key={p._id} className="px-6 py-4 text-muted">{cell(p)}</td>
-                    ))}
-                  </tr>
+      <Container className="pb-24">
+        <div className="overflow-x-auto rounded-3xl bg-background p-2">
+          <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+            <thead>
+              <tr>
+                <th className="px-6 py-4.5 font-semibold text-muted">Feature</th>
+                {COLUMNS.map((c) => (
+                  <th key={c} className="px-6 py-4.5 text-center font-extrabold">{c}</th>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </Container>
-      )}
+              </tr>
+            </thead>
+            <tbody>
+              {ROWS.map(([label, basic, standard, premium], i) => (
+                <tr key={label} className={i % 2 === 0 ? "bg-white [&>td:first-child]:rounded-l-xl [&>td:last-child]:rounded-r-xl" : ""}>
+                  <td className="px-6 py-4">{label}</td>
+                  <td className="px-6 py-4 text-center">{basic}</td>
+                  <td className="px-6 py-4 text-center">{standard}</td>
+                  <td className="px-6 py-4 text-center">{premium}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Container>
     </main>
   );
 }
