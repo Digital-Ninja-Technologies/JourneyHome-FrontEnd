@@ -48,13 +48,13 @@ export function SiteHeader() {
             );
           })}
         </nav>
-        <div className="flex items-center gap-2 sm:gap-3.5">
+        <div className="flex items-center gap-3.5">
           <a href={LOGIN_URL} className="hidden text-sm font-bold md:inline">
             Log in
           </a>
           <a
             href={SIGNUP_URL}
-            className="inline-flex h-11 items-center rounded-full bg-accent px-4 text-sm font-extrabold text-foreground sm:h-12 sm:px-6"
+            className="hidden h-12 items-center rounded-full bg-accent px-6 text-sm font-extrabold text-foreground md:inline-flex"
           >
             Get started →
           </a>
@@ -93,6 +93,12 @@ export function SiteHeader() {
           })}
           <a href={LOGIN_URL} className="rounded-2xl px-4 py-3.5 text-[15px] font-semibold text-ink-soft">
             Log in
+          </a>
+          <a
+            href={SIGNUP_URL}
+            className="mt-2 inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-sm font-extrabold text-foreground"
+          >
+            Get started →
           </a>
         </nav>
       )}
