@@ -18,7 +18,7 @@ const NAV = [
 export function SiteHeader() {
   const pathname = usePathname();
   return (
-    <header className="flex flex-wrap items-center justify-between gap-4 bg-canvas px-6 py-5 md:px-20">
+    <header className="sticky top-0 z-50 flex flex-wrap items-center justify-between gap-4 border-b border-border/60 bg-canvas/95 px-6 py-5 backdrop-blur-sm md:px-20">
       <Link href="/">
         <Logo />
       </Link>
