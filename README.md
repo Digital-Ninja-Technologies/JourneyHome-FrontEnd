@@ -118,3 +118,19 @@ frontend can support it. Don't silently re-add it to the UI without that.
 4. Admin console, same pattern, hitting the `/admin`-scoped backend routes.
 5. Marketing site last — static content, lowest risk, can be done in parallel by
    anyone.
+
+## Repo layout (monorepo)
+
+pnpm workspaces + Turborepo.
+
+```
+apps/
+  dashboard/   # Vite + React + React Router — customer app + onboarding (port 5173)
+  admin/       # Vite + React + React Router — internal admin console (port 5174)
+  marketing/   # Next.js — public marketing site (port 3000)
+packages/
+  ui/          # @journeyhome/ui — shared shadcn-style components + Tailwind v4 theme tokens
+```
+
+Commands: `pnpm install`, `pnpm dev`, `pnpm build`, `pnpm typecheck`.
+Add a shadcn component from `packages/ui` with `pnpm dlx shadcn@latest add <name>`.
