@@ -1,5 +1,5 @@
 import { ApiError } from "./errors";
-import { NOT_MOCKED, mockRequest } from "../mocks";
+import { NOT_MOCKED, isDemoUploadUrl, mockRequest, registerDemoFile } from "@journeyhome/mock-api";
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3043/api/v1";
 
@@ -22,8 +22,13 @@ export function configureApi(opts: { getToken: () => string | null; onUnauthoriz
 export async function api<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
   const method = init.method ?? (init.body ? "POST" : "GET");
   if (USE_MOCKS) {
-    const mocked = await mockRequest(method, path, init.body);
-    if (mocked !== NOT_MOCKED) return mocked as T;
+    try {
+      const mocked = await mockRequest(method, path, init.body, getToken());
+      if (mocked !== NOT_MOCKED) return mocked as T;
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401 && getToken()) onUnauthorized();
+      throw e;
+    }
   }
   const token = getToken();
   let res: Response;
@@ -45,4 +50,13 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
     throw new ApiError(res.status, json?.message ?? "Something went wrong. Please try again.");
   }
   return json.data as T;
+}
+
+/** Uploads a file to the signed storage URL (in demo mode, "uploads" stay in the browser). */
+export async function uploadToStorage(url: string, file: File): Promise<Response | null> {
+  if (isDemoUploadUrl(url)) {
+    registerDemoFile(url, file);
+    return null;
+  }
+  return fetch(url, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
 }

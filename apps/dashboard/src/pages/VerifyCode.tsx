@@ -7,7 +7,7 @@ import { DemoNotice } from "../components/DemoNotice";
 import { OnboardingShell } from "../components/OnboardingShell";
 import { OtpInput } from "../components/OtpInput";
 import { UNSUPPORTED_MESSAGE, api, isUnsupported } from "../lib/api";
-import { DEMO_CODE } from "../mocks";
+import { DEMO_CODE } from "@journeyhome/mock-api";
 
 const COOLDOWN = 30;
 

@@ -7,7 +7,7 @@ import { Label } from "@journeyhome/ui/components/label";
 import { AuthShell } from "../components/AuthShell";
 import { DemoNotice } from "../components/DemoNotice";
 import { UNSUPPORTED_MESSAGE, USE_MOCKS, api, isUnsupported } from "../lib/api";
-import { DEMO_RESET_TOKEN } from "../mocks";
+import { DEMO_RESET_TOKEN } from "@journeyhome/mock-api";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");

@@ -198,7 +198,7 @@ function ChangePassword() {
           }}
           className="mb-5 flex flex-col gap-3"
         >
-          <DemoNotice>Any current password works except <strong>wrong</strong>.</DemoNotice>
+          <DemoNotice>Enter your current password (the sample account's is <strong>demo1234</strong>).</DemoNotice>
           <Input name="current" type="password" required autoComplete="current-password" placeholder="Current password" aria-label="Current password" />
           <Input name="next" type="password" required minLength={6} autoComplete="new-password" placeholder="New password (6+ characters)" aria-label="New password" />
           <Input name="confirm" type="password" required minLength={6} autoComplete="new-password" placeholder="Confirm new password" aria-label="Confirm new password" />

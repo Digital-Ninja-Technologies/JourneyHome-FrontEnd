@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@journeyhome/ui/components/button";
 import { useAuth } from "../auth/AuthContext";
+import { DemoLogin } from "../components/DemoLogin";
 
 const MARKETING_URL = import.meta.env.VITE_MARKETING_URL ?? "/";
 
@@ -49,6 +50,7 @@ export default function Login() {
           </h1>
           <p className="text-[13px] text-canvas/60">Restricted to Journey Home staff. Access is logged.</p>
         </div>
+        <DemoLogin />
         <div className="flex flex-col gap-4 rounded-3xl border border-canvas/10 bg-[#1d1811] p-7">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="email" className={label}>Work email</label>
