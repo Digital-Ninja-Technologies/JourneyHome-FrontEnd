@@ -1,9 +1,8 @@
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
 import { ShieldCheck } from "lucide-react";
 import { Button } from "@journeyhome/ui/components/button";
 import { StatusPill } from "../components/StatusPill";
-import { api } from "../lib/api";
+import { useStartCheckout } from "../lib/checkout";
 import { formatDay, formatMoney } from "../lib/format";
 import { MARKETING_URL, canPayNow, fullName, relationshipLabel } from "../lib/plans";
 import { usePlans } from "../lib/queries";
@@ -32,11 +31,7 @@ const Note = ({ children }: { children: React.ReactNode }) => (
 function Checkout({ plan }: { plan: Plan }) {
   const navigate = useNavigate();
   const money = formatMoney(plan.contributionAmountMinor, plan.currency);
-  const start = useMutation({
-    mutationFn: () => api<{ authorizationUrl: string }>(`/payments/plans/${plan._id}/initialize-initial`, { method: "POST" }),
-    // Paystack hosts the card / bank form; it sends the customer back to /app/payments/callback.
-    onSuccess: (data) => window.location.assign(data.authorizationUrl),
-  });
+  const start = useStartCheckout(plan._id);
   const busy = start.isPending || start.isSuccess;
 
   return (

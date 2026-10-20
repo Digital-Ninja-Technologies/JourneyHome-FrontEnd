@@ -196,3 +196,15 @@ The backend's `GET /notifications` returns event records only (event type, plan,
 read/unread state. The dashboard composes the title/body from the event type and the plan (see
 `apps/dashboard/src/lib/notifications.ts`) and tracks "read" per device in `localStorage`, so it won't sync across
 browsers. A `read` flag and a mark-as-read endpoint on the backend would let this be shared.
+
+### Onboarding (dashboard)
+
+Signup → First plan (`/signup/plan`) → Payment (`/signup/payment`) → Welcome (`/welcome`).
+
+- There is **no Verify step**: the backend has no email/phone verification endpoint, so the stepper has three steps.
+- The plan step also asks for date of birth and home address, which `POST /plans` requires (the mockup's form omitted them).
+- The mockup's card-number form can't be built (card details are collected on Paystack's hosted page), so the payment
+  step redirects to Paystack, same as "Make a payment". A plan can't be edited once created, so there is no "Back"
+  from payment; "Skip for now" leaves a Pending plan that can be paid later from My plans.
+- After Paystack, the return page (`/app/payments/callback`) sends new customers to the welcome screen using a
+  `sessionStorage` flag set at the payment step; any other first payment shows the normal "Payment received" page.

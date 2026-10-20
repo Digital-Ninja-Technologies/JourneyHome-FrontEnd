@@ -16,6 +16,7 @@ export const formatDay = (iso: string) => {
   const d = new Date(iso);
   return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
 };
+export const formatDate = (iso: string) => `${formatDay(iso)} ${new Date(iso).getFullYear()}`;
 export const formatDayLong = (d: Date) => `${d.getDate()} ${MONTHS_LONG[d.getMonth()]}`;
 export const formatToday = (d = new Date()) => `${WEEKDAYS[d.getDay()]}, ${d.getDate()} ${MONTHS_LONG[d.getMonth()]}`;
 export const formatMonthYear = (iso: string) => {

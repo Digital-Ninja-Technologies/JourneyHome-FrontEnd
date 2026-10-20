@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { api } from "../lib/api";
+import { getOnboardingPlan } from "../lib/checkout";
 import { formatMoney } from "../lib/format";
 import type { Payment } from "../lib/types";
 
@@ -29,6 +30,11 @@ export default function PaymentCallback() {
   }, [verify.isSuccess, queryClient]);
 
   const pay = verify.data;
+
+  // A new customer finishing onboarding continues to the welcome screen.
+  if (pay?.status === "Successful" && pay.purpose === "initial_contribution" && getOnboardingPlan() === pay.plan) {
+    return <Navigate to={`/welcome?plan=${pay.plan}`} replace />;
+  }
   let icon = <Clock className="size-10 text-status-due" />;
   let title = "Confirming your payment…";
   let body = "Please don’t close this page.";

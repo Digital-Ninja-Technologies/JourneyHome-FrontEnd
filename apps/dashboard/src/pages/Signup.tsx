@@ -1,16 +1,19 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
 import { useAuth } from "../auth/AuthContext";
-import { AuthShell } from "../components/AuthShell";
+import { OnboardingShell } from "../components/OnboardingShell";
 
 export default function Signup() {
-  const { signup } = useAuth();
+  const { user, signup } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Already logged in (and not mid-signup): nothing to do here.
+  if (user && !busy) return <Navigate to="/app" replace />;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -19,7 +22,7 @@ export default function Signup() {
     setError(null);
     try {
       await signup(String(data.get("name")).trim(), String(data.get("email")).trim(), String(data.get("password")));
-      navigate("/app", { replace: true });
+      navigate("/signup/plan", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed");
       setBusy(false);
@@ -27,7 +30,7 @@ export default function Signup() {
   }
 
   return (
-    <AuthShell title="Create your" accent="account." subtitle="Takes about two minutes. You'll set up your first plan right after.">
+    <OnboardingShell step={1} title="Create your" accent="account." subtitle="Takes about two minutes. You'll set up your first plan right after." width="max-w-[440px]">
       <form onSubmit={onSubmit} className="flex flex-col gap-8">
         <section className="flex flex-col gap-4 rounded-[20px] bg-card p-7 shadow-sm">
           <div className="flex flex-col gap-1.5">
@@ -73,6 +76,6 @@ export default function Signup() {
           </Link>
         </div>
       </form>
-    </AuthShell>
+    </OnboardingShell>
   );
 }
