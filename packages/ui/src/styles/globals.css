@@ -1,0 +1,46 @@
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Manrope:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-background: #f3efe7;
+  --color-foreground: #0f2420;
+  --color-sidebar: #15110b;
+  --color-primary: #0f2420;
+  --color-primary-foreground: #f3efe7;
+  --color-accent: #d4a55a;
+  --color-accent-foreground: #0f2420;
+  --color-link: #8a6224;
+  --color-link-hover: #5c3b0c;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f2420;
+  --color-border: #e2dccf;
+  --color-canvas: #fbf9f4;
+  --color-sand: #f0eadc;
+  --color-cream: #f6e8d0;
+  --color-muted: #5a6660;
+  --color-ink-soft: #3a443f;
+  --color-forest: #1b2f2a;
+
+  --color-status-active: #1f5a40;
+  --color-status-active-bg: #e3efe7;
+  --color-status-due: #7a4f10;
+  --color-status-due-bg: #f6ead3;
+  --color-status-review: #2c5f7a;
+  --color-status-review-bg: #e3eef5;
+  --color-status-approved: #5b3b8a;
+  --color-status-approved-bg: #ede3f5;
+  --color-status-paused: #5a6660;
+  --color-status-paused-bg: #eee9df;
+  --color-status-cancelled: #8e3322;
+  --color-status-cancelled-bg: #f5e3e1;
+
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+  --radius: 0.75rem;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}

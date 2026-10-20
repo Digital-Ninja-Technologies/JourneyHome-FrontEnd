@@ -118,3 +118,116 @@ frontend can support it. Don't silently re-add it to the UI without that.
 4. Admin console, same pattern, hitting the `/admin`-scoped backend routes.
 5. Marketing site last — static content, lowest risk, can be done in parallel by
    anyone.
+
+## Repo layout (monorepo)
+
+pnpm workspaces + Turborepo.
+
+```
+apps/
+  dashboard/   # Vite + React + React Router — customer app + onboarding (port 5173)
+  admin/       # Vite + React + React Router — internal admin console (port 5174)
+  marketing/   # Next.js — public marketing site (port 3000)
+packages/
+  ui/          # @journeyhome/ui — shared shadcn-style components + Tailwind v4 theme tokens
+```
+
+Commands: `pnpm install`, `pnpm dev`, `pnpm build`, `pnpm typecheck`.
+Add a shadcn component from `packages/ui` with `pnpm dlx shadcn@latest add <name>`.
+
+### Marketing site (`apps/marketing`)
+
+All seven public pages are built (Home, How it works, Pricing, FAQ, Contact, Terms, Privacy).
+Copy `.env.example`: `NEXT_PUBLIC_API_URL` (backend, used for live package pricing on Home and
+Pricing, revalidated every 5 minutes) and `NEXT_PUBLIC_APP_URL` (the dashboard, for Log in /
+Get started links).
+
+- **Photos:** the mockups reference design-tool blob URLs that aren't in this repo, so photos
+  render as tinted placeholders. Add files to `apps/marketing/public/images/` and set the paths
+  in `apps/marketing/lib/images.ts`.
+- **Contact form:** there is no contact endpoint on the backend, so "Send message" opens the
+  visitor's email client addressed to `hello@journeyhome.ng`.
+
+### Payments (dashboard)
+
+- Only a plan's **first contribution** can be started by the customer (`POST /payments/plans/:id/initialize-initial`,
+  Pending plans only). Every later contribution is charged automatically by the backend's billing job, so "Make a
+  payment" explains that instead of offering a manual payment. A manual pay endpoint would need to be added to the
+  backend first.
+- **Paystack return URL:** the backend does not send a `callback_url` when it initializes checkout, so Paystack sends
+  customers to the callback URL set in the **Paystack dashboard**. Set it to `<dashboard origin>/app/payments/callback`
+  (the page verifies the payment via `POST /payments/verify/:reference`).
+
+### Service requests (dashboard)
+
+- Documents upload straight from the browser to private storage via a presigned `PUT` (the backend's
+  `/service-requests/:id/documents/upload-url` + `/complete` flow), so the **storage bucket's CORS rules must allow
+  `PUT` from the dashboard origin** or uploads will fail with a network error.
+- Request statuses come from the backend (`Submitted`, `Under_Review`, `More_Info_Required`, `Docs_Verified`,
+  `Approved`, `Rejected`, `Cancelled`); "Scheduled" and "Completed" are read from the linked plan's status.
+- Provider (photographer/videographer) assignment is intentionally not shown — see "Known scope decision" above.
+
+### Admin console (`apps/admin`)
+
+Separate app on its own origin, so routes are at the root (`/users`, `/plans`, `/service-requests`, …) rather than
+under `/admin`. Sessions live in `sessionStorage` (tab only). Copy `.env.example` (`VITE_API_URL`, `VITE_MARKETING_URL`).
+
+Built against the backend's admin endpoints: login, customers, all plans (+ status changes using the backend's
+transition rules), the full service-request review workflow (start review, approve/flag documents, mark verified,
+approve, request more info, reject), package pricing, and admin-team management (super admins only).
+
+Built on top of endpoints the backend doesn't have yet (Payments, Audit log, notification preferences, revoke
+sessions): they run in **demo mode** with simulated data, and show a "not available on the server yet" message when
+the real server lacks them. See `docs/BACKEND_CONTRACT.md` for the exact shapes to implement.
+
+Still not built because they need data-model decisions: suspend account, send password reset from the admin, deficit
+tracking/filters, identity documents on plans, plan payment history and activity feed.
+
+Also not surfaced (not in the design): creating packages and the billing policy / "run due billing" endpoints.
+
+### Notifications (dashboard)
+
+The backend's `GET /notifications` returns event records only (event type, plan, timestamp) — no message text and no
+read/unread state. The dashboard composes the title/body from the event type and the plan (see
+`apps/dashboard/src/lib/notifications.ts`) and tracks "read" per device in `localStorage`, so it won't sync across
+browsers. A `read` flag and a mark-as-read endpoint on the backend would let this be shared.
+
+### Onboarding (dashboard)
+
+Signup → Verify (`/signup/verify`) → First plan (`/signup/plan`) → Payment (`/signup/payment`) → Welcome (`/welcome`).
+
+- The Verify step uses the verification-code endpoints from `docs/BACKEND_CONTRACT.md` (demo mode until they exist). If the
+  server doesn't have them, the page says so and lets the user continue.
+- The plan step also asks for date of birth and home address, which `POST /plans` requires (the mockup's form omitted them).
+- The mockup's card-number form can't be built (card details are collected on Paystack's hosted page), so the payment
+  step redirects to Paystack, same as "Make a payment". A plan can't be edited once created, so there is no "Back"
+  from payment; "Skip for now" leaves a Pending plan that can be paid later from My plans.
+- After Paystack, the return page (`/app/payments/callback`) sends new customers to the welcome screen using a
+  `sessionStorage` flag set at the payment step; any other first payment shows the normal "Payment received" page.
+
+### Demo mode (screens whose backend endpoints don't exist yet)
+
+Verification code, forgot/reset password, Profile & settings (including saved cards and notification preferences),
+and the admin Payments, Audit log, preferences and session-revoke screens are built against the contract in
+`docs/BACKEND_CONTRACT.md`. In dev (`pnpm dev`) they talk to a **simulated server** kept in the browser
+(`apps/*/src/mocks`): verification code `123456`, reset link `/reset-password?token=demo-token`, and so on. Set
+`VITE_USE_MOCKS=false` to turn it off in dev (or `true` to force it on in a build). Production builds have it off by
+default, and a server that returns 404 for one of these endpoints produces a clear "not available yet" message.
+
+## Deploying to Vercel
+
+Three Vercel projects, one per app, all linked to this repo with a different **Root Directory**:
+
+| Project | Root Directory | Framework |
+|---|---|---|
+| `journeyhome-marketing` | `apps/marketing` | Next.js |
+| `journeyhome-dashboard` | `apps/dashboard` | Vite (SPA rewrite in `vercel.json`) |
+| `journeyhome-admin` | `apps/admin` | Vite (SPA rewrite in `vercel.json`) |
+
+Environment variables are baked in at build time, so **redeploy after changing them**:
+
+- marketing: `NEXT_PUBLIC_API_URL` (backend, ending in `/api/v1`), `NEXT_PUBLIC_APP_URL` (dashboard URL)
+- dashboard: `VITE_API_URL`, `VITE_MARKETING_URL`
+- admin: `VITE_API_URL`, `VITE_MARKETING_URL`
+
+Demo mode is off in these builds, so screens whose endpoints the backend lacks show a "not available yet" message.
