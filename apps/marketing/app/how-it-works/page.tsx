@@ -31,7 +31,7 @@ export default function HowItWorks() {
         Four steps, taken <Accent>gently.</Accent>
       </PageHero>
       <Container className="pb-14">
-        <Photo src={images.howStep1} alt="A family together, planning ahead with care" className="h-[400px] w-full rounded-[32px] md:h-[560px]" />
+        <Photo src={images.howStep1} alt="A family together, planning ahead with care" className="h-[581px] w-full rounded-[32px]" />
       </Container>
       <Container className="flex flex-col gap-20 pb-16">
         <div className="grid items-center gap-12 md:grid-cols-2">
