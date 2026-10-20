@@ -134,7 +134,7 @@ export default function About() {
                 </div>
                 <div className="text-[17px] font-bold leading-snug">{title}</div>
               </div>
-              <p className="text-sm leading-relaxed text-muted md:max-w-md">{body}</p>
+              <p className="text-base leading-relaxed text-muted md:max-w-md">{body}</p>
             </div>
           ))}
         </div>
@@ -149,7 +149,7 @@ export default function About() {
             </div>
             <div>
               <div className="text-lg font-bold">Are you a photographer or videographer?</div>
-              <div className="text-sm text-muted">Join our verified network across 24 states and be the one a grieving family can count on.</div>
+              <div className="text-base text-muted">Join our verified network across 24 states and be the one a grieving family can count on.</div>
             </div>
           </div>
           <a href={`mailto:${CONTACT_EMAIL}`} className="inline-flex h-12 flex-shrink-0 items-center rounded-full bg-foreground px-6 text-sm font-bold text-canvas">
