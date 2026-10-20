@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Journey Home — Website (Home)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#FBF9F4}
+a{color:inherit;text-decoration:none}
+</style>
+</helmet>
+<div style="width:1440px;box-sizing:border-box;background:#FBF9F4;color:#0F2420;font-family:'Manrope',system-ui,sans-serif">
+
+  <!-- NAV -->
+  <header style="display:flex;align-items:center;justify-content:space-between;padding:20px 80px;background:#FBF9F4">
+    <div style="display:flex;align-items:center;gap:10px">
+      <svg role="img" aria-label="Journey Home" width="28" height="28" viewBox="0 0 64 64"><path d="M16 56 V30 A16 16 0 0 1 48 30 V56" fill="none" stroke="#0F2420" stroke-width="4.5" stroke-linecap="round"></path><circle cx="32" cy="40" r="6" fill="#D4A55A"></circle><line x1="8" y1="56" x2="56" y2="56" stroke="#0F2420" stroke-width="4.5" stroke-linecap="round"></line></svg>
+      <span style="font-size:19px;font-weight:800;letter-spacing:-0.4px">Journey Home</span>
+    </div>
+    <nav aria-label="Main" style="display:flex;align-items:center;gap:4px;background:#F0EADC;border-radius:999px;padding:6px">
+      <a href="Home.dc.html" style="padding:10px 18px;border-radius:999px;background:#0F2420;color:#FBF9F4;font-size:14px;font-weight:700">Home</a>
+      <a href="HowItWorks.dc.html" style="padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;color:#3A443F">How it works</a>
+      <a href="Pricing.dc.html" style="padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;color:#3A443F">Pricing</a>
+      <a href="FAQ.dc.html" style="padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;color:#3A443F">FAQ</a>
+      <a href="Contact.dc.html" style="padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;color:#3A443F">Contact</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:14px">
+      <a href="Login.dc.html" style="font-size:14px;font-weight:700">Log in</a>
+      <a href="OnboardingSignup.dc.html" style="display:inline-flex;align-items:center;height:48px;padding:0 24px;border-radius:999px;background:#D4A55A;color:#0F2420;font-size:14px;font-weight:800">Get started →</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section style="padding:56px 80px 0;display:grid;grid-template-columns:1fr 0.92fr;gap:40px;align-items:center">
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div style="display:inline-flex;align-items:center;gap:8px;align-self:flex-start;background:#E3F3EA;color:#1F5A40;padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700"><span style="width:7px;height:7px;border-radius:50%;background:#2F7D5B"></span>Now serving 24 states</div>
+      <h1 style="margin:0;font-size:72px;font-weight:800;line-height:0.98;letter-spacing:-2.8px">Save ahead.<br>Prepare with <span style="font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-style:italic;color:#8A6224">dignity.</span></h1>
+      <p style="margin:0;font-size:18px;line-height:1.6;color:#4F5B55;max-width:460px">Journey Home is where families save a little each month toward professional photography and videography for a loved one's burial — so when the time comes, you can be present, not scrambling.</p>
+      <div style="display:flex;gap:12px;margin-top:4px">
+        <a href="OnboardingSignup.dc.html" style="display:inline-flex;align-items:center;height:56px;padding:0 28px;border-radius:999px;background:#0F2420;color:#FBF9F4;font-size:15px;font-weight:800">Start saving today</a>
+        <a href="HowItWorks.dc.html" style="display:inline-flex;align-items:center;height:56px;padding:0 28px;border-radius:999px;border:1.5px solid #CFC7B6;font-size:15px;font-weight:700">Watch how it works</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+        <div style="display:flex">
+          <div style="width:34px;height:34px;border-radius:17px;background:#D4A55A;border:2px solid #FBF9F4;margin-right:-10px"></div>
+          <div style="width:34px;height:34px;border-radius:17px;background:#5FBF8F;border:2px solid #FBF9F4;margin-right:-10px"></div>
+          <div style="width:34px;height:34px;border-radius:17px;background:#0F2420;border:2px solid #FBF9F4"></div>
+        </div>
+        <div style="font-size:13px;color:#5A6660"><strong style="color:#0F2420">12,400+</strong> families already saving</div>
+      </div>
+    </div>
+
+    <!-- Realistic hero photo with floating stat card -->
+    <div style="position:relative;border-radius:28px;overflow:hidden;box-shadow:0 30px 70px rgba(15,36,32,0.18)">
+      <img src="/_blob/57d6088838d09f08d5093125c4c8ee9b" alt="A Nigerian family together, smiling" style="width:100%;height:600px;object-fit:cover;display:block">
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(15,36,32,0) 42%, rgba(10,26,23,0.7) 100%)"></div>
+      <div style="position:absolute;top:20px;left:20px;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);padding:8px 14px;border-radius:999px;font-size:12px;font-weight:700;color:#1F5A40">
+        <span style="width:7px;height:7px;border-radius:50%;background:#2F7D5B"></span>Verified family, Lagos
+      </div>
+      <div style="position:absolute;left:20px;right:20px;bottom:20px;background:rgba(255,255,255,0.97);backdrop-filter:blur(6px);border-radius:20px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 20px 50px rgba(0,0,0,0.22)">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:46px;height:46px;border-radius:13px;background:#0F2420;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4A55A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#5A6660;text-transform:uppercase;letter-spacing:1px">Total saved</div>
+            <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px;font-variant-numeric:tabular-nums">₦240,000</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;font-weight:700;color:#5A6660;text-transform:uppercase;letter-spacing:1px">Saving since</div>
+          <div style="font-size:14px;font-weight:800;color:#2F7D5B">Mar 2025 · ongoing</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST STRIP -->
+  <section style="padding:88px 80px 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px">
+    <div style="display:flex;flex-direction:column;gap:4px"><div style="font-size:40px;font-weight:800;letter-spacing:-1.5px;font-variant-numeric:tabular-nums">12,400+</div><div style="font-size:14px;color:#5A6660">Families saving</div></div>
+    <div style="display:flex;flex-direction:column;gap:4px"><div style="font-size:40px;font-weight:800;letter-spacing:-1.5px;font-variant-numeric:tabular-nums">380+</div><div style="font-size:14px;color:#5A6660">Photographers &amp; videographers</div></div>
+    <div style="display:flex;flex-direction:column;gap:4px"><div style="font-size:40px;font-weight:800;letter-spacing:-1.5px;font-variant-numeric:tabular-nums">24</div><div style="font-size:14px;color:#5A6660">States covered</div></div>
+    <div style="display:flex;flex-direction:column;gap:4px"><div style="font-size:40px;font-weight:800;letter-spacing:-1.5px;font-variant-numeric:tabular-nums">98%</div><div style="font-size:14px;color:#5A6660">Services delivered on time</div></div>
+  </section>
+
+  <!-- BENTO FEATURES -->
+  <section style="padding:96px 80px;display:flex;flex-direction:column;gap:32px">
+    <div style="max-width:620px;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#8A6224">Why families choose us</div>
+      <h2 style="margin:0;font-size:44px;font-weight:800;letter-spacing:-1.4px;line-height:1.08">Built for peace of mind, not paperwork.</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;grid-template-rows:auto auto;gap:20px">
+      <div style="grid-row:span 2;background:#0F2420;color:#F3EFE7;border-radius:28px;padding:40px;display:flex;flex-direction:column;justify-content:space-between;gap:28px">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:24px;font-weight:800;letter-spacing:-0.4px">Every naira tracked, always visible</div>
+          <div style="font-size:15px;line-height:1.6;color:#B7C4B9;max-width:360px">No black box. Every contribution is dated, recorded, and receipted the moment it lands.</div>
+        </div>
+        <div style="background:rgba(243,239,231,0.06);border:1px solid rgba(243,239,231,0.14);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;font-size:13px"><span>Journey Home Plan · Emeka</span><span style="font-variant-numeric:tabular-nums">₦10,000</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:#B7C4B9"><span>15 Sep · Card ••4821</span><span style="color:#5FBF8F">Successful</span></div>
+          <div style="height:1px;background:rgba(243,239,231,0.12)"></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px"><span>Journey Home Plan · Ngozi</span><span style="font-variant-numeric:tabular-nums">₦10,000</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:#B7C4B9"><span>12 Sep · Card ••4821</span><span style="color:#5FBF8F">Successful</span></div>
+        </div>
+      </div>
+      <div style="position:relative;border-radius:28px;overflow:hidden;min-height:220px;display:flex;flex-direction:column;justify-content:flex-end">
+        <img src="/_blob/6c2993fba828555d5125a13eba8e26f4" alt="One of our network photographers" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(15,36,32,0) 35%, rgba(10,26,23,0.82) 100%)"></div>
+        <div style="position:relative;padding:28px;color:#F3EFE7">
+          <div style="font-size:21px;font-weight:800;letter-spacing:-0.3px;margin-bottom:6px">380+ photographers, nationwide</div>
+          <div style="font-size:14px;line-height:1.55;color:#E6E1D6">We assign someone near your family, wherever the service is needed.</div>
+        </div>
+      </div>
+      <div style="background:#E3F3EA;border-radius:28px;padding:36px;display:flex;flex-direction:column;justify-content:space-between;gap:18px">
+        <svg aria-hidden="true" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1F5A40" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="4"></rect><path d="M8 2v4M16 2v4M3 10h18"></path></svg>
+        <div><div style="font-size:21px;font-weight:800;letter-spacing:-0.3px;margin-bottom:6px">Multiple plans, one account</div><div style="font-size:14px;line-height:1.55;color:#2A4A3B">Parents, grandparents, uncles, aunts — a plan for each, all in your dashboard.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section style="padding:0 80px 96px;display:flex;flex-direction:column;gap:40px">
+    <div style="max-width:620px;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#1F5A40">Features</div>
+      <h2 style="margin:0;font-size:44px;font-weight:800;letter-spacing:-1.4px;line-height:1.08">Everything you need, in one place.</h2>
+      <p style="margin:0;font-size:16px;line-height:1.6;color:#4F5B55;max-width:480px">From the first contribution to the final keepsake, Journey Home handles the logistics so your family doesn't have to.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px">
+
+      <div style="background:#FFFFFF;border:1.5px solid #E2DCCF;border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:16px">
+        <div style="width:44px;height:44px;border-radius:12px;background:#E3F3EA;display:flex;align-items:center;justify-content:center">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F5A40" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="4"></rect><path d="M8 2v4M16 2v4M3 10h18"></path></svg>
+        </div>
+        <div><div style="font-size:17px;font-weight:800;margin-bottom:6px">Multiple savings plans</div><div style="font-size:14px;line-height:1.55;color:#4F5B55">Track a separate plan for each loved one, all from one account.</div></div>
+      </div>
+
+      <div style="background:#FFFFFF;border:1.5px solid #E2DCCF;border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:16px">
+        <div style="width:44px;height:44px;border-radius:12px;background:#F6EAD3;display:flex;align-items:center;justify-content:center">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A6224" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.35-7-10a7 7 0 0 1 14 0c0 5.65-7 10-7 10Z"></path><circle cx="12" cy="11" r="2.5"></circle></svg>
+        </div>
+        <div><div style="font-size:17px;font-weight:800;margin-bottom:6px">Verified photographer network</div><div style="font-size:14px;line-height:1.55;color:#4F5B55">380+ photographers and videographers, vetted and matched across 24 states.</div></div>
+      </div>
+
+      <div style="background:#FFFFFF;border:1.5px solid #E2DCCF;border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:16px">
+        <div style="width:44px;height:44px;border-radius:12px;background:#E9EFEA;display:flex;align-items:center;justify-content:center">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2F7D5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"></path><circle cx="12" cy="12" r="9"></circle></svg>
+        </div>
+        <div><div style="font-size:17px;font-weight:800;margin-bottom:6px">Gentle reminders</div><div style="font-size:14px;line-height:1.55;color:#4F5B55">A nudge a few days before your contribution is due — never a surprise.</div></div>
+      </div>
+
+      <div style="background:#FFFFFF;border:1.5px solid #E2DCCF;border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:16px">
+        <div style="width:44px;height:44px;border-radius:12px;background:#E3F3EA;display:flex;align-items:center;justify-content:center">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F5A40" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"></rect><circle cx="8.5" cy="8.5" r="1.8"></circle><path d="m21 15-5-5L5 21"></path></svg>
+        </div>
+        <div><div style="font-size:17px;font-weight:800;margin-bottom:6px">Instant digital gallery</div><div style="font-size:14px;line-height:1.55;color:#4F5B55">Share photos and the keepsake film with family anywhere in the world.</div></div>
+      </div>
+
+      <div style="background:#FFFFFF;border:1.5px solid #E2DCCF;border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:16px">
+        <div style="width:44px;height:44px;border-radius:12px;background:#F6EAD3;display:flex;align-items:center;justify-content:center">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A6224" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12.5 11 15l4.5-5.5"></path><circle cx="12" cy="12" r="9"></circle></svg>
+        </div>
+        <div><div style="font-size:17px;font-weight:800;margin-bottom:6px">Full payment transparency</div><div style="font-size:14px;line-height:1.55;color:#4F5B55">Every contribution is dated, recorded, and receipted the moment it lands.</div></div>
+      </div>
+
+      <div style="background:#FFFFFF;border:1.5px solid #E2DCCF;border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:16px">
+        <div style="width:44px;height:44px;border-radius:12px;background:#E9EFEA;display:flex;align-items:center;justify-content:center">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2F7D5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"></rect><path d="M2 10h20"></path></svg>
+        </div>
+        <div><div style="font-size:17px;font-weight:800;margin-bottom:6px">Flexible payment methods</div><div style="font-size:14px;line-height:1.55;color:#4F5B55">Card, bank transfer, or recurring debit — whatever works for your family.</div></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS TEASER -->
+  <section style="background:#0F2420;color:#F3EFE7;padding:96px 80px;display:flex;flex-direction:column;gap:48px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px">
+      <div style="max-width:520px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#D4A55A">How it works</div>
+        <h2 style="margin:0;font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.1">Four steps, taken gently.</h2>
+      </div>
+      <a href="HowItWorks.dc.html" style="display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:#D4A55A">See the full walkthrough →</a>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 0.8fr;gap:40px;align-items:stretch">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="background:rgba(243,239,231,0.05);border:1px solid rgba(243,239,231,0.12);border-radius:20px;padding:24px 28px;display:flex;align-items:center;gap:20px">
+          <div style="font-size:15px;color:#D4A55A;font-weight:800;flex-shrink:0;width:30px">01</div>
+          <div><div style="font-size:18px;font-weight:700;margin-bottom:4px">Start a plan</div><div style="font-size:14px;line-height:1.5;color:#B7C4B9">Choose a loved one and a package.</div></div>
+        </div>
+        <div style="background:rgba(243,239,231,0.05);border:1px solid rgba(243,239,231,0.12);border-radius:20px;padding:24px 28px;display:flex;align-items:center;gap:20px">
+          <div style="font-size:15px;color:#D4A55A;font-weight:800;flex-shrink:0;width:30px">02</div>
+          <div><div style="font-size:18px;font-weight:700;margin-bottom:4px">We verify</div><div style="font-size:14px;line-height:1.5;color:#B7C4B9">Every naira is recorded and receipted.</div></div>
+        </div>
+        <div style="background:rgba(243,239,231,0.05);border:1px solid rgba(243,239,231,0.12);border-radius:20px;padding:24px 28px;display:flex;align-items:center;gap:20px">
+          <div style="font-size:15px;color:#D4A55A;font-weight:800;flex-shrink:0;width:30px">03</div>
+          <div><div style="font-size:18px;font-weight:700;margin-bottom:4px">We prepare</div><div style="font-size:14px;line-height:1.5;color:#B7C4B9">We assign a photographer near you.</div></div>
+        </div>
+        <div style="background:rgba(243,239,231,0.05);border:1px solid rgba(243,239,231,0.12);border-radius:20px;padding:24px 28px;display:flex;align-items:center;gap:20px">
+          <div style="font-size:15px;color:#D4A55A;font-weight:800;flex-shrink:0;width:30px">04</div>
+          <div><div style="font-size:18px;font-weight:700;margin-bottom:4px">We capture the day</div><div style="font-size:14px;line-height:1.5;color:#B7C4B9">Delivered as a keepsake you'll treasure.</div></div>
+        </div>
+      </div>
+      <div style="border-radius:24px;overflow:hidden;position:relative;min-height:460px">
+        <img src="/_blob/7bf93c7c83454db39f32abf6885615df" alt="A photographer capturing a multi-generational family portrait at home" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        <div style="position:absolute;inset:0;background:linear-gradient(0deg, rgba(10,26,23,0.55) 0%, rgba(10,26,23,0) 50%)"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING TEASER -->
+  <section style="padding:96px 80px;display:flex;flex-direction:column;gap:40px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px">
+      <div style="max-width:560px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#8A6224">Pricing</div>
+        <h2 style="margin:0;font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.1">Save at whatever pace suits your family.</h2>
+      </div>
+      <a href="Pricing.dc.html" style="display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:700">Compare all packages →</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:stretch">
+      <div style="background:#FFFFFF;border:1.5px solid #E2DCCF;border-radius:28px;padding:32px;display:flex;flex-direction:column;gap:18px">
+        <div><div style="font-size:21px;font-weight:800">Basic</div><div style="font-size:14px;color:#5A6660;margin-top:4px">Photography only</div></div>
+        <div style="font-size:30px;font-weight:800">[PRICE] <span style="font-size:14px;font-weight:500;color:#5A6660">/ month</span></div>
+        <a href="OnboardingSignup.dc.html" style="display:inline-flex;align-items:center;justify-content:center;height:50px;border-radius:999px;border:1.5px solid #0F2420;font-size:14px;font-weight:800">Choose Basic</a>
+      </div>
+      <div style="background:#0F2420;color:#F3EFE7;border-radius:28px;padding:32px;display:flex;flex-direction:column;gap:18px;box-shadow:0 20px 50px rgba(15,36,32,0.2);position:relative">
+        <div style="position:absolute;top:24px;right:24px;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#0F2420;background:#D4A55A;padding:5px 12px;border-radius:7px">Most chosen</div>
+        <div><div style="font-size:21px;font-weight:800">Standard</div><div style="font-size:14px;color:#B7C4B9;margin-top:4px">Photography + videography</div></div>
+        <div style="font-size:30px;font-weight:800">[PRICE] <span style="font-size:14px;font-weight:500;color:#B7C4B9">/ month</span></div>
+        <a href="OnboardingSignup.dc.html" style="display:inline-flex;align-items:center;justify-content:center;height:50px;border-radius:999px;background:#D4A55A;color:#0F2420;font-size:14px;font-weight:800">Choose Standard</a>
+      </div>
+      <div style="background:#FFFFFF;border:1.5px solid #E2DCCF;border-radius:28px;padding:32px;display:flex;flex-direction:column;gap:18px">
+        <div><div style="font-size:21px;font-weight:800">Premium</div><div style="font-size:14px;color:#5A6660;margin-top:4px">Full production</div></div>
+        <div style="font-size:30px;font-weight:800">[PRICE] <span style="font-size:14px;font-weight:500;color:#5A6660">/ month</span></div>
+        <a href="OnboardingSignup.dc.html" style="display:inline-flex;align-items:center;justify-content:center;height:50px;border-radius:999px;border:1.5px solid #0F2420;font-size:14px;font-weight:800">Choose Premium</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIAL -->
+  <section style="background:#F6EAD3;padding:96px 80px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:24px">
+    <blockquote style="margin:0;max-width:760px;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:34px;line-height:1.3;letter-spacing:-0.4px;color:#2A2015">"We had been saving for two years without really knowing what for. When the day came, Journey Home just <span style="font-style:italic;color:#8A6224">showed up</span> — the film they gave us is the thing my children watch every year."</blockquote>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:44px;height:44px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid rgba(138,98,36,0.3)"><img src="/_blob/882c595e59653c90143b65840aa0c64c" alt="" style="width:100%;height:100%;object-fit:cover"></div>
+      <div style="text-align:left"><div style="font-size:15px;font-weight:800">Adaeze N.</div><div style="font-size:13px;color:#7A4F10">Journey Home Plan, Lagos</div></div>
+    </div>
+  </section>
+
+  <!-- CLOSING CTA -->
+  <section style="padding:96px 80px;">
+    <div style="background:#0F2420;border-radius:32px;padding:72px 64px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:22px;position:relative;overflow:hidden">
+      <svg aria-hidden="true" width="100%" height="100%" viewBox="0 0 1300 400" style="position:absolute;inset:0;opacity:0.5"><circle cx="650" cy="400" r="220" fill="#D4A55A" fill-opacity="0.07"></circle></svg>
+      <h2 style="position:relative;margin:0;color:#F3EFE7;font-size:46px;font-weight:800;letter-spacing:-1.2px;max-width:640px;line-height:1.1">Start your family's plan <span style="font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-style:italic;color:#D4A55A">today.</span></h2>
+      <p style="position:relative;margin:0;font-size:16px;color:#D6DCD5;max-width:440px;line-height:1.6">A few minutes to set up. Save at your own pace. We'll be ready when the time comes.</p>
+      <a href="OnboardingSignup.dc.html" style="position:relative;display:inline-flex;align-items:center;height:56px;padding:0 32px;border-radius:999px;background:#D4A55A;color:#0F2420;font-size:15px;font-weight:800">Start a plan</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="padding:0 80px 56px;display:flex;flex-direction:column;gap:48px">
+    <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <svg role="img" aria-label="Journey Home" width="24" height="24" viewBox="0 0 64 64"><path d="M16 56 V30 A16 16 0 0 1 48 30 V56" fill="none" stroke="#0F2420" stroke-width="4.5" stroke-linecap="round"></path><circle cx="32" cy="40" r="6" fill="#D4A55A"></circle><line x1="8" y1="56" x2="56" y2="56" stroke="#0F2420" stroke-width="4.5" stroke-linecap="round"></line></svg>
+          <span style="font-size:17px;font-weight:800">Journey Home</span>
+        </div>
+        <div style="font-size:14px;line-height:1.6;color:#5A6660;max-width:260px">Save ahead. Prepare with dignity. Capture the memories that matter.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;font-weight:600">
+        <div style="font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#8A6224;margin-bottom:4px">Product</div>
+        <a href="HowItWorks.dc.html">How it works</a><a href="Pricing.dc.html">Pricing</a><a href="FAQ.dc.html">FAQ</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;font-weight:600">
+        <div style="font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#8A6224;margin-bottom:4px">Company</div>
+        <a href="#">About</a><a href="Contact.dc.html">Contact</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;font-weight:600">
+        <div style="font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#8A6224;margin-bottom:4px">Legal</div>
+        <a href="Terms.dc.html">Plan terms &amp; conditions</a><a href="Privacy.dc.html">Privacy policy</a>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:24px;border-top:1px solid #E2DCCF;font-size:13px;color:#5A6660">
+      <span>© 2026 Journey Home. All rights reserved.</span>
+      <span>Lagos, Nigeria</span>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3260}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

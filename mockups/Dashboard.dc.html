@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Journey Home — App (Dashboard)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Manrope:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3EFE7}
+a{color:#8A6224}a:hover{color:#5C3B0C}
+.jh-sidebar{flex:0 0 248px;width:248px;transition:width .18s ease}
+.jh-nav a{white-space:nowrap}
+.jh-toggle-expand{display:none}
+#navCollapse:checked ~ .jh-sidebar{flex:0 0 72px;width:72px}
+#navCollapse:checked ~ .jh-sidebar .jh-label,
+#navCollapse:checked ~ .jh-sidebar .jh-wordmark,
+#navCollapse:checked ~ .jh-sidebar .jh-footer-card{display:none}
+#navCollapse:checked ~ .jh-sidebar .jh-nav a{justify-content:center;padding:0;gap:0}
+#navCollapse:checked ~ .jh-sidebar .jh-brand-row{flex-direction:column;gap:14px;justify-content:center}
+#navCollapse:checked ~ .jh-sidebar .jh-toggle-collapse{display:none}
+#navCollapse:checked ~ .jh-sidebar .jh-toggle-expand{display:inline-flex}
+#createPlan{display:none;position:fixed;inset:0;background:rgba(15,36,32,0.55);z-index:60;padding:24px;box-sizing:border-box;overflow-y:auto}
+#createPlanToggle:checked ~ #createPlan{display:block}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F3EFE7; color: #0F2420; font-family: 'Manrope', system-ui, sans-serif; display: flex; flex-wrap: wrap">
+
+  <input type="checkbox" id="navCollapse" style="display:none">
+  <input type="checkbox" id="createPlanToggle" style="display:none">
+  <aside class="jh-sidebar" style="background: #0F2420; color: #F3EFE7; padding: 28px 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 32px">
+    <div class="jh-brand-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 8px">
+      <div style="display: flex; align-items: center; gap: 12px; min-width: 0">
+        <svg role="img" aria-label="Journey Home" width="32" height="32" viewBox="0 0 64 64" style="flex-shrink: 0"><path d="M16 56 V30 A16 16 0 0 1 48 30 V56" fill="none" stroke="#F3EFE7" stroke-width="4" stroke-linecap="round"></path><circle cx="32" cy="40" r="6" fill="#D4A55A"></circle><line x1="8" y1="56" x2="56" y2="56" stroke="#F3EFE7" stroke-width="4" stroke-linecap="round"></line></svg>
+        <div class="jh-wordmark" style="font-family: 'Instrument Serif', Georgia, serif; font-size: 24px; white-space: nowrap">Journey <span style="font-style: italic; color: #D4A55A">Home</span></div>
+      </div>
+      <label for="navCollapse" aria-label="Collapse sidebar" style="width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #B7C4B9; flex-shrink: 0">
+        <svg class="jh-toggle-collapse" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+        <svg class="jh-toggle-expand" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+      </label>
+    </div>
+    <nav aria-label="Main" class="jh-nav" style="display: flex; flex-direction: column; gap: 4px">
+      <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 14px; border-radius: 12px; background: rgba(243,239,231,0.10); color: #F3EFE7; text-decoration: none; font-size: 14px; font-weight: 600"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4A55A" stroke-width="1.8" stroke-linecap="round"><path d="M5 21V11a7 7 0 0 1 14 0v10"></path><path d="M3 21h18"></path></svg><span class="jh-label">Dashboard</span></a>
+      <a href="Plans.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 14px; border-radius: 12px; color: #B7C4B9; text-decoration: none; font-size: 14px; font-weight: 500"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="3"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg><span class="jh-label">My plans</span></a>
+      <a href="Payments.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 14px; border-radius: 12px; color: #B7C4B9; text-decoration: none; font-size: 14px; font-weight: 500"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"></rect><path d="M3 10h18"></path></svg><span class="jh-label">Payments</span></a>
+      <a href="ServiceRequests.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 14px; border-radius: 12px; color: #B7C4B9; text-decoration: none; font-size: 14px; font-weight: 500"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4l2-3h6l2 3h4v12H3z"></path><circle cx="12" cy="13" r="3.5"></circle></svg><span class="jh-label">Service requests</span></a>
+      <a href="Notifications.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 14px; border-radius: 12px; color: #B7C4B9; text-decoration: none; font-size: 14px; font-weight: 500"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><span class="jh-label">Notifications</span></a>
+      <a href="Profile.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 14px; border-radius: 12px; color: #B7C4B9; text-decoration: none; font-size: 14px; font-weight: 500"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg><span class="jh-label">Profile &amp; settings</span></a>
+    </nav>
+    <div class="jh-footer-card" style="margin-top: auto; border: 1px solid rgba(212,165,90,0.4); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+      <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 20px; line-height: 1.2">When the time comes, <span style="font-style: italic; color: #D4A55A">we're here.</span></div>
+      <div style="font-size: 13px; line-height: 1.5; color: #B7C4B9">Submit documents and we'll coordinate everything, with care.</div>
+      <a href="RequestService.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 12px; background: #D4A55A; color: #0F2420; text-decoration: none; font-size: 14px; font-weight: 700">Request service</a>
+    </div>
+  </aside>
+
+  <main style="flex: 999 1 560px; min-width: 0; padding: 32px 40px 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+    <header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <div style="font-size: 14px; color: #5A6660">Monday, 12 October</div>
+        <h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 44px; letter-spacing: -0.8px; line-height: 1.05">Good morning, <span style="font-style: italic">Chidi</span></h1>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px">
+        <label for="createPlanToggle" style="cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 14px; background: #0F2420; color: #F3EFE7; text-decoration: none; font-size: 14px; font-weight: 600"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A55A" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Create new plan</label>
+        <a href="Notifications.dc.html" aria-label="Notifications" style="width: 48px; height: 48px; border-radius: 14px; border: 1px solid #DDD5C5; background: #FFFFFF; display: flex; align-items: center; justify-content: center; padding: 0; text-decoration: none"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F2420" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg></a>
+        <a href="Profile.dc.html" aria-label="Chidi Okafor" style="width: 48px; height: 48px; border-radius: 24px; background: #B7C4B9; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; text-decoration: none; color: #0F2420">CO</a>
+      </div>
+    </header>
+
+    <section aria-label="Summary" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px">
+      <div style="background: #FFFFFF; border-radius: 20px; padding: 22px 24px; display: flex; flex-direction: column; gap: 8px">
+        <div style="font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #5A6660">Total contributed</div>
+        <div style="font-size: 30px; font-weight: 600; letter-spacing: -1px; font-variant-numeric: tabular-nums; color: #0F2420">₦240,000</div>
+        <div style="font-size: 13px; color: #5A6660">24 payments since Oct 2025</div>
+      </div>
+      <div style="background: #FFFFFF; border-radius: 20px; padding: 22px 24px; display: flex; flex-direction: column; gap: 8px">
+        <div style="font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #5A6660">Active plans</div>
+        <div style="font-size: 30px; font-weight: 600; letter-spacing: -1px">2</div>
+        <div style="font-size: 13px; color: #5A6660">Emeka · Ngozi</div>
+      </div>
+      <div style="background: #FFFFFF; border-radius: 20px; padding: 22px 24px; display: flex; flex-direction: column; gap: 8px">
+        <div style="font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #5A6660">Next payment</div>
+        <div style="font-size: 30px; font-weight: 600; letter-spacing: -1px; font-variant-numeric: tabular-nums">₦10,000</div>
+        <div style="font-size: 13px; color: #7A4F10; font-weight: 600">Ngozi's plan · due today</div>
+      </div>
+      <div style="background: #FFFFFF; border-radius: 20px; padding: 22px 24px; display: flex; flex-direction: column; gap: 8px">
+        <div style="font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #5A6660">Upcoming</div>
+        <div style="font-size: 18px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A6224" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v8H4v-8M4 8h16v4H4zM12 8V4m-3 4a3 3 0 0 1 3-4 3 3 0 0 1 3 4"></path></svg>Emeka's birthday</div>
+        <div style="font-size: 13px; color: #5A6660">3 November · reminder set</div>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <section aria-label="Your plans" style="flex: 3 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline">
+          <h2 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 30px">Your plans</h2>
+          <a href="Plans.dc.html" style="font-size: 14px; font-weight: 600; text-decoration: none">Manage plans</a>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px">
+          <article style="background: #0F2420; color: #F3EFE7; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+            <div style="display: flex; gap: 14px; align-items: center">
+              <div style="min-width: 0">
+                <h3 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 22px; line-height: 1.1">Journey Home Plan</h3>
+                <div style="font-size: 13px; color: #B7C4B9; margin-top: 2px">Father</div>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center">
+              <span style="display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; background: rgba(47,125,91,0.25); color: #A9DCC2; font-size: 12px; font-weight: 600"><span style="width: 6px; height: 6px; border-radius: 50%; background: #5FBF8F"></span>Active</span>
+              <span style="font-size: 12px; color: #B7C4B9">Standard</span>
+            </div>
+            <div style="font-size: 26px; font-weight: 600; letter-spacing: -0.7px; font-variant-numeric: tabular-nums">₦120,000</div>
+            <div style="height: 5px; border-radius: 5px; background: rgba(243,239,231,0.14)"><div style="width: 50%; height: 5px; border-radius: 5px; background: #D4A55A"></div></div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #D6DCD5; font-variant-numeric: tabular-nums"><span>12 × ₦10,000</span><span>Next 15 Oct</span></div>
+            <a href="PlanDetail.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 12px; border: 1px solid rgba(243,239,231,0.3); color: #F3EFE7; text-decoration: none; font-size: 14px; font-weight: 600">View plan</a>
+          </article>
+          <article style="background: #FFFFFF; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 14px; border: 1px solid #E2DCCF">
+            <div style="display: flex; gap: 14px; align-items: center">
+              <div style="min-width: 0">
+                <h3 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 22px; line-height: 1.1">Journey Home Plan</h3>
+                <div style="font-size: 13px; color: #5A6660; margin-top: 2px">&nbsp;Mother</div>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center">
+              <span style="display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; background: #F6EAD3; color: #7A4F10; font-size: 12px; font-weight: 600"><span style="width: 6px; height: 6px; border-radius: 50%; background: #B7791F"></span>Payment due</span>
+              <span style="font-size: 12px; color: #5A6660">Standard</span>
+            </div>
+            <div style="font-size: 26px; font-weight: 600; letter-spacing: -0.7px; font-variant-numeric: tabular-nums">₦120,000</div>
+            <div style="height: 5px; border-radius: 5px; background: #EEE9DF"><div style="width: 50%; height: 5px; border-radius: 5px; background: #0F2420"></div></div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #5A6660; font-variant-numeric: tabular-nums"><span>12 × ₦10,000</span><span>Due today</span></div>
+            <a href="Plans.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 12px; background: #D4A55A; color: #0F2420; text-decoration: none; font-size: 14px; font-weight: 700">Pay ₦10,000 now</a>
+          </article>
+          <label for="createPlanToggle" style="cursor: pointer; border: 1.5px dashed #CFC7B6; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; text-decoration: none; color: #0F2420; min-height: 230px">
+            <span style="width: 52px; height: 52px; border-radius: 26px; background: #E8E2D5; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F2420" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></span>
+            <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 22px">Plan for someone else</span>
+            <span style="font-size: 13px; line-height: 1.5; color: #5A6660; max-width: 200px">Parents, grandparents, uncles, aunts — one plan per person, all in one account.</span>
+          </label>
+        </div>
+      </section>
+
+      <section aria-label="Recent payments" style="flex: 1 1 320px; min-width: 0; background: #FFFFFF; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 4px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px">
+          <h2 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 26px">Recent payments</h2>
+          <a href="Payments.dc.html" style="font-size: 13px; font-weight: 600; text-decoration: none">See all</a>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid #EEE9DF; gap: 12px"><div><div style="font-size: 14px; font-weight: 600">Journey Home Plan <span style="color: #5A6660; font-weight: 500">· Emeka</span></div><div style="font-size: 12px; color: #5A6660">15 Sep · Card ••4821</div></div><div style="text-align: right"><div style="font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums">₦10,000</div><div style="font-size: 12px; color: #1F5A40; font-weight: 600">Successful</div></div></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid #EEE9DF; gap: 12px"><div><div style="font-size: 14px; font-weight: 600">Journey Home Plan <span style="color: #5A6660; font-weight: 500">· Ngozi</span></div><div style="font-size: 12px; color: #5A6660">12 Sep · Card ••4821</div></div><div style="text-align: right"><div style="font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums">₦10,000</div><div style="font-size: 12px; color: #1F5A40; font-weight: 600">Successful</div></div></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid #EEE9DF; gap: 12px"><div><div style="font-size: 14px; font-weight: 600">Journey Home Plan <span style="color: #5A6660; font-weight: 500">· Emeka</span></div><div style="font-size: 12px; color: #5A6660">15 Aug · Card ••4821</div></div><div style="text-align: right"><div style="font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums">₦10,000</div><div style="font-size: 12px; color: #1F5A40; font-weight: 600">Successful</div></div></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid #EEE9DF; gap: 12px"><div><div style="font-size: 14px; font-weight: 600">Journey Home Plan <span style="color: #5A6660; font-weight: 500">· Ngozi</span></div><div style="font-size: 12px; color: #5A6660">12 Aug · Card ••4821</div></div><div style="text-align: right"><div style="font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums">₦10,000</div><div style="font-size: 12px; color: #8E3322; font-weight: 600">Retried · paid 13 Aug</div></div></div>
+        <div style="margin-top: 12px; background: #F6EAD3; border-radius: 14px; padding: 14px 16px; display: flex; gap: 10px; align-items: flex-start">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A4F10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5"></path><path d="M12 16h.01"></path></svg>
+          <div style="font-size: 13px; line-height: 1.5; color: #5C3B0C">Ngozi's ₦10,000 contribution is due today. It will be charged automatically this evening.</div>
+        </div>
+        <div style="margin-top: 10px; text-align: center">
+          <a href="Terms.dc.html" style="font-size: 12px; color: #5A6660; text-decoration: underline">View plan terms &amp; conditions</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="createPlan">
+    <div style="max-width:640px;margin:40px auto;background:#FBF9F4;border-radius:24px;box-shadow:0 30px 80px rgba(15,36,32,0.35);display:flex;flex-direction:column;max-height:calc(100vh - 80px)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:24px 28px;border-bottom:1px solid #E2DCCF;flex-shrink:0">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#8A6224;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">New plan</div>
+          <h2 style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:28px">Start a new <span style="font-style:italic">plan</span></h2>
+        </div>
+        <label for="createPlanToggle" aria-label="Close" style="cursor:pointer;width:36px;height:36px;border-radius:12px;background:#F0EADC;display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F2420" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </label>
+      </div>
+
+      <div style="padding:24px 28px;display:flex;flex-direction:column;gap:22px;overflow-y:auto">
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="font-size:12px;font-weight:700;color:#5A6660;text-transform:uppercase;letter-spacing:1px">Who is this plan for?</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+            <label style="display:flex;flex-direction:column;gap:6px;grid-column:1 / -1">
+              <span style="font-size:12px;font-weight:600;color:#5A6660">Full name</span>
+              <input type="text" placeholder="e.g. Adunni Okafor" style="height:44px;border-radius:12px;border:1px solid #E2DCCF;padding:0 14px;font-size:14px;background:#FFFFFF;color:#0F2420">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:12px;font-weight:600;color:#5A6660">Relationship</span>
+              <select style="height:44px;border-radius:12px;border:1px solid #E2DCCF;padding:0 14px;font-size:14px;background:#FFFFFF;color:#0F2420">
+                <option>Mother</option><option>Father</option><option>Grandparent</option><option>Uncle / Aunt</option><option>Other</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:12px;font-weight:600;color:#5A6660">Date of birth</span>
+              <input type="date" style="height:44px;border-radius:12px;border:1px solid #E2DCCF;padding:0 14px;font-size:14px;background:#FFFFFF;color:#0F2420">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:12px;font-weight:600;color:#5A6660">Gender</span>
+              <select style="height:44px;border-radius:12px;border:1px solid #E2DCCF;padding:0 14px;font-size:14px;background:#FFFFFF;color:#0F2420">
+                <option>Female</option><option>Male</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:12px;font-weight:600;color:#5A6660">Phone number</span>
+              <input type="tel" placeholder="e.g. 0803 123 4567" style="height:44px;border-radius:12px;border:1px solid #E2DCCF;padding:0 14px;font-size:14px;background:#FFFFFF;color:#0F2420">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:12px;font-weight:600;color:#5A6660">State / location</span>
+              <input type="text" placeholder="e.g. Lagos" style="height:44px;border-radius:12px;border:1px solid #E2DCCF;padding:0 14px;font-size:14px;background:#FFFFFF;color:#0F2420">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;grid-column:1 / -1">
+              <span style="font-size:12px;font-weight:600;color:#5A6660">Home address</span>
+              <input type="text" placeholder="e.g. 14 Awolowo Road, Ikoyi" style="height:44px;border-radius:12px;border:1px solid #E2DCCF;padding:0 14px;font-size:14px;background:#FFFFFF;color:#0F2420">
+            </label>
+          </div>
+        </div>
+
+        <div style="height:1px;background:#E2DCCF"></div>
+
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:12px;font-weight:700;color:#5A6660;text-transform:uppercase;letter-spacing:1px">Proof of identity</div>
+          <p style="margin:0;font-size:13px;line-height:1.6;color:#5A6660">Upload one valid document for the plan owner — a passport, birth certificate, or any government-issued ID.</p>
+          <select style="height:44px;border-radius:12px;border:1px solid #E2DCCF;padding:0 14px;font-size:14px;background:#FFFFFF;color:#0F2420">
+            <option>International passport</option><option>Birth certificate</option><option>National ID (NIN) card</option><option>Driver's licence</option><option>Voter's card</option>
+          </select>
+          <label style="border:1.5px dashed #D9CFB8;border-radius:14px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;background:#FFFFFF;text-align:center">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A6224" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"></path><path d="m7 9 5-5 5 5"></path><path d="M20 16.5v2a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 18.5v-2"></path></svg>
+            <div style="font-size:13px;font-weight:700">Click to upload, or drag a file here</div>
+            <div style="font-size:11px;color:#9A9387">JPG, PNG, or PDF — up to 10MB</div>
+            <input type="file" style="display:none">
+          </label>
+        </div>
+
+        <div style="height:1px;background:#E2DCCF"></div>
+
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:12px;font-weight:700;color:#5A6660;text-transform:uppercase;letter-spacing:1px">Choose a package</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <label style="border:1.5px solid #E2DCCF;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:4px;cursor:pointer">
+              <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:700">Basic</span><input type="radio" name="modalPkg"></div>
+              <div style="font-size:16px;font-weight:700">₦5,000<span style="font-size:11px;font-weight:500;color:#5A6660">/mo</span></div>
+            </label>
+            <label style="border:1.5px solid #0F2420;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:4px;cursor:pointer;background:#FBF4E4">
+              <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:700">Standard</span><input type="radio" name="modalPkg" checked></div>
+              <div style="font-size:16px;font-weight:700">₦10,000<span style="font-size:11px;font-weight:500;color:#5A6660">/mo</span></div>
+            </label>
+            <label style="border:1.5px solid #E2DCCF;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:4px;cursor:pointer">
+              <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:700">Premium</span><input type="radio" name="modalPkg"></div>
+              <div style="font-size:16px;font-weight:700">₦18,000<span style="font-size:11px;font-weight:500;color:#5A6660">/mo</span></div>
+            </label>
+          </div>
+        </div>
+
+        <div style="height:1px;background:#E2DCCF"></div>
+
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:12px;font-weight:700;color:#5A6660;text-transform:uppercase;letter-spacing:1px">Payment method</div>
+          <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;border:1.5px solid #0F2420;border-radius:14px;padding:12px 16px;background:#FBF4E4">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:36px;height:24px;border-radius:6px;background:#0F2420;color:#D4A55A;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800">VISA</div>
+              <div>
+                <div style="font-size:13px;font-weight:600">Card ending in 4821</div>
+                <div style="font-size:11px;color:#5A6660">First charge today, then monthly</div>
+              </div>
+            </div>
+            <input type="radio" name="modalMethod" checked>
+          </label>
+        </div>
+
+      </div>
+
+      <div style="padding:20px 28px;border-top:1px solid #E2DCCF;display:flex;gap:12px;flex-shrink:0">
+        <label for="createPlanToggle" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 22px;border-radius:14px;border:1.5px solid #0F2420;color:#0F2420;text-decoration:none;font-size:14px;font-weight:600">Cancel</label>
+        <a href="Plans.dc.html" style="flex:1;display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:14px;background:#0F2420;color:#F3EFE7;text-decoration:none;font-size:14px;font-weight:700">Create plan — ₦10,000/mo</a>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1120}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
