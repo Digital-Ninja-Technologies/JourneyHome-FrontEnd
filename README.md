@@ -134,3 +134,16 @@ packages/
 
 Commands: `pnpm install`, `pnpm dev`, `pnpm build`, `pnpm typecheck`.
 Add a shadcn component from `packages/ui` with `pnpm dlx shadcn@latest add <name>`.
+
+### Marketing site (`apps/marketing`)
+
+All seven public pages are built (Home, How it works, Pricing, FAQ, Contact, Terms, Privacy).
+Copy `.env.example`: `NEXT_PUBLIC_API_URL` (backend, used for live package pricing on Home and
+Pricing, revalidated every 5 minutes) and `NEXT_PUBLIC_APP_URL` (the dashboard, for Log in /
+Get started links).
+
+- **Photos:** the mockups reference design-tool blob URLs that aren't in this repo, so photos
+  render as tinted placeholders. Add files to `apps/marketing/public/images/` and set the paths
+  in `apps/marketing/lib/images.ts`.
+- **Contact form:** there is no contact endpoint on the backend, so "Send message" opens the
+  visitor's email client addressed to `hello@journeyhome.ng`.

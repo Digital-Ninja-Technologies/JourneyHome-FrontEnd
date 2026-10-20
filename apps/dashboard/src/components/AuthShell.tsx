@@ -12,7 +12,7 @@ export function AuthShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col items-center bg-[#FBF9F4] px-6 pb-20 pt-9">
+    <div className="flex min-h-screen flex-col items-center bg-canvas px-6 pb-20 pt-9">
       <div className="mb-16 flex w-full max-w-[1200px] items-center justify-between">
         <a href={import.meta.env.VITE_MARKETING_URL ?? "/"}>
           <Logo />

@@ -3,7 +3,7 @@ import { cn } from "../lib/utils";
 
 export const Label = ({ className, ...props }: React.ComponentProps<"label">) => (
   <label
-    className={cn("text-xs font-bold uppercase tracking-wider text-status-paused", className)}
+    className={cn("text-xs font-bold uppercase tracking-wider text-muted", className)}
     {...props}
   />
 );

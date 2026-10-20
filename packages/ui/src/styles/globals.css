@@ -13,7 +13,13 @@
   --color-link-hover: #5c3b0c;
   --color-card: #ffffff;
   --color-card-foreground: #0f2420;
-  --color-border: #e0d9c9;
+  --color-border: #e2dccf;
+  --color-canvas: #fbf9f4;
+  --color-sand: #f0eadc;
+  --color-cream: #f6e8d0;
+  --color-muted: #5a6660;
+  --color-ink-soft: #3a443f;
+  --color-forest: #1b2f2a;
 
   --color-status-active: #1f5a40;
   --color-status-active-bg: #e3efe7;
