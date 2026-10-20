@@ -56,7 +56,7 @@ export default function About() {
 
       {/* HERO IMAGE */}
       <Container className="pb-14">
-        <Photo src={images.hero} alt="A Nigerian family together, smiling" className="h-[400px] w-full rounded-[32px] md:h-[560px]" />
+        <Photo src={images.aboutHero} alt="The Journey Home team" className="h-[400px] w-full rounded-[32px] md:h-[560px]" />
       </Container>
 
       {/* FOUNDED + MISSION */}
@@ -95,8 +95,8 @@ export default function About() {
         </div>
         <div className="relative min-h-[360px] overflow-hidden rounded-[32px]">
           <Photo
-            src={images.howItWorks}
-            alt="A photographer capturing a multi-generational family portrait at home"
+            src={images.aboutOrigin}
+            alt="The Journey Home team"
             className="absolute inset-0 size-full"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent" />
