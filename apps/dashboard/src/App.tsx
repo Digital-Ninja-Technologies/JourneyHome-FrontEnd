@@ -4,11 +4,11 @@ import { GuestOnly, RequireAuth } from "./components/RequireAuth";
 import ComingSoon from "./pages/ComingSoon";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import PlanDetail from "./pages/PlanDetail";
+import Plans from "./pages/Plans";
 import Signup from "./pages/Signup";
 
 const COMING_SOON: [path: string, title: string][] = [
-  ["plans", "My plans"],
-  ["plans/:id", "Plan details"],
   ["payments", "Payments"],
   ["payments/new", "Make a payment"],
   ["service-requests", "Service requests"],
@@ -27,6 +27,8 @@ export default function App() {
       <Route element={<RequireAuth />}>
         <Route path="/app" element={<AppShell />}>
           <Route index element={<Dashboard />} />
+          <Route path="plans" element={<Plans />} />
+          <Route path="plans/:id" element={<PlanDetail />} />
           {COMING_SOON.map(([path, title]) => (
             <Route key={path} path={path} element={<ComingSoon title={title} />} />
           ))}

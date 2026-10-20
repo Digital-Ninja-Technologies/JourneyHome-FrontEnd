@@ -25,6 +25,7 @@ export interface Plan {
   status: PlanStatus;
   lastPaymentAt?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Payment {
@@ -36,4 +37,13 @@ export interface Payment {
   status: PaymentStatus;
   processedAt?: string;
   createdAt: string;
+}
+
+export interface Package {
+  _id: string;
+  name: string;
+  photographyIncluded: boolean;
+  videographyIncluded: boolean;
+  monthlyContributionMinor: number;
+  currency: string;
 }
