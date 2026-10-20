@@ -166,3 +166,26 @@ Get started links).
 - Request statuses come from the backend (`Submitted`, `Under_Review`, `More_Info_Required`, `Docs_Verified`,
   `Approved`, `Rejected`, `Cancelled`); "Scheduled" and "Completed" are read from the linked plan's status.
 - Provider (photographer/videographer) assignment is intentionally not shown — see "Known scope decision" above.
+
+### Admin console (`apps/admin`)
+
+Separate app on its own origin, so routes are at the root (`/users`, `/plans`, `/service-requests`, …) rather than
+under `/admin`. Sessions live in `sessionStorage` (tab only). Copy `.env.example` (`VITE_API_URL`, `VITE_MARKETING_URL`).
+
+Built against the backend's admin endpoints: login, customers, all plans (+ status changes using the backend's
+transition rules), the full service-request review workflow (start review, approve/flag documents, mark verified,
+approve, request more info, reject), package pricing, and admin-team management (super admins only).
+
+Not built because the backend has no endpoint for it (screens show a "Not available yet" note where noted):
+
+| Design feature | What the backend would need |
+|---|---|
+| Payments screen (list, KPIs, export) | an admin payments list endpoint (e.g. `GET /payments/admin`) |
+| Audit log + dashboard "Recent activity" | a route that reads audit logs (they are recorded but not exposed) |
+| Dashboard "Revenue this month" | monthly payment totals — the dashboard shows total contributed from plans instead |
+| Suspend account, send password reset, deficit filters | user suspension, password-reset and deficit tracking |
+| Identity documents on user/plan pages | identity documents aren't stored on plans |
+| Plan payment history, plan "History" feed | admin access to a plan's payments / audit events |
+| Settings: notification preferences, 2FA, revoke sessions | admin preference, 2FA and session endpoints |
+
+Also not surfaced (not in the design): creating packages and the billing policy / "run due billing" endpoints.
