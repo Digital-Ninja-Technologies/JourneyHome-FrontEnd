@@ -21,8 +21,8 @@ export default function Signup() {
     setBusy(true);
     setError(null);
     try {
-      await signup(String(data.get("name")).trim(), String(data.get("email")).trim(), String(data.get("password")));
-      navigate("/signup/plan", { replace: true });
+      await signup(String(data.get("name")).trim(), String(data.get("email")).trim(), String(data.get("password")), String(data.get("phone") ?? "").trim() || undefined);
+      navigate("/signup/verify", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed");
       setBusy(false);
@@ -41,7 +41,10 @@ export default function Signup() {
             <Label htmlFor="email">Email address</Label>
             <Input id="email" name="email" type="email" required autoComplete="email" placeholder="you@example.com" />
           </div>
-          {/* Phone number from the mockup is omitted: the backend has no phone field on signup yet. */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="phone">Phone number (optional)</Label>
+            <Input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="+234 800 000 0000" />
+          </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="password">Password</Label>
             <Input id="password" name="password" type="password" required minLength={6} autoComplete="new-password" placeholder="At least 6 characters" />

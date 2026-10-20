@@ -43,3 +43,23 @@ export function useNotifications() {
   const { user } = useAuth();
   return useQuery({ queryKey: ["notifications", user?.id], queryFn: () => api<AppNotification[]>("/notifications"), staleTime: 30_000 });
 }
+
+export interface Me {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  createdAt: string;
+  preferences: { paymentReminders: boolean; deficitAlerts: boolean; serviceUpdates: boolean; productNews: boolean };
+}
+export interface SavedCard { _id: string; brand: string; last4: string; expMonth: number; expYear: number; isDefault: boolean }
+
+export function useMe() {
+  const { user } = useAuth();
+  return useQuery({ queryKey: ["me", user?.id], queryFn: () => api<Me>("/auth/me"), staleTime: 60_000, retry: false });
+}
+
+export function useSavedCards() {
+  const { user } = useAuth();
+  return useQuery({ queryKey: ["cards", user?.id], queryFn: () => api<SavedCard[]>("/payments/methods"), retry: false });
+}

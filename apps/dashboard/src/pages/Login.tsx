@@ -43,7 +43,7 @@ export default function Login() {
             <label className="flex items-center gap-2 text-[13px] text-status-paused">
               <input type="checkbox" name="remember" /> Remember me
             </label>
-            {/* TODO: no backend endpoint for password reset yet; route is not built */}
+            <Link to="/forgot-password" className="text-[13px] font-bold text-link underline">Forgot password?</Link>
           </div>
           {error && (
             <p role="alert" className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-[13px] text-status-cancelled">

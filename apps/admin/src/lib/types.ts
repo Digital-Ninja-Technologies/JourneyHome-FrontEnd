@@ -82,3 +82,39 @@ export interface Package {
   currency: string;
   isActive: boolean;
 }
+
+export type PaymentStatus = "Pending" | "Processing" | "Successful" | "Failed" | "Refunded" | "Cancelled";
+
+export interface AdminPayment {
+  _id: string;
+  owner: string;
+  plan: string;
+  /** Optional display names, so the screen doesn't depend on looking up every owner/plan. */
+  ownerName?: string;
+  planName?: string;
+  reference: string;
+  amountMinor: number;
+  currency: string;
+  purpose: "initial_contribution" | "recurring_contribution";
+  status: PaymentStatus;
+  createdAt: string;
+  processedAt?: string;
+}
+
+export interface AuditEntry {
+  _id: string;
+  actor?: string;
+  actorName?: string;
+  action: string;
+  resourceType: string;
+  resourceId: string;
+  resourceLabel?: string;
+  createdAt: string;
+}
+
+export interface AdminMe {
+  id: string;
+  name: string;
+  email: string;
+  preferences: { newServiceRequest: boolean; paymentFailed: boolean; weeklyDigest: boolean };
+}

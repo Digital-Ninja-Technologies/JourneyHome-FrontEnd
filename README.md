@@ -176,17 +176,12 @@ Built against the backend's admin endpoints: login, customers, all plans (+ stat
 transition rules), the full service-request review workflow (start review, approve/flag documents, mark verified,
 approve, request more info, reject), package pricing, and admin-team management (super admins only).
 
-Not built because the backend has no endpoint for it (screens show a "Not available yet" note where noted):
+Built on top of endpoints the backend doesn't have yet (Payments, Audit log, notification preferences, revoke
+sessions): they run in **demo mode** with simulated data, and show a "not available on the server yet" message when
+the real server lacks them. See `docs/BACKEND_CONTRACT.md` for the exact shapes to implement.
 
-| Design feature | What the backend would need |
-|---|---|
-| Payments screen (list, KPIs, export) | an admin payments list endpoint (e.g. `GET /payments/admin`) |
-| Audit log + dashboard "Recent activity" | a route that reads audit logs (they are recorded but not exposed) |
-| Dashboard "Revenue this month" | monthly payment totals — the dashboard shows total contributed from plans instead |
-| Suspend account, send password reset, deficit filters | user suspension, password-reset and deficit tracking |
-| Identity documents on user/plan pages | identity documents aren't stored on plans |
-| Plan payment history, plan "History" feed | admin access to a plan's payments / audit events |
-| Settings: notification preferences, 2FA, revoke sessions | admin preference, 2FA and session endpoints |
+Still not built because they need data-model decisions: suspend account, send password reset from the admin, deficit
+tracking/filters, identity documents on plans, plan payment history and activity feed.
 
 Also not surfaced (not in the design): creating packages and the billing policy / "run due billing" endpoints.
 
@@ -199,12 +194,22 @@ browsers. A `read` flag and a mark-as-read endpoint on the backend would let thi
 
 ### Onboarding (dashboard)
 
-Signup → First plan (`/signup/plan`) → Payment (`/signup/payment`) → Welcome (`/welcome`).
+Signup → Verify (`/signup/verify`) → First plan (`/signup/plan`) → Payment (`/signup/payment`) → Welcome (`/welcome`).
 
-- There is **no Verify step**: the backend has no email/phone verification endpoint, so the stepper has three steps.
+- The Verify step uses the verification-code endpoints from `docs/BACKEND_CONTRACT.md` (demo mode until they exist). If the
+  server doesn't have them, the page says so and lets the user continue.
 - The plan step also asks for date of birth and home address, which `POST /plans` requires (the mockup's form omitted them).
 - The mockup's card-number form can't be built (card details are collected on Paystack's hosted page), so the payment
   step redirects to Paystack, same as "Make a payment". A plan can't be edited once created, so there is no "Back"
   from payment; "Skip for now" leaves a Pending plan that can be paid later from My plans.
 - After Paystack, the return page (`/app/payments/callback`) sends new customers to the welcome screen using a
   `sessionStorage` flag set at the payment step; any other first payment shows the normal "Payment received" page.
+
+### Demo mode (screens whose backend endpoints don't exist yet)
+
+Verification code, forgot/reset password, Profile & settings (including saved cards and notification preferences),
+and the admin Payments, Audit log, preferences and session-revoke screens are built against the contract in
+`docs/BACKEND_CONTRACT.md`. In dev (`pnpm dev`) they talk to a **simulated server** kept in the browser
+(`apps/*/src/mocks`): verification code `123456`, reset link `/reset-password?token=demo-token`, and so on. Set
+`VITE_USE_MOCKS=false` to turn it off in dev (or `true` to force it on in a build). Production builds have it off by
+default, and a server that returns 404 for one of these endpoints produces a clear "not available yet" message.

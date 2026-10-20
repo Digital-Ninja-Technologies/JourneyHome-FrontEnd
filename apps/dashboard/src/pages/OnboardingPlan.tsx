@@ -26,7 +26,7 @@ export default function OnboardingPlan() {
   });
 
   return (
-    <OnboardingShell step={2} title="Set up your first" accent="plan." subtitle="Who are you saving for? You can add more plans later, any time." exitTo="/app">
+    <OnboardingShell step={3} title="Set up your first" accent="plan." subtitle="Who are you saving for? You can add more plans later, any time." exitTo="/app">
       <form
         onSubmit={(e) => { e.preventDefault(); if (selected) create.mutate(planRequestBody(e.currentTarget, selected._id)); }}
         className="flex flex-col gap-6"

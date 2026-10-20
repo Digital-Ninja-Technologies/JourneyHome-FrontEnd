@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
 import { api } from "./api";
-import type { AdminUser, Customer, Package, Plan, ServiceDocument, ServiceRequest } from "./types";
+import type { AdminMe, AdminPayment, AdminUser, AuditEntry, Customer, Package, Plan, ServiceDocument, ServiceRequest } from "./types";
 
 function useAdminQuery<T>(key: unknown[], path: string, enabled = true) {
   const { user } = useAuth();
@@ -23,3 +23,7 @@ export function useDirectory() {
   const byId = new Map((q.data ?? []).map((c) => [c._id, c]));
   return { ...q, byId, nameOf: (id: string) => byId.get(id)?.name ?? "Unknown user" };
 }
+
+export const useAdminPayments = () => useAdminQuery<AdminPayment[]>(["admin-payments"], "/payments/admin");
+export const useAuditLog = () => useAdminQuery<AuditEntry[]>(["audit"], "/audit-logs");
+export const useAdminMe = () => useAdminQuery<AdminMe>(["admin-me"], "/auth/me");

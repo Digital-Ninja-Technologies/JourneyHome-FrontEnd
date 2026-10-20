@@ -4,8 +4,7 @@ import { Logo } from "@journeyhome/ui/components/logo";
 import { cn } from "@journeyhome/ui/lib/utils";
 
 const MARKETING_URL = import.meta.env.VITE_MARKETING_URL ?? "/";
-// There is no separate verification step: the backend has no email/phone code endpoint.
-const STEPS = ["Account", "First plan", "Payment"];
+const STEPS = ["Account", "Verify", "First plan", "Payment"];
 
 function Stepper({ current }: { current: number }) {
   return (

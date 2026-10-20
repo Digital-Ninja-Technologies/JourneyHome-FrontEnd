@@ -1,10 +1,15 @@
+import { ApiError } from "./errors";
+import { NOT_MOCKED, mockRequest } from "../mocks";
+
+export { ApiError, isUnsupported, UNSUPPORTED_MESSAGE } from "./errors";
+
 const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3043/api/v1";
 
-export class ApiError extends Error {
-  constructor(public status: number, message: string) {
-    super(message);
-  }
-}
+/**
+ * Demo mode simulates the endpoints the backend doesn't have yet (verification codes, password reset,
+ * profile, saved cards). On by default in dev; set VITE_USE_MOCKS=true/false to override.
+ */
+export const USE_MOCKS: boolean = import.meta.env.VITE_USE_MOCKS ? import.meta.env.VITE_USE_MOCKS === "true" : import.meta.env.DEV;
 
 let getToken: () => string | null = () => null;
 let onUnauthorized: () => void = () => {};
@@ -15,11 +20,16 @@ export function configureApi(opts: { getToken: () => string | null; onUnauthoriz
 }
 
 export async function api<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
+  const method = init.method ?? (init.body ? "POST" : "GET");
+  if (USE_MOCKS) {
+    const mocked = await mockRequest(method, path, init.body);
+    if (mocked !== NOT_MOCKED) return mocked as T;
+  }
   const token = getToken();
   let res: Response;
   try {
     res = await fetch(`${BASE_URL}${path}`, {
-      method: init.method ?? (init.body ? "POST" : "GET"),
+      method,
       headers: {
         ...(init.body ? { "Content-Type": "application/json" } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),

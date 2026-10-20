@@ -51,7 +51,7 @@ export default function OnboardingPayment() {
   if (plan && plan.status !== "Pending") return <Navigate to={`/welcome?plan=${plan._id}`} replace />;
 
   return (
-    <OnboardingShell step={3} title="Make your first" accent="payment." subtitle="Your first contribution starts today; after that it's monthly." exitTo="/app" width="max-w-[480px]">
+    <OnboardingShell step={4} title="Make your first" accent="payment." subtitle="Your first contribution starts today; after that it's monthly." exitTo="/app" width="max-w-[480px]">
       {!params.get("plan") && <p className="text-center text-sm text-muted">No plan selected. <Link to="/signup/plan" className="font-bold text-link underline">Set up a plan</Link></p>}
       {params.get("plan") && planQ.isPending && <p className="text-center text-sm text-muted">Loading your plan…</p>}
       {planQ.isError && (

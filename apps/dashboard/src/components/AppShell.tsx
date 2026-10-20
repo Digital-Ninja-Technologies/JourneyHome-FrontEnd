@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
-import { Bell, ChevronLeft, ChevronRight, CreditCard, Camera, FileText, LayoutDashboard, User } from "lucide-react";
+import { ArrowLeft, Bell, ChevronLeft, ChevronRight, CreditCard, Camera, FileText, LayoutDashboard, LogOut, User } from "lucide-react";
 import { cn } from "@journeyhome/ui/lib/utils";
+import { useAuth } from "../auth/AuthContext";
 
 const NAV = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -24,6 +25,7 @@ function readCollapsed() {
 
 export function AppShell() {
   const [collapsed, setCollapsed] = useState(readCollapsed);
+  const { logout } = useAuth();
 
   function toggle() {
     setCollapsed((c) => {
@@ -104,6 +106,16 @@ export function AppShell() {
             </Link>
           </div>
         )}
+        <div className={cn("flex flex-col gap-1", collapsed ? "mt-auto items-center" : "")}>
+          <a href={import.meta.env.VITE_MARKETING_URL ?? "/"} title={collapsed ? "Back to site" : undefined} className={cn("flex h-10 items-center gap-3 rounded-xl px-3.5 text-sm font-semibold text-canvas/70 hover:text-canvas", collapsed && "justify-center px-0")}>
+            <ArrowLeft className="size-[18px] shrink-0" />
+            {!collapsed && "Back to site"}
+          </a>
+          <button onClick={logout} title={collapsed ? "Log out" : undefined} className={cn("flex h-10 items-center gap-3 rounded-xl px-3.5 text-sm font-semibold text-canvas/70 hover:text-canvas", collapsed && "justify-center px-0")}>
+            <LogOut className="size-[18px] shrink-0" />
+            {!collapsed && "Log out"}
+          </button>
+        </div>
       </aside>
       <div className="min-w-0 flex-1">
         <Outlet />

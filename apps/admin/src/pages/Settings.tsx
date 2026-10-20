@@ -3,10 +3,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
+import { Switch } from "@journeyhome/ui/components/switch";
 import { useAuth } from "../auth/AuthContext";
 import { Card, CardTitle, PageHeader, Pill, QueryError } from "../components/ui";
 import { api } from "../lib/api";
-import { usePackages, useAdmins } from "../lib/queries";
+import { DemoNotice } from "../components/DemoNotice";
+import { UNSUPPORTED_MESSAGE, isUnsupported } from "../lib/api";
+import { useAdminMe, usePackages, useAdmins } from "../lib/queries";
+import type { AdminMe } from "../lib/types";
 import type { Package } from "../lib/types";
 
 function PackageCard({ pkg }: { pkg: Package }) {
@@ -96,6 +100,68 @@ function AdminTeam() {
   );
 }
 
+const PREFS: { key: keyof AdminMe["preferences"]; label: string }[] = [
+  { key: "newServiceRequest", label: "New service request submitted" },
+  { key: "paymentFailed", label: "Payment failed or retried" },
+  { key: "weeklyDigest", label: "Weekly summary digest" },
+];
+const explain = (e: unknown) => (isUnsupported(e) ? `${UNSUPPORTED_MESSAGE} Saving this isn't enabled yet.` : (e as Error).message);
+
+function Preferences() {
+  const meQ = useAdminMe();
+  const queryClient = useQueryClient();
+  const [error, setError] = useState<string | null>(null);
+  const toggle = useMutation({
+    mutationFn: (patch: Partial<AdminMe["preferences"]>) => api("/auth/me/preferences", { method: "PATCH", body: patch }),
+    onMutate: async (patch) => {
+      setError(null);
+      await queryClient.cancelQueries({ queryKey: ["admin-me"] });
+      const prev = queryClient.getQueriesData<AdminMe>({ queryKey: ["admin-me"] });
+      queryClient.setQueriesData<AdminMe>({ queryKey: ["admin-me"] }, (m) => (m ? { ...m, preferences: { ...m.preferences, ...patch } } : m));
+      return { prev };
+    },
+    onError: (e, _p, ctx) => {
+      ctx?.prev.forEach(([key, data]) => queryClient.setQueryData(key, data));
+      setError(explain(e));
+    },
+  });
+  const prefs = meQ.data?.preferences;
+  return (
+    <Card>
+      <CardTitle className="mb-3">Notification preferences</CardTitle>
+      <DemoNotice>changes are saved in this browser only.</DemoNotice>
+      {meQ.isError && <p className="text-sm text-muted">{isUnsupported(meQ.error) ? `${UNSUPPORTED_MESSAGE} Preferences will appear here once it's enabled.` : meQ.error.message}</p>}
+      {prefs && PREFS.map((p) => (
+        <div key={p.key} className="flex items-center justify-between gap-4 border-t border-border py-4 text-sm first:border-0">
+          <span>{p.label}</span>
+          <Switch checked={prefs[p.key]} label={p.label} onCheckedChange={(v) => toggle.mutate({ [p.key]: v })} />
+        </div>
+      ))}
+      {error && <p role="alert" className="mt-2 text-xs text-status-cancelled">{error}</p>}
+    </Card>
+  );
+}
+
+function Security() {
+  const revoke = useMutation({ mutationFn: () => api("/auth/sessions/revoke-others", { method: "POST" }) });
+  return (
+    <Card>
+      <CardTitle className="mb-1">Security</CardTitle>
+      <p className="mb-3 text-sm text-muted">Sign out of every other browser or device where this admin account is signed in.</p>
+      <DemoNotice>no real sessions are affected.</DemoNotice>
+      <button
+        disabled={revoke.isPending}
+        onClick={() => window.confirm("Sign out all your other sessions?") && revoke.mutate()}
+        className="mt-3 text-sm font-semibold text-status-cancelled underline"
+      >
+        {revoke.isPending ? "Revoking…" : "Revoke all other sessions"}
+      </button>
+      {revoke.isSuccess && <p className="mt-2 text-[13px] font-semibold text-status-active">Other sessions have been signed out.</p>}
+      {revoke.isError && <p role="alert" className="mt-2 text-xs text-status-cancelled">{explain(revoke.error)}</p>}
+    </Card>
+  );
+}
+
 export default function Settings() {
   const { isSuperAdmin } = useAuth();
   const packagesQ = usePackages();
@@ -109,6 +175,8 @@ export default function Settings() {
         {packagesQ.isError && <QueryError error={packagesQ.error} retry={() => void packagesQ.refetch()} />}
         <div className="grid gap-4 sm:grid-cols-2">{packagesQ.data?.map((p) => <PackageCard key={p._id} pkg={p} />)}</div>
       </Card>
+      <Preferences />
+      <Security />
       {isSuperAdmin ? (
         <AdminTeam />
       ) : (

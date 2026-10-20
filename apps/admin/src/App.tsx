@@ -1,14 +1,15 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AdminShell } from "./components/AdminShell";
 import { GuestOnly, RequireAuth } from "./components/RequireAuth";
+import AuditLog from "./pages/AuditLog";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import Payments from "./pages/Payments";
 import PlanDetail from "./pages/PlanDetail";
 import Plans from "./pages/Plans";
 import ServiceRequestDetail from "./pages/ServiceRequestDetail";
 import ServiceRequests from "./pages/ServiceRequests";
 import Settings from "./pages/Settings";
-import Unavailable from "./pages/Unavailable";
 import UserDetail from "./pages/UserDetail";
 import Users from "./pages/Users";
 
@@ -27,8 +28,8 @@ export default function App() {
           <Route path="plans/:id" element={<PlanDetail />} />
           <Route path="service-requests" element={<ServiceRequests />} />
           <Route path="service-requests/:id" element={<ServiceRequestDetail />} />
-          <Route path="payments" element={<Unavailable title="Payments" needs="an admin payments endpoint (for example GET /payments/admin returning every payment)" />} />
-          <Route path="audit-log" element={<Unavailable title="Audit log" needs="an endpoint that reads the audit log (the backend records audit events but has no route to list them)" />} />
+          <Route path="payments" element={<Payments />} />
+          <Route path="audit-log" element={<AuditLog />} />
           <Route path="settings" element={<Settings />} />
         </Route>
       </Route>

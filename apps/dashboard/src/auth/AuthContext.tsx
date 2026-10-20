@@ -17,7 +17,8 @@ interface AuthResult {
 interface AuthContextValue {
   user: User | null;
   login: (email: string, password: string, remember: boolean) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<void>;
+  signup: (name: string, email: string, password: string, phone?: string) => Promise<void>;
+  updateUser: (patch: Partial<Pick<User, "name" | "email">>) => void;
   logout: () => void;
 }
 
@@ -79,8 +80,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logout,
       login: async (email, password, remember) =>
         start(await api<AuthResult>("/auth/login", { body: { email, password } }), remember),
-      signup: async (name, email, password) =>
-        start(await api<AuthResult>("/auth/signup", { body: { name, email, password, role: "customer" } }), true),
+      // `phone` isn't stored by the current backend; it is sent so it can be kept once supported.
+      signup: async (name, email, password, phone) =>
+        start(await api<AuthResult>("/auth/signup", { body: { name, email, password, role: "customer", ...(phone && { phone }) } }), true),
+      updateUser: (patch) =>
+        setSession((cur) => {
+          if (!cur) return cur;
+          const next = { ...cur, user: { ...cur.user, ...patch } };
+          writeSession(next);
+          return next;
+        }),
     }),
     [session, logout, start],
   );
