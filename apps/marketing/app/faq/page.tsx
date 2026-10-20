@@ -30,12 +30,12 @@ export default function FAQ() {
         ))}
       </Container>
       <Container className="pb-24">
-        <div className="flex max-w-4xl flex-wrap items-center justify-between gap-4 rounded-3xl bg-sand px-8 py-7">
+        <div className="flex flex-wrap items-center justify-between gap-6 rounded-[32px] bg-foreground px-10 py-12">
           <div>
-            <div className="text-lg font-bold">Still have a question?</div>
-            <div className="text-sm text-muted">Our team usually replies within a day.</div>
+            <div className="text-[28px] font-extrabold tracking-tight text-canvas">Still have a question?</div>
+            <div className="mt-1.5 text-[15px] text-canvas/70">Our team usually replies within a day.</div>
           </div>
-          <a href="/contact" className="inline-flex h-12 items-center rounded-full bg-foreground px-6 text-sm font-bold text-canvas">
+          <a href="/contact" className="inline-flex h-[52px] flex-shrink-0 items-center rounded-full bg-accent px-7 text-sm font-extrabold text-foreground">
             Contact us
           </a>
         </div>

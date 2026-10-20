@@ -22,12 +22,24 @@ export function PageHero({ eyebrow, children, intro }: { eyebrow: string; childr
   );
 }
 
-export function CtaBand({ title, label = "Start a plan", href }: { title: string; label?: string; href: string }) {
+export function CtaBand({
+  title,
+  description,
+  label = "Start a plan",
+  href,
+}: {
+  title: React.ReactNode;
+  description?: string;
+  label?: string;
+  href: string;
+}) {
   return (
     <Container className="py-12">
-      <div className="flex flex-wrap items-center justify-between gap-6 rounded-[32px] bg-foreground px-10 py-12">
-        <h2 className="text-4xl font-extrabold tracking-tight text-canvas">{title}</h2>
-        <a href={href} className="inline-flex h-14 items-center rounded-full bg-accent px-8 text-[15px] font-extrabold text-foreground">
+      <div className="relative flex flex-col items-center gap-5 overflow-hidden rounded-[32px] bg-foreground px-8 py-16 text-center md:py-20">
+        <div className="absolute -bottom-40 left-1/2 size-[380px] -translate-x-1/2 rounded-full bg-accent/[0.07]" aria-hidden />
+        <h2 className="relative max-w-2xl text-4xl font-extrabold leading-[1.1] tracking-tight text-canvas md:text-5xl">{title}</h2>
+        {description && <p className="relative max-w-md text-base leading-relaxed text-canvas/80">{description}</p>}
+        <a href={href} className="relative inline-flex h-14 items-center rounded-full bg-accent px-8 text-[15px] font-extrabold text-foreground">
           {label}
         </a>
       </div>

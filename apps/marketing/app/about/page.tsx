@@ -54,6 +54,11 @@ export default function About() {
         Grief shouldn&rsquo;t come with <Accent>guesswork.</Accent>
       </PageHero>
 
+      {/* HERO IMAGE */}
+      <Container className="pb-14">
+        <Photo src={images.hero} alt="A Nigerian family together, smiling" className="h-[400px] w-full rounded-[32px] md:h-[560px]" />
+      </Container>
+
       {/* FOUNDED + MISSION */}
       <Container className="grid gap-10 border-y border-border py-14 md:grid-cols-[1fr_1.6fr]">
         <div>
@@ -181,7 +186,11 @@ export default function About() {
         </div>
       </Container>
 
-      <CtaBand title="Start your family's plan today." href={SIGNUP_URL} />
+      <CtaBand
+        title={<>Start your family&rsquo;s plan <Accent className="text-accent">today.</Accent></>}
+        description="A few minutes to set up. Save at your own pace. We'll be ready when the time comes."
+        href={SIGNUP_URL}
+      />
     </main>
   );
 }

@@ -30,19 +30,19 @@ export default function HowItWorks() {
       <PageHero eyebrow="How it works" intro="From the first naira saved to the day the film arrives — here's exactly what happens, and when.">
         Four steps, taken <Accent>gently.</Accent>
       </PageHero>
+      <Container className="pb-14">
+        <Photo src={images.howStep1} alt="A family together, planning ahead with care" className="h-[400px] w-full rounded-[32px] md:h-[560px]" />
+      </Container>
       <Container className="flex flex-col gap-20 pb-16">
         <div className="grid items-center gap-12 md:grid-cols-2">
-          <Photo src={images.howStep1} alt="A family together, planning ahead with care" className="min-h-[340px] w-full rounded-[32px]" />
-          <div className="flex flex-col gap-6">
-            <Step n="01" title="Start a plan">
-              Pick a loved one, choose a package, and set how much you&rsquo;d like to contribute each month. Most families start between ₦5,000 and ₦15,000.
-            </Step>
-            <Panel>
-              <div className="text-xs font-extrabold uppercase tracking-wider text-link">New plan</div>
-              <Row a="For: Emeka (father)" b="Standard" />
-              <Row a="Monthly contribution" b="₦10,000" />
-            </Panel>
-          </div>
+          <Step n="01" title="Start a plan">
+            Pick a loved one, choose a package, and set how much you&rsquo;d like to contribute each month. Most families start between ₦5,000 and ₦15,000.
+          </Step>
+          <Panel>
+            <div className="text-xs font-extrabold uppercase tracking-wider text-link">New plan</div>
+            <Row a="For: Emeka (father)" b="Standard" />
+            <Row a="Monthly contribution" b="₦10,000" />
+          </Panel>
         </div>
 
         <div className="grid items-center gap-12 md:grid-cols-2">

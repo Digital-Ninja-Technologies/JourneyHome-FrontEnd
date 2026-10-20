@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Calendar, Check, Clock, CreditCard, ImageIcon, MapPin, ShieldCheck } from "lucide-react";
+import { Calendar, Check, CheckCircle2, Clock, CreditCard, ImageIcon, MapPin } from "lucide-react";
 import { Photo } from "../components/Photo";
 import { PackageCards, PackagesUnavailable } from "../components/PackageCards";
 import { Accent, Container, Eyebrow } from "../components/Section";
@@ -18,11 +18,11 @@ const STATS = [
 
 const FEATURES = [
   { icon: Calendar, title: "Multiple savings plans", body: "Track a separate plan for each loved one, all from one account.", tint: "bg-status-active-bg text-status-active" },
-  { icon: MapPin, title: "Verified photographer network", body: "380+ photographers and videographers, vetted and matched across 24 states.", tint: "bg-cream text-status-due" },
-  { icon: Clock, title: "Gentle reminders", body: "A nudge a few days before your contribution is due — never a surprise.", tint: "bg-status-active-bg text-status-active" },
+  { icon: MapPin, title: "Verified photographer network", body: "380+ photographers and videographers, vetted and matched across 24 states.", tint: "bg-cream text-link" },
+  { icon: Clock, title: "Gentle reminders", body: "A nudge a few days before your contribution is due — never a surprise.", tint: "bg-[#E9EFEA] text-[#2F7D5B]" },
   { icon: ImageIcon, title: "Instant digital gallery", body: "Share photos and the keepsake film with family anywhere in the world.", tint: "bg-status-active-bg text-status-active" },
-  { icon: ShieldCheck, title: "Full payment transparency", body: "Every contribution is dated, recorded, and receipted the moment it lands.", tint: "bg-cream text-status-due" },
-  { icon: CreditCard, title: "Flexible payment methods", body: "Card, bank transfer, or recurring debit — whatever works for your family.", tint: "bg-status-active-bg text-status-active" },
+  { icon: CheckCircle2, title: "Full payment transparency", body: "Every contribution is dated, recorded, and receipted the moment it lands.", tint: "bg-cream text-link" },
+  { icon: CreditCard, title: "Flexible payment methods", body: "Card, bank transfer, or recurring debit — whatever works for your family.", tint: "bg-[#E9EFEA] text-[#2F7D5B]" },
 ];
 
 const STEPS = [
