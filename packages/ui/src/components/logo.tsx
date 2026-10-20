@@ -6,7 +6,9 @@ export function Logo({ className }: { className?: string }) {
         <circle cx="32" cy="40" r="6" fill="#D4A55A" />
         <line x1="8" y1="56" x2="56" y2="56" stroke="#0F2420" strokeWidth="4.5" strokeLinecap="round" />
       </svg>
-      <span className="text-[19px] font-extrabold tracking-tight">Journey Home</span>
+      <span className="font-serif text-[21px] tracking-tight text-foreground">
+        Journey <span className="italic text-accent">Home</span>
+      </span>
     </span>
   );
 }
