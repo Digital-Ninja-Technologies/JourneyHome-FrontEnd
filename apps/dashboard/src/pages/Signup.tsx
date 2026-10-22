@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { Button } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
@@ -22,7 +22,7 @@ export default function Signup() {
     setError(null);
     try {
       await signup(String(data.get("name")).trim(), String(data.get("email")).trim(), String(data.get("password")), String(data.get("phone") ?? "").trim() || undefined);
-      navigate("/signup/verify", { replace: true });
+      navigate({ to: "/signup/verify", replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed");
       setBusy(false);

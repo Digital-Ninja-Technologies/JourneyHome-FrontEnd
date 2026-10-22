@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
@@ -17,7 +17,7 @@ export default function ForgotPassword() {
   if (send.isSuccess) {
     return (
       <AuthShell title="Check your" accent="email." subtitle={`If an account exists for ${email}, we've sent a link to reset your password.`}>
-        <DemoNotice>No email is sent. {USE_MOCKS && <Link className="font-bold underline" to={`/reset-password?token=${DEMO_RESET_TOKEN}`}>Open the reset link</Link>}</DemoNotice>
+        <DemoNotice>No email is sent. {USE_MOCKS && <Link className="font-bold underline" to="/reset-password" search={{ token: DEMO_RESET_TOKEN }}>Open the reset link</Link>}</DemoNotice>
         <div className="flex flex-col items-center gap-3 text-[13px] text-muted">
           <p>It can take a few minutes to arrive. Check your spam folder too.</p>
           <button className="font-bold text-link underline" onClick={() => send.reset()}>Use a different email</button>

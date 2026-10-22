@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@journeyhome/ui/components/button";
 import { useAuth } from "../auth/AuthContext";
@@ -24,7 +24,7 @@ export default function VerifyCode() {
   });
   const confirm = useMutation({
     mutationFn: () => api("/auth/verification/confirm", { body: { code } }),
-    onSuccess: () => navigate("/signup/plan", { replace: true }),
+    onSuccess: () => navigate({ to: "/signup/plan", replace: true }),
   });
 
   // Ask for a code once when the page opens.

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { Link, Outlet } from "@tanstack/react-router";
 import { ArrowLeft, Bell, ChevronLeft, ChevronRight, CreditCard, Camera, FileText, LayoutDashboard, LogOut, Menu, User, X } from "lucide-react";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useAuth } from "../auth/AuthContext";
@@ -95,23 +95,22 @@ export function AppShell() {
 
         <nav aria-label="Main" className="flex flex-col gap-1">
           {NAV.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
+            <Link
               key={to}
-              to={to}
-              end={end}
+              to={to as any}
+              activeOptions={{ exact: end }}
+              activeProps={{ className: "bg-canvas/10 text-canvas" }}
+              inactiveProps={{ className: "text-canvas/70 hover:text-canvas" }}
               onClick={closeMobile}
               title={collapsed ? label : undefined}
-              className={({ isActive }) =>
-                cn(
-                  "flex h-11 items-center gap-3 whitespace-nowrap rounded-xl px-3.5 text-sm font-semibold",
-                  collapsed && "md:justify-center md:px-0",
-                  isActive ? "bg-canvas/10 text-canvas" : "text-canvas/70 hover:text-canvas",
-                )
-              }
+              className={cn(
+                "flex h-11 items-center gap-3 whitespace-nowrap rounded-xl px-3.5 text-sm font-semibold",
+                collapsed && "md:justify-center md:px-0",
+              )}
             >
               <Icon className="size-[18px] shrink-0" />
               <span className={cn(collapsed && "md:hidden")}>{label}</span>
-            </NavLink>
+            </Link>
           ))}
         </nav>
 

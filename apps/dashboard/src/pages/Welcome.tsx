@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearch } from "@tanstack/react-router";
 import { Bell, Check, Plus } from "lucide-react";
 import { Logo } from "@journeyhome/ui/components/logo";
 import { useAuth } from "../auth/AuthContext";
@@ -11,8 +11,8 @@ import { usePlan } from "../lib/queries";
 
 export default function Welcome() {
   const { user } = useAuth();
-  const [params] = useSearchParams();
-  const planQ = usePlan(params.get("plan") ?? undefined);
+  const { plan: planId } = useSearch({ from: "/welcome" });
+  const planQ = usePlan(planId);
   const plan = planQ.data;
 
   useEffect(() => setOnboardingPlan(null), []);
@@ -41,7 +41,7 @@ export default function Welcome() {
           )}
         </div>
 
-        {planQ.isPending && params.get("plan") && <p className="text-sm text-muted">Loading your plan…</p>}
+        {planQ.isPending && planId && <p className="text-sm text-muted">Loading your plan…</p>}
         {plan && (
           <section className="flex w-full flex-col gap-3.5 rounded-[28px] bg-foreground p-7 text-canvas">
             <div className="flex items-start justify-between gap-4">
@@ -59,7 +59,7 @@ export default function Welcome() {
 
         <section className="flex w-full flex-col gap-2.5">
           <div className="text-xs font-bold uppercase tracking-wider text-muted">What&rsquo;s next</div>
-          <Link to="/app/plans?new=1" className="flex items-center gap-4 rounded-2xl bg-white px-5 py-4 text-sm">
+          <Link to="/app/plans" search={{ new: "1" }} className="flex items-center gap-4 rounded-2xl bg-white px-5 py-4 text-sm">
             <Plus className="size-4 shrink-0 text-link" />
             <span>Add another plan for someone else — one account can hold as many as you need.</span>
           </Link>

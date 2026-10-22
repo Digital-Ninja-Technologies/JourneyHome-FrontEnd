@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@tanstack/react-router";
 import { AlertCircle, Bell, Gift, Plus } from "lucide-react";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useAuth } from "../auth/AuthContext";
@@ -7,7 +7,7 @@ import {
   capitalise, daysUntil, firstName, formatDay, formatDayLong, formatMoney, formatMonthYear, formatToday,
   greeting, initials, nextBirthday,
 } from "../lib/format";
-import { LIVE, canPayNow, isDue, payLink } from "../lib/plans";
+import { LIVE, canPayNow, isDue } from "../lib/plans";
 import { usePayments, usePlans } from "../lib/queries";
 import type { Payment, Plan } from "../lib/types";
 
@@ -54,15 +54,26 @@ function PlanCard({ plan }: { plan: Plan }) {
         </span>
         <span>{dueLabel(plan)}</span>
       </div>
-      <Link
-        to={pay ? payLink(plan) : `/app/plans/${plan._id}`}
-        className={cn(
-          "inline-flex h-11 items-center justify-center rounded-xl text-sm font-bold",
-          pay ? "bg-accent text-foreground" : dark ? "border border-canvas/30 text-canvas" : "border border-foreground",
-        )}
-      >
-        {pay ? "Complete payment" : "View plan"}
-      </Link>
+      {pay ? (
+        <Link
+          to="/app/payments/new"
+          search={{ plan: plan._id }}
+          className="inline-flex h-11 items-center justify-center rounded-xl bg-accent text-sm font-bold text-foreground"
+        >
+          Complete payment
+        </Link>
+      ) : (
+        <Link
+          to="/app/plans/$id"
+          params={{ id: plan._id }}
+          className={cn(
+            "inline-flex h-11 items-center justify-center rounded-xl text-sm font-bold",
+            dark ? "border border-canvas/30 text-canvas" : "border border-foreground",
+          )}
+        >
+          View plan
+        </Link>
+      )}
     </article>
   );
 }
@@ -126,7 +137,7 @@ export default function Dashboard() {
           </h1>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Link to="/app/plans?new=1" className="inline-flex h-[52px] items-center gap-2 rounded-2xl bg-foreground px-4 text-sm font-semibold text-canvas sm:px-6">
+          <Link to="/app/plans" search={{ new: "1" }} className="inline-flex h-[52px] items-center gap-2 rounded-2xl bg-foreground px-4 text-sm font-semibold text-canvas sm:px-6">
             <Plus className="size-4" /> <span className="whitespace-nowrap">Create new plan</span>
           </Link>
           <Link to="/app/notifications" aria-label="Notifications" className="grid size-[52px] shrink-0 place-items-center rounded-2xl border border-border bg-white">
@@ -184,7 +195,8 @@ export default function Dashboard() {
             <div className="grid gap-4 sm:grid-cols-2">
               {plans.map((p) => <PlanCard key={p._id} plan={p} />)}
               <Link
-                to="/app/plans?new=1"
+                to="/app/plans"
+                search={{ new: "1" }}
                 className="flex min-h-[270px] flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-foreground/30 p-6 text-center"
               >
                 <span className="grid size-[52px] place-items-center rounded-full bg-sand"><Plus className="size-5" /></span>

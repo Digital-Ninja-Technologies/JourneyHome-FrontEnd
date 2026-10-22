@@ -54,6 +54,34 @@
 - Generated `src/routeTree.gen.ts` with all 19 route nodes and full type safety.
 - Verified: `pnpm --filter @journeyhome/dashboard typecheck` and `build` succeed with 0 errors.
 
+## Stage 4: Migrate Codebase (Components, Hooks, Pages)
+- Replaced all `react-router-dom` imports across all components and pages with `@tanstack/react-router`:
+  - `src/components/AppShell.tsx`: Replaced `NavLink` with TanStack `Link` using `activeProps` / `inactiveProps` and `activeOptions={{ exact: end }}`. Replaced `Outlet`.
+  - `src/components/OnboardingShell.tsx`: Replaced `Link`.
+  - `src/components/CreatePlanDialog.tsx`: Replaced `useNavigate`.
+  - Removed dead file `src/components/RequireAuth.tsx`.
+  - `src/pages/Login.tsx`: Replaced `Link`, `useNavigate`, `useSearchParams` (using `useSearch({ from: "/login" })`).
+  - `src/pages/ForgotPassword.tsx`: Replaced `Link`.
+  - `src/pages/ResetPassword.tsx`: Replaced `Link`, `useSearchParams` (using `useSearch({ from: "/reset-password" })`).
+  - `src/pages/Signup.tsx`: Replaced `Link`, `useNavigate`, `Navigate`.
+  - `src/pages/VerifyCode.tsx`: Replaced `Link`, `useNavigate`.
+  - `src/pages/OnboardingPlan.tsx`: Replaced `Link`, `useNavigate`.
+  - `src/pages/OnboardingPayment.tsx`: Replaced `Link`, `Navigate`, `useSearchParams` (using `useSearch({ from: "/signup/payment" })`).
+  - `src/pages/Welcome.tsx`: Replaced `Link`, `useSearchParams` (using `useSearch({ from: "/welcome" })`).
+  - `src/pages/Dashboard.tsx`: Replaced `Link`.
+  - `src/pages/Plans.tsx`: Replaced `Link`, `useNavigate({ from: "/app/plans/" })`, `useSearch({ from: "/app/plans/" })`.
+  - `src/pages/PlanDetail.tsx`: Replaced `Link`, `useParams({ from: "/app/plans/$id" })`.
+  - `src/pages/ServiceRequests.tsx`: Replaced `Link`.
+  - `src/pages/RequestService.tsx`: Replaced `Link`, `useNavigate`, `useSearch({ from: "/app/service-requests/new" })`.
+  - `src/pages/Notifications.tsx`: Replaced `Link`.
+  - `src/pages/Payments.tsx`: Replaced `Link`, `useNavigate({ from: "/app/payments/" })`, `useSearch({ from: "/app/payments/" })`.
+  - `src/pages/MakePayment.tsx`: Replaced `Link`, `useNavigate`, `useSearch({ from: "/app/payments/new" })`.
+  - `src/pages/PaymentCallback.tsx`: Replaced `Link`, `Navigate`, `useSearch({ from: "/app/payments/callback" })`.
+  - `src/pages/Profile.tsx`: Replaced `Link`, `useNavigate({ from: "/app/profile" })`, `useSearch({ from: "/app/profile" })`.
+- Zero imports of `react-router-dom` remain in `apps/dashboard/src`.
+- Verified: `pnpm --filter @journeyhome/dashboard typecheck` and `pnpm --filter @journeyhome/dashboard build` succeed with 0 errors.
+
+
 
 
 

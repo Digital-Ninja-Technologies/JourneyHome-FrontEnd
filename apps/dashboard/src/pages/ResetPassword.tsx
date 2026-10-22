@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearch } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
@@ -9,7 +9,7 @@ import { DemoNotice } from "../components/DemoNotice";
 import { UNSUPPORTED_MESSAGE, api, isUnsupported } from "../lib/api";
 
 export default function ResetPassword() {
-  const token = useSearchParams()[0].get("token");
+  const { token } = useSearch({ from: "/reset-password" });
   const [mismatch, setMismatch] = useState(false);
   const reset = useMutation({ mutationFn: (password: string) => api("/auth/reset-password", { body: { token, password } }) });
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
 import { Button } from "@journeyhome/ui/components/button";
@@ -84,7 +84,8 @@ function PersonalInfo({ me }: { me?: Me }) {
 function PaymentMethods() {
   const cardsQ = useSavedCards();
   const queryClient = useQueryClient();
-  const [params, setParams] = useSearchParams();
+  const navigate = useNavigate({ from: "/app/profile" });
+  const search = useSearch({ from: "/app/profile" });
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ["cards"] });
 
   const remove = useMutation({ mutationFn: (id: string) => api(`/payments/methods/${id}`, { method: "DELETE" }), onSuccess: refresh });
@@ -93,7 +94,7 @@ function PaymentMethods() {
     mutationFn: () => api<{ authorizationUrl: string }>("/payments/methods/initialize", { method: "POST" }),
     onSuccess: (d) => window.location.assign(d.authorizationUrl),
   });
-  const justAdded = params.get("card_added") === "1";
+  const justAdded = search.card_added === "1";
   useEffect(() => {
     if (justAdded) refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -110,7 +111,7 @@ function PaymentMethods() {
       </div>
       {justAdded && (
         <p className="rounded-xl bg-status-active-bg px-3.5 py-2 text-[13px] text-status-active">
-          Card added. <button className="font-bold underline" onClick={() => setParams({}, { replace: true })}>Dismiss</button>
+          Card added. <button className="font-bold underline" onClick={() => navigate({ search: {}, replace: true })}>Dismiss</button>
         </p>
       )}
       {cardsQ.isPending && <p className="text-sm text-muted">Loading…</p>}
@@ -218,7 +219,7 @@ function CloseAccount() {
   const [typed, setTyped] = useState("");
   const close = useMutation({
     mutationFn: () => api("/auth/me", { method: "DELETE" }),
-    onSuccess: () => { logout(); navigate("/login", { replace: true }); },
+    onSuccess: () => { logout(); navigate({ to: "/login", replace: true }); },
   });
   return (
     <>

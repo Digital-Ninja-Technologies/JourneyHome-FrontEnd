@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@journeyhome/ui/components/button";
 import { OnboardingShell } from "../components/OnboardingShell";
@@ -21,7 +21,7 @@ export default function OnboardingPlan() {
     mutationFn: (body: unknown) => api<Plan>("/plans", { body }),
     onSuccess: (plan) => {
       void queryClient.invalidateQueries({ queryKey: ["plans"] });
-      navigate(`/signup/payment?plan=${plan._id}`);
+      navigate({ to: "/signup/payment", search: { plan: plan._id } });
     },
   });
 

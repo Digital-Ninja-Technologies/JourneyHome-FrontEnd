@@ -1,11 +1,11 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { NoticeBanner } from "../components/NoticeBanner";
 import { PAYMENT_TEXT, StatusPill } from "../components/StatusPill";
 import { ApiError } from "../lib/api";
 import { capitalise, formatDay, formatMoney, formatMonthYear } from "../lib/format";
-import { MARKETING_URL, canPayNow, contributionCount, nextCell, payLink, planNotice, startedLabel } from "../lib/plans";
+import { MARKETING_URL, canPayNow, contributionCount, nextCell, planNotice, startedLabel } from "../lib/plans";
 import { usePayments, usePlan } from "../lib/queries";
 
 function Detail({ label, value, wide }: { label: string; value?: string; wide?: boolean }) {
@@ -18,7 +18,7 @@ function Detail({ label, value, wide }: { label: string; value?: string; wide?: 
 }
 
 export default function PlanDetail() {
-  const { id } = useParams();
+  const { id } = useParams({ from: "/app/plans/$id" });
   const planQ = usePlan(id);
   const paymentsQ = usePayments();
   const plan = planQ.data;
@@ -62,7 +62,7 @@ export default function PlanDetail() {
           </div>
         </div>
         {canPay && (
-          <Link to={payLink(plan)} className="inline-flex h-12 items-center rounded-2xl bg-accent px-6 text-sm font-bold text-foreground">
+          <Link to="/app/payments/new" search={{ plan: plan._id }} className="inline-flex h-12 items-center rounded-2xl bg-accent px-6 text-sm font-bold text-foreground">
             Complete payment
           </Link>
         )}
@@ -105,7 +105,7 @@ export default function PlanDetail() {
       <section aria-label="Plan payment history" className="flex flex-col gap-1 rounded-[28px] bg-white p-8">
         <div className="mb-2 flex items-end justify-between">
           <h2 className="font-serif text-[28px] font-normal">Payment history</h2>
-          <Link to={`/app/payments?plan=${plan._id}`} className="text-sm font-semibold text-link hover:text-link-hover">See all payments</Link>
+          <Link to="/app/payments" search={{ plan: plan._id }} className="text-sm font-semibold text-link hover:text-link-hover">See all payments</Link>
         </div>
         {paymentsQ.isPending && <p className="py-4 text-sm text-muted">Loading…</p>}
         {paymentsQ.isError && <p className="py-4 text-sm text-status-cancelled">Couldn&rsquo;t load payments. {paymentsQ.error.message}</p>}
@@ -124,7 +124,7 @@ export default function PlanDetail() {
         ))}
         {history.length > 3 && (
           <div className="border-t border-border pt-4 text-center text-sm">
-            <Link to={`/app/payments?plan=${plan._id}`} className="font-semibold text-link">View full history</Link>
+            <Link to="/app/payments" search={{ plan: plan._id }} className="font-semibold text-link">View full history</Link>
           </div>
         )}
       </section>

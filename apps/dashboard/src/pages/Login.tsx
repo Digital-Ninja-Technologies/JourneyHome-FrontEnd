@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Button } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
@@ -9,7 +9,8 @@ import { AuthShell } from "../components/AuthShell";
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const from = (useLocation().state as { from?: string } | null)?.from ?? "/app";
+  const search = useSearch({ from: "/login" });
+  const from = search.redirect || "/app";
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -20,7 +21,7 @@ export default function Login() {
     setError(null);
     try {
       await login(String(data.get("email")).trim(), String(data.get("password")), data.get("remember") === "on");
-      navigate(from, { replace: true });
+      navigate({ to: from as any, replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
       setBusy(false);

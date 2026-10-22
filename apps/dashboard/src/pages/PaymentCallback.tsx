@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearch } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { api } from "../lib/api";
@@ -9,8 +9,8 @@ import type { Payment } from "../lib/types";
 
 /** Paystack returns here after checkout with ?reference=…; we ask the backend to verify it. */
 export default function PaymentCallback() {
-  const [params] = useSearchParams();
-  const reference = params.get("reference") ?? params.get("trxref");
+  const search = useSearch({ from: "/app/payments/callback" });
+  const reference = search.reference ?? search.trxref;
   const queryClient = useQueryClient();
 
   const verify = useQuery({
@@ -33,7 +33,7 @@ export default function PaymentCallback() {
 
   // A new customer finishing onboarding continues to the welcome screen.
   if (pay?.status === "Successful" && pay.purpose === "initial_contribution" && getOnboardingPlan() === pay.plan) {
-    return <Navigate to={`/welcome?plan=${pay.plan}`} replace />;
+    return <Navigate to="/welcome" search={{ plan: pay.plan }} replace />;
   }
   let icon = <Clock className="size-10 text-status-due" />;
   let title = "Confirming your payment…";
@@ -59,12 +59,12 @@ export default function PaymentCallback() {
     icon = <CheckCircle2 className="size-10 text-status-active" />;
     title = "Payment received";
     body = `Your ${formatMoney(pay.amountMinor, pay.currency)} contribution is confirmed and your plan is now active.`;
-    action = <Link to={`/app/plans/${pay.plan}`} className="inline-flex h-12 items-center rounded-xl bg-foreground px-6 text-sm font-bold text-canvas">View your plan</Link>;
+    action = <Link to="/app/plans/$id" params={{ id: pay.plan }} className="inline-flex h-12 items-center rounded-xl bg-foreground px-6 text-sm font-bold text-canvas">View your plan</Link>;
   } else if (pay && (pay.status === "Failed" || pay.status === "Cancelled")) {
     icon = <XCircle className="size-10 text-status-cancelled" />;
     title = "That payment didn’t go through";
     body = pay.failureMessage ?? "You haven’t been charged. You can try again whenever you’re ready.";
-    action = <Link to={`/app/payments/new?plan=${pay.plan}`} className="inline-flex h-12 items-center rounded-xl bg-accent px-6 text-sm font-bold text-foreground">Try again</Link>;
+    action = <Link to="/app/payments/new" search={{ plan: pay.plan }} className="inline-flex h-12 items-center rounded-xl bg-accent px-6 text-sm font-bold text-foreground">Try again</Link>;
   } else if (pay) {
     title = "Your payment is still processing";
     body = "We’ll update your plan as soon as it’s confirmed. You can safely leave this page.";

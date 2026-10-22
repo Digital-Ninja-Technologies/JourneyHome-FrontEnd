@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { Logo } from "@journeyhome/ui/components/logo";
 import { cn } from "@journeyhome/ui/lib/utils";
@@ -43,7 +43,7 @@ export function OnboardingShell({
     <div className="flex min-h-screen flex-col items-center bg-canvas px-6 pb-20 pt-9">
       <div className="mb-10 flex w-full max-w-[1200px] items-center justify-between">
         <a href={MARKETING_URL}><Logo /></a>
-        {exitTo ? <Link to={exitTo} className="text-[13px] font-semibold text-muted">Exit setup</Link> : <a href={MARKETING_URL} className="text-[13px] font-semibold text-muted">Exit setup</a>}
+        {exitTo ? <Link to={exitTo as any} className="text-[13px] font-semibold text-muted">Exit setup</Link> : <a href={MARKETING_URL} className="text-[13px] font-semibold text-muted">Exit setup</a>}
       </div>
       <div className={cn("flex w-full flex-col items-center gap-8", width)}>
         <Stepper current={step} />

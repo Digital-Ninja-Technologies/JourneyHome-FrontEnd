@@ -1,4 +1,4 @@
-import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearch } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 import { Button } from "@journeyhome/ui/components/button";
 import { OnboardingShell } from "../components/OnboardingShell";
@@ -43,17 +43,17 @@ function Checkout({ plan }: { plan: Plan }) {
 }
 
 export default function OnboardingPayment() {
-  const [params] = useSearchParams();
-  const planQ = usePlan(params.get("plan") ?? undefined);
+  const { plan: planId } = useSearch({ from: "/signup/payment" });
+  const planQ = usePlan(planId);
   const plan = planQ.data;
 
   // Already paid (e.g. the page was reopened after checkout): carry on to the welcome screen.
-  if (plan && plan.status !== "Pending") return <Navigate to={`/welcome?plan=${plan._id}`} replace />;
+  if (plan && plan.status !== "Pending") return <Navigate to="/welcome" search={{ plan: plan._id }} replace />;
 
   return (
     <OnboardingShell step={4} title="Make your first" accent="payment." subtitle="Your first contribution starts today; after that it's monthly." exitTo="/app" width="max-w-[480px]">
-      {!params.get("plan") && <p className="text-center text-sm text-muted">No plan selected. <Link to="/signup/plan" className="font-bold text-link underline">Set up a plan</Link></p>}
-      {params.get("plan") && planQ.isPending && <p className="text-center text-sm text-muted">Loading your plan…</p>}
+      {!planId && <p className="text-center text-sm text-muted">No plan selected. <Link to="/signup/plan" className="font-bold text-link underline">Set up a plan</Link></p>}
+      {planId && planQ.isPending && <p className="text-center text-sm text-muted">Loading your plan…</p>}
       {planQ.isError && (
         <p role="alert" className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-center text-[13px] text-status-cancelled">
           {planQ.error.message} <Link to="/signup/plan" className="font-bold underline">Set up a plan</Link>

@@ -1,4 +1,4 @@
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 import { Button } from "@journeyhome/ui/components/button";
 import { StatusPill } from "../components/StatusPill";
@@ -71,7 +71,7 @@ function Checkout({ plan }: { plan: Plan }) {
         <p role="alert" className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-[13px] text-status-cancelled">{start.error.message}</p>
       )}
       <div className="flex gap-3">
-        <Button variant="outline" size="lg" className="h-[54px] rounded-xl" onClick={() => navigate("/app/plans")} disabled={busy}>Cancel</Button>
+        <Button variant="outline" size="lg" className="h-[54px] rounded-xl" onClick={() => navigate({ to: "/app/plans" })} disabled={busy}>Cancel</Button>
         <Button variant="accent" size="lg" className="h-[54px] flex-1 rounded-xl" disabled={busy} onClick={() => start.mutate()}>
           {busy ? "Taking you to Paystack…" : `Confirm payment — ${money}`}
         </Button>
@@ -86,8 +86,7 @@ function Checkout({ plan }: { plan: Plan }) {
 
 export default function MakePayment() {
   const plansQ = usePlans();
-  const [params] = useSearchParams();
-  const planId = params.get("plan");
+  const { plan: planId } = useSearch({ from: "/app/payments/new" });
 
   if (plansQ.isPending) return <Shell><p className="text-muted">Loading…</p></Shell>;
   if (plansQ.isError) return <Shell><p role="alert" className="text-status-cancelled">{plansQ.error.message}</p></Shell>;
@@ -112,7 +111,7 @@ export default function MakePayment() {
             <>This plan can&rsquo;t take a payment right now.</>
           )}
         </Note>
-        <Link to={`/app/plans/${plan._id}`} className="text-sm font-bold text-link underline">Back to plan</Link>
+        <Link to="/app/plans/$id" params={{ id: plan._id }} className="text-sm font-bold text-link underline">Back to plan</Link>
       </Shell>
     );
   }
@@ -132,7 +131,8 @@ export default function MakePayment() {
           {waiting.map((p) => (
             <Link
               key={p._id}
-              to={`/app/payments/new?plan=${p._id}`}
+              to="/app/payments/new"
+              search={{ plan: p._id }}
               className="flex items-center justify-between rounded-2xl border border-border bg-white p-5 hover:border-foreground"
             >
               <div>

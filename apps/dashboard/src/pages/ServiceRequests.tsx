@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@tanstack/react-router";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Pill } from "../components/StatusPill";
 import { RequestDocuments } from "../components/RequestDocuments";

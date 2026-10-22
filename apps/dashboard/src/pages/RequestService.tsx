@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Info, Upload, X } from "lucide-react";
 import { Button } from "@journeyhome/ui/components/button";
@@ -65,14 +65,14 @@ export default function RequestService() {
   const plansQ = usePlans();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [params] = useSearchParams();
+  const { plan: paramPlan } = useSearch({ from: "/app/service-requests/new" });
   const [files, setFiles] = useState<Partial<Record<DocumentType, File>>>({});
   const [progress, setProgress] = useState<string | null>(null);
   // If the request is created but an upload fails, a retry skips creation and uploads what's left.
   const created = useRef<{ id: string; done: Set<DocumentType> } | null>(null);
 
   const eligible = (plansQ.data ?? []).filter((p) => ELIGIBLE_PLAN.has(p.status));
-  const [planId, setPlanId] = useState(params.get("plan") ?? "");
+  const [planId, setPlanId] = useState(paramPlan ?? "");
   const plan = eligible.find((p) => p._id === planId) ?? eligible[0];
 
   const submit = useMutation({
@@ -94,7 +94,7 @@ export default function RequestService() {
       void queryClient.invalidateQueries({ queryKey: ["plans"] });
       void queryClient.invalidateQueries({ queryKey: ["plan"] });
       void queryClient.invalidateQueries({ queryKey: ["service-requests"] });
-      navigate("/app/service-requests");
+      navigate({ to: "/app/service-requests" });
     },
     onSettled: () => setProgress(null),
   });
@@ -194,7 +194,7 @@ export default function RequestService() {
             </p>
           )}
           <div className="flex gap-3">
-            <Button type="button" variant="outline" size="lg" className="h-[54px] rounded-xl" onClick={() => navigate("/app/service-requests")} disabled={submit.isPending}>
+            <Button type="button" variant="outline" size="lg" className="h-[54px] rounded-xl" onClick={() => navigate({ to: "/app/service-requests" })} disabled={submit.isPending}>
               {partial ? "Skip for now" : "Cancel"}
             </Button>
             <Button type="submit" variant="accent" size="lg" className="h-[54px] flex-1 rounded-xl" disabled={submit.isPending}>

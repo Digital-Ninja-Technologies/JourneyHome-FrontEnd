@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@journeyhome/ui/components/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@journeyhome/ui/components/dialog";
@@ -20,7 +20,7 @@ export function CreatePlanDialog({ open, onClose }: { open: boolean; onClose: ()
     onSuccess: (plan) => {
       void queryClient.invalidateQueries({ queryKey: ["plans"] });
       onClose();
-      navigate(`/app/plans/${plan._id}`);
+      navigate({ to: "/app/plans/$id", params: { id: plan._id } });
     },
   });
 

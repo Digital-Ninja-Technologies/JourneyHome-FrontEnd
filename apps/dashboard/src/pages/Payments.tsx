@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { PAYMENT_TEXT } from "../components/StatusPill";
 import { daysUntil, firstName, formatDay, formatMoney, formatMonthYear } from "../lib/format";
-import { LIVE, MARKETING_URL, canPayNow, isDue, payLink } from "../lib/plans";
+import { LIVE, MARKETING_URL, canPayNow, isDue } from "../lib/plans";
 import { usePayments, usePlans } from "../lib/queries";
 import type { Payment, Plan } from "../lib/types";
 
@@ -42,7 +42,7 @@ function PaymentRow({ pay, plan }: { pay: Payment; plan?: Plan }) {
           <div className={cn("text-xs font-semibold", PAYMENT_TEXT[pay.status])}>{pay.status}</div>
         </div>
         {canResume && plan && (
-          <Link to={payLink(plan)} className="inline-flex h-9 items-center rounded-xl bg-foreground px-4 text-xs font-bold text-canvas">
+          <Link to="/app/payments/new" search={{ plan: plan._id }} className="inline-flex h-9 items-center rounded-xl bg-foreground px-4 text-xs font-bold text-canvas">
             {resumeLabel}
           </Link>
         )}
@@ -54,13 +54,13 @@ function PaymentRow({ pay, plan }: { pay: Payment; plan?: Plan }) {
 export default function Payments() {
   const plansQ = usePlans();
   const paymentsQ = usePayments();
-  const [params, setParams] = useSearchParams();
+  const navigate = useNavigate({ from: "/app/payments/" });
+  const { plan: filter } = useSearch({ from: "/app/payments/" });
   const [shown, setShown] = useState(PAGE);
 
   const plans = plansQ.data ?? [];
   const byId = new Map(plans.map((p) => [p._id, p]));
   const payments = paymentsQ.data ?? [];
-  const filter = params.get("plan");
   const rows = filter ? payments.filter((p) => p.plan === filter) : payments;
 
   const successful = payments.filter((p) => p.status === "Successful");
@@ -126,7 +126,7 @@ export default function Payments() {
                 <button
                   key={f.id ?? "all"}
                   aria-pressed={filter === f.id}
-                  onClick={() => { setParams(f.id ? { plan: f.id } : {}, { replace: true }); setShown(PAGE); }}
+                  onClick={() => { navigate({ search: f.id ? { plan: f.id } : {}, replace: true }); setShown(PAGE); }}
                   className={cn("rounded-full px-4 py-2 font-semibold", filter === f.id ? "bg-foreground text-canvas" : "text-muted hover:text-foreground")}
                 >
                   {f.label}

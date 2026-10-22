@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@tanstack/react-router";
 import { AlertCircle, Bell, Camera, Check, CreditCard } from "lucide-react";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useAuth } from "../auth/AuthContext";
@@ -77,7 +77,7 @@ export default function Notifications() {
                   <div className={cn("text-[15px]", unreadNow ? "font-bold" : "font-semibold")}>{view.title}</div>
                   <div className="text-sm leading-relaxed text-ink-soft">
                     {view.body}{" "}
-                    {view.link && <Link to={view.link.to} className="font-semibold text-link underline">{view.link.label}</Link>}
+                    {view.link && <Link to={view.link.to as any} className="font-semibold text-link underline">{view.link.label}</Link>}
                     {view.policy && <> <a href={`${MARKETING_URL}/terms`} className="font-semibold text-link underline">Read the policy</a></>}
                   </div>
                   <div className="mt-1 text-xs text-muted">{formatNotificationTime(n.createdAt)}</div>
