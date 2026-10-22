@@ -29,6 +29,8 @@ export const Route = createRootRoute({
     ],
   }),
   component: RootComponent,
+  notFoundComponent: NotFoundComponent,
+  errorComponent: ErrorComponent,
 });
 
 function RootComponent() {
@@ -38,6 +40,36 @@ function RootComponent() {
       <Outlet />
       <SiteFooter />
     </RootDocument>
+  );
+}
+
+function NotFoundComponent() {
+  return (
+    <main className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+      <div className="flex items-center gap-5">
+        <h1 className="border-r border-foreground/30 pr-5 text-2xl font-medium leading-[49px]">
+          404
+        </h1>
+        <h2 className="m-0 text-sm font-normal leading-[49px]">
+          This page could not be found.
+        </h2>
+      </div>
+    </main>
+  );
+}
+
+function ErrorComponent({ error }: { error: unknown }) {
+  return (
+    <main className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+      <div className="flex items-center gap-5">
+        <h1 className="border-r border-foreground/30 pr-5 text-2xl font-medium leading-[49px]">
+          Error
+        </h1>
+        <h2 className="m-0 text-sm font-normal leading-[49px]">
+          {error instanceof Error ? error.message : "Something went wrong."}
+        </h2>
+      </div>
+    </main>
   );
 }
 

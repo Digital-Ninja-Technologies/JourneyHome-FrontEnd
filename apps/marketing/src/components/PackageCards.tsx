@@ -8,7 +8,7 @@ export function PackagesUnavailable() {
   return (
     <div className="rounded-3xl border border-border bg-white p-8 text-muted">
       Package pricing is temporarily unavailable. Please check back shortly or{" "}
-      <Link to={"/contact" as string} className="font-bold text-link underline">
+      <Link to="/contact" className="font-bold text-link underline">
         contact us
       </Link>
       .

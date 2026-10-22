@@ -9,6 +9,7 @@
     "lint": "turbo run lint"
   },
   "devDependencies": {
+    "playwright": "^1.64.1",
     "turbo": "^2.11.9",
     "typescript": "^7.0.2"
   }

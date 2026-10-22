@@ -163,3 +163,25 @@
 - **Fonts:** Added `<link rel="preconnect">` and Google Fonts `<link rel="stylesheet">` directly into root document head in `src/routes/__root.tsx`.
 - **Link usage convention:** TanStack Router `<Link to="...">` used for all internal routing; plain `<a href="...">` used for external links (dashboard login/signup, mailto).
 - Verified whole-monorepo `pnpm typecheck` and `pnpm --filter @journeyhome/marketing build` (Next.js baseline remains fully runnable).
+
+---
+
+## Stage 3 Implementation: Routes Migration
+- **Route mapping (8 routes + 404):**
+  - `/` -> `src/routes/index.tsx`
+  - `/how-it-works` -> `src/routes/how-it-works.tsx`
+  - `/pricing` -> `src/routes/pricing.tsx`
+  - `/about` -> `src/routes/about.tsx`
+  - `/faq` -> `src/routes/faq.tsx`
+  - `/contact` -> `src/routes/contact.tsx`
+  - `/terms` -> `src/routes/terms.tsx`
+  - `/privacy` -> `src/routes/privacy.tsx`
+- **Root Layout & Error UI:**
+  - Added root `notFoundComponent` in `src/routes/__root.tsx` matching Next.js 404 UI.
+  - Added root `errorComponent` in `src/routes/__root.tsx`.
+- **Interactivity & Hydration Verification:**
+  - Verified client-side hydration: FAQ `<details>/<summary>` accordion toggles smoothly.
+  - Verified Contact form topic button selection updates `aria-pressed` state and triggers mailto composition.
+  - Verified full client-side navigation between all 8 routes, browser history back/forward, and page reload.
+  - Captured Playwright screenshots of all 8 routes in `apps/marketing/.migration-baseline/screenshots-start/`.
+  - Next.js app in `app/` remains fully runnable and build passes.
