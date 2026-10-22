@@ -16,6 +16,20 @@
 - Created `apps/dashboard/src/routes` directory for file-based routing.
 - Verified TypeScript include configuration (`tsconfig.json` includes `src`, which contains generated `routeTree.gen.ts`).
 
+## Stage 2: Root Route, Router Instance, and Providers
+- Created `src/routes/__root.tsx` with `createRootRouteWithContext<RouterContext>()`:
+  - Typed context includes `queryClient: QueryClient` and `auth: { user: User | null }`.
+  - Added `<ScrollRestoration />` and `<Outlet />`.
+- Created `src/router.tsx`:
+  - Configured `createRouter` with `routeTree`, context defaults, `defaultPreload: 'intent'`, `scrollRestoration: true`, and `defaultNotFoundComponent`.
+  - Added global module augmentation `Register { router: typeof router }`.
+- Updated `src/main.tsx` and `src/App.tsx`:
+  - Removed `BrowserRouter` and React Router `<Routes>` from `main.tsx`.
+  - Nested `<RouterProvider router={router} context={{ queryClient, auth: { user } }} />` inside `QueryClientProvider` and `AuthProvider`.
+  - In `App.tsx`, hooked `router.invalidate()` to `user` state changes so auth transitions automatically trigger route re-evaluation.
+- Verified: App boots to root route with providers intact, dev server runs without errors.
+
+
 
 ## Stage 0: Inventory & Route Contract
 
