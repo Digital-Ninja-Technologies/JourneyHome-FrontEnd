@@ -9,27 +9,315 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SplatRouteImport } from './routes/$'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedAuditLogRouteImport } from './routes/_authenticated/audit-log'
+import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedPlansIndexRouteImport } from './routes/_authenticated/plans/index'
+import { Route as AuthenticatedPlansIdRouteImport } from './routes/_authenticated/plans/$id'
+import { Route as AuthenticatedServiceRequestsIndexRouteImport } from './routes/_authenticated/service-requests/index'
+import { Route as AuthenticatedServiceRequestsIdRouteImport } from './routes/_authenticated/service-requests/$id'
+import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
+import { Route as AuthenticatedUsersIdRouteImport } from './routes/_authenticated/users/$id'
 
-export interface FileRoutesByFullPath {}
-export interface FileRoutesByTo {}
+const SplatRoute = SplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAuditLogRoute = AuthenticatedAuditLogRouteImport.update({
+  id: '/audit-log',
+  path: '/audit-log',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPlansIndexRoute = AuthenticatedPlansIndexRouteImport.update({
+  id: '/plans/',
+  path: '/plans/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPlansIdRoute = AuthenticatedPlansIdRouteImport.update({
+  id: '/plans/$id',
+  path: '/plans/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedServiceRequestsIndexRoute =
+  AuthenticatedServiceRequestsIndexRouteImport.update({
+    id: '/service-requests/',
+    path: '/service-requests/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedServiceRequestsIdRoute =
+  AuthenticatedServiceRequestsIdRouteImport.update({
+    id: '/service-requests/$id',
+    path: '/service-requests/$id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedUsersIdRoute = AuthenticatedUsersIdRouteImport.update({
+  id: '/users/$id',
+  path: '/users/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/$': typeof SplatRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/login': typeof LoginRoute
+  '/audit-log': typeof AuthenticatedAuditLogRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/plans/$id': typeof AuthenticatedPlansIdRoute
+  '/service-requests/$id': typeof AuthenticatedServiceRequestsIdRoute
+  '/users/$id': typeof AuthenticatedUsersIdRoute
+  '/plans/': typeof AuthenticatedPlansIndexRoute
+  '/service-requests/': typeof AuthenticatedServiceRequestsIndexRoute
+  '/users/': typeof AuthenticatedUsersIndexRoute
+}
+export interface FileRoutesByTo {
+  '/$': typeof SplatRoute
+  '/login': typeof LoginRoute
+  '/audit-log': typeof AuthenticatedAuditLogRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/plans/$id': typeof AuthenticatedPlansIdRoute
+  '/service-requests/$id': typeof AuthenticatedServiceRequestsIdRoute
+  '/users/$id': typeof AuthenticatedUsersIdRoute
+  '/plans': typeof AuthenticatedPlansIndexRoute
+  '/service-requests': typeof AuthenticatedServiceRequestsIndexRoute
+  '/users': typeof AuthenticatedUsersIndexRoute
+}
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/$': typeof SplatRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_authenticated/audit-log': typeof AuthenticatedAuditLogRoute
+  '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/plans/$id': typeof AuthenticatedPlansIdRoute
+  '/_authenticated/service-requests/$id': typeof AuthenticatedServiceRequestsIdRoute
+  '/_authenticated/users/$id': typeof AuthenticatedUsersIdRoute
+  '/_authenticated/plans/': typeof AuthenticatedPlansIndexRoute
+  '/_authenticated/service-requests/': typeof AuthenticatedServiceRequestsIndexRoute
+  '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: never
+  fullPaths:
+    | '/$'
+    | '/'
+    | '/login'
+    | '/audit-log'
+    | '/payments'
+    | '/settings'
+    | '/plans/$id'
+    | '/service-requests/$id'
+    | '/users/$id'
+    | '/plans/'
+    | '/service-requests/'
+    | '/users/'
   fileRoutesByTo: FileRoutesByTo
-  to: never
-  id: '__root__'
+  to:
+    | '/$'
+    | '/login'
+    | '/audit-log'
+    | '/payments'
+    | '/settings'
+    | '/'
+    | '/plans/$id'
+    | '/service-requests/$id'
+    | '/users/$id'
+    | '/plans'
+    | '/service-requests'
+    | '/users'
+  id:
+    | '__root__'
+    | '/$'
+    | '/_authenticated'
+    | '/login'
+    | '/_authenticated/audit-log'
+    | '/_authenticated/payments'
+    | '/_authenticated/settings'
+    | '/_authenticated/'
+    | '/_authenticated/plans/$id'
+    | '/_authenticated/service-requests/$id'
+    | '/_authenticated/users/$id'
+    | '/_authenticated/plans/'
+    | '/_authenticated/service-requests/'
+    | '/_authenticated/users/'
   fileRoutesById: FileRoutesById
 }
-export interface RootRouteChildren {}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {}
+export interface RootRouteChildren {
+  SplatRoute: typeof SplatRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
-const rootRouteChildren: RootRouteChildren = {}
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/$': {
+      id: '/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof SplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/audit-log': {
+      id: '/_authenticated/audit-log'
+      path: '/audit-log'
+      fullPath: '/audit-log'
+      preLoaderRoute: typeof AuthenticatedAuditLogRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/payments': {
+      id: '/_authenticated/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/plans/': {
+      id: '/_authenticated/plans/'
+      path: '/plans'
+      fullPath: '/plans/'
+      preLoaderRoute: typeof AuthenticatedPlansIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/plans/$id': {
+      id: '/_authenticated/plans/$id'
+      path: '/plans/$id'
+      fullPath: '/plans/$id'
+      preLoaderRoute: typeof AuthenticatedPlansIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/service-requests/': {
+      id: '/_authenticated/service-requests/'
+      path: '/service-requests'
+      fullPath: '/service-requests/'
+      preLoaderRoute: typeof AuthenticatedServiceRequestsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/service-requests/$id': {
+      id: '/_authenticated/service-requests/$id'
+      path: '/service-requests/$id'
+      fullPath: '/service-requests/$id'
+      preLoaderRoute: typeof AuthenticatedServiceRequestsIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/users/': {
+      id: '/_authenticated/users/'
+      path: '/users'
+      fullPath: '/users/'
+      preLoaderRoute: typeof AuthenticatedUsersIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/users/$id': {
+      id: '/_authenticated/users/$id'
+      path: '/users/$id'
+      fullPath: '/users/$id'
+      preLoaderRoute: typeof AuthenticatedUsersIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+  }
+}
+
+interface AuthenticatedRouteChildren {
+  AuthenticatedAuditLogRoute: typeof AuthenticatedAuditLogRoute
+  AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedPlansIdRoute: typeof AuthenticatedPlansIdRoute
+  AuthenticatedServiceRequestsIdRoute: typeof AuthenticatedServiceRequestsIdRoute
+  AuthenticatedUsersIdRoute: typeof AuthenticatedUsersIdRoute
+  AuthenticatedPlansIndexRoute: typeof AuthenticatedPlansIndexRoute
+  AuthenticatedServiceRequestsIndexRoute: typeof AuthenticatedServiceRequestsIndexRoute
+  AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAuditLogRoute: AuthenticatedAuditLogRoute,
+  AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedPlansIdRoute: AuthenticatedPlansIdRoute,
+  AuthenticatedServiceRequestsIdRoute: AuthenticatedServiceRequestsIdRoute,
+  AuthenticatedUsersIdRoute: AuthenticatedUsersIdRoute,
+  AuthenticatedPlansIndexRoute: AuthenticatedPlansIndexRoute,
+  AuthenticatedServiceRequestsIndexRoute:
+    AuthenticatedServiceRequestsIndexRoute,
+  AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
+const rootRouteChildren: RootRouteChildren = {
+  SplatRoute: SplatRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  LoginRoute: LoginRoute,
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()

@@ -18,12 +18,12 @@ export const router = createRouter({
     auth: {
       user: null,
       isSuperAdmin: false,
-      logout: () => {},
+      logout: void,
     },
   },
   defaultPreload: "intent",
   scrollRestoration: true,
-  defaultNotFoundComponent: () => <Navigate to={"/" as any} replace />,
+  defaultNotFoundComponent: () => <Navigate to="/" replace />,
 });
 
 declare module "@tanstack/react-router" {

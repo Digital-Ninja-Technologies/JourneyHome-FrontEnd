@@ -53,6 +53,28 @@
   - In `app.tsx`, connected `router.invalidate()` to `user` state changes to ensure immediate re-evaluation on auth transitions.
 - Verified: `tsc --noEmit` and `vite build` pass cleanly with 0 errors.
 
+## Stage 3: File-based Routes & Zod Search Schemas
+
+- Created `src/lib/search-schemas.ts` with reusable Zod schemas:
+  - `redirectSearchSchema = z.object({ redirect: z.string().startsWith("/").refine(v => !v.startsWith("//")).optional() })`
+  - `querySearchSchema = z.object({ q: z.string().optional(), filter: z.string().optional() })`
+- Created all 13 route files according to the route contract:
+  - `/login` (`src/routes/login.tsx`): validated search `redirect?: string`, guest guard redirecting authenticated users to `redirect` param or `/`.
+  - `/_authenticated` (`src/routes/_authenticated.tsx`): pathless layout route enforcing auth guard in `beforeLoad` (redirecting to `/login?redirect=...`) and rendering `AdminShell`.
+  - `/` (`src/routes/_authenticated/index.tsx`): `Dashboard`
+  - `/users/` (`src/routes/_authenticated/users/index.tsx`): `Users`
+  - `/users/$id` (`src/routes/_authenticated/users/$id.tsx`): `UserDetail` with dynamic param `$id`
+  - `/plans/` (`src/routes/_authenticated/plans/index.tsx`): `Plans`
+  - `/plans/$id` (`src/routes/_authenticated/plans/$id.tsx`): `PlanDetail` with dynamic param `$id`
+  - `/service-requests/` (`src/routes/_authenticated/service-requests/index.tsx`): `ServiceRequests`
+  - `/service-requests/$id` (`src/routes/_authenticated/service-requests/$id.tsx`): `ServiceRequestDetail` with dynamic param `$id`
+  - `/payments` (`src/routes/_authenticated/payments.tsx`): `Payments`
+  - `/audit-log` (`src/routes/_authenticated/audit-log.tsx`): `AuditLog`
+  - `/settings` (`src/routes/_authenticated/settings.tsx`): `Settings`
+  - `/$` (`src/routes/$.tsx`): wildcard splat route redirecting to `/`
+- Generated typed `src/routeTree.gen.ts` with all 13 route nodes.
+- Verified: `tsc --noEmit` and `vite build` pass with 0 errors.
+
 ---
 
 ## ROUTE CONTRACT (Verification Checklist)
