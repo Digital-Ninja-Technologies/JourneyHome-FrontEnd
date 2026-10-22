@@ -19,9 +19,12 @@ truth instead of guessing at layout or scope.
 
 ## What to build
 
-A production web app (recommend **React + TypeScript + Vite**, or Next.js if SSR/SEO
-matters for the marketing pages) implementing the screens in `/mockups`, wired to the
+A production web app implementing the screens in `/mockups`, wired to the
 existing backend:
+- `apps/marketing`: Public marketing site powered by **TanStack Start** (React 19 + Vite + Nitro SSR/Edge caching)
+- `apps/dashboard`: Authenticated customer app (**React + Vite + React Router**)
+- `apps/admin`: Ops console (**React + Vite + React Router**)
+- `packages/ui`: Shared UI tokens and components (@journeyhome/ui)
 
 - **Backend repo:** `Digital-Ninja-Technologies/journey_home_backend`
   (Express + TypeScript + PostgreSQL/Prisma + JWT auth, REST at `/api/v1`). Its
