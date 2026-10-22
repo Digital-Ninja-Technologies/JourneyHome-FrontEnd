@@ -1,6 +1,6 @@
 import { Logo } from "@journeyhome/ui/components/logo";
 import { cn } from "@journeyhome/ui/lib/utils";
-import { Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 
 const MARKETING_URL = import.meta.env.VITE_MARKETING_URL ?? "/";
@@ -54,23 +54,22 @@ function Stepper({ current }: { current: number }) {
   );
 }
 
-export function OnboardingShell({
-  step,
-  title,
-  accent,
-  subtitle,
-  exitTo,
-  children,
-  width = "max-w-[560px]",
-}: {
-  step: number;
-  title: string;
-  accent: string;
-  subtitle: string;
-  exitTo?: string;
-  children: React.ReactNode;
-  width?: string;
-}) {
+function getStep(pathname: string) {
+  if (pathname.includes("/verify")) return 2;
+  if (pathname.includes("/plan")) return 3;
+  if (pathname.includes("/payment")) return 4;
+  return 1;
+}
+
+export const Route = createFileRoute("/signup")({
+  component: SignupLayout,
+});
+
+function SignupLayout() {
+  const { pathname } = useLocation();
+  const step = getStep(pathname);
+  const exitTo = step > 1 ? "/app" : undefined;
+
   return (
     <div className="flex min-h-screen flex-col items-center bg-canvas px-6 pb-20 pt-9">
       <div className="mb-10 flex w-full max-w-[1200px] items-center justify-between">
@@ -93,18 +92,9 @@ export function OnboardingShell({
           </a>
         )}
       </div>
-      <div className={cn("flex w-full flex-col items-center gap-8", width)}>
+      <div className="flex w-full flex-col items-center gap-8">
         <Stepper current={step} />
-        <div className="flex flex-col gap-2 text-center">
-          <h1 className="font-sans text-4xl font-extrabold leading-[1.1] tracking-tight">
-            {title}{" "}
-            <span className="font-serif font-normal italic text-link">
-              {accent}
-            </span>
-          </h1>
-          <p className="text-sm leading-relaxed text-muted">{subtitle}</p>
-        </div>
-        <div className="flex w-full flex-col gap-6">{children}</div>
+        <Outlet />
       </div>
     </div>
   );

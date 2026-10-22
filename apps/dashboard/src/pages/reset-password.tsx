@@ -4,12 +4,11 @@ import { Label } from "@journeyhome/ui/components/label";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
-import { AuthShell } from "@/components/auth-shell";
 import { DemoNotice } from "@/components/demo-notice";
 import { api, isUnsupported, UNSUPPORTED_MESSAGE } from "../lib/api";
 
 export default function ResetPassword() {
-  const { token } = useSearch({ from: "/reset-password" });
+  const { token } = useSearch({ from: "/_auth/reset-password" });
   const [mismatch, setMismatch] = useState(false);
   const reset = useMutation({
     mutationFn: (password: string) =>
@@ -18,44 +17,65 @@ export default function ResetPassword() {
 
   if (!token) {
     return (
-      <AuthShell
-        title="This link isn't"
-        accent="valid."
-        subtitle="The reset link is missing or incomplete. Request a new one and try again."
-      >
+      <>
+        <div className="flex flex-col gap-2 text-center">
+          <h1 className="font-sans text-4xl font-extrabold leading-[1.1] tracking-tight">
+            This link isn't{" "}
+            <span className="font-serif font-normal italic text-link">
+              valid.
+            </span>
+          </h1>
+          <p className="text-sm leading-relaxed text-status-paused">
+            The reset link is missing or incomplete. Request a new one and try again.
+          </p>
+        </div>
         <Link
           to="/forgot-password"
           className="inline-flex h-[52px] items-center justify-center rounded-[14px] bg-foreground text-sm font-bold text-canvas"
         >
           Request a new link
         </Link>
-      </AuthShell>
+      </>
     );
   }
 
   if (reset.isSuccess) {
     return (
-      <AuthShell
-        title="Password"
-        accent="updated."
-        subtitle="You can now log in with your new password."
-      >
+      <>
+        <div className="flex flex-col gap-2 text-center">
+          <h1 className="font-sans text-4xl font-extrabold leading-[1.1] tracking-tight">
+            Password{" "}
+            <span className="font-serif font-normal italic text-link">
+              updated.
+            </span>
+          </h1>
+          <p className="text-sm leading-relaxed text-status-paused">
+            You can now log in with your new password.
+          </p>
+        </div>
         <Link
           to="/login"
           className="inline-flex h-[52px] items-center justify-center rounded-[14px] bg-foreground text-sm font-bold text-canvas"
         >
           Log in
         </Link>
-      </AuthShell>
+      </>
     );
   }
 
   return (
-    <AuthShell
-      title="Set a new"
-      accent="password."
-      subtitle="Choose something you haven't used before."
-    >
+    <>
+      <div className="flex flex-col gap-2 text-center">
+        <h1 className="font-sans text-4xl font-extrabold leading-[1.1] tracking-tight">
+          Set a new{" "}
+          <span className="font-serif font-normal italic text-link">
+            password.
+          </span>
+        </h1>
+        <p className="text-sm leading-relaxed text-status-paused">
+          Choose something you haven't used before.
+        </p>
+      </div>
       <DemoNotice />
       <form
         onSubmit={(e) => {
@@ -114,7 +134,7 @@ export default function ResetPassword() {
         >
           {reset.isPending ? "Saving…" : "Save new password"}
         </Button>
-      </form>
-    </AuthShell>
+        </form>
+    </>
   );
 }

@@ -20,11 +20,10 @@ Routing is powered by **TanStack Router** using file-based routing under `src/ro
 
 - `src/routes/__root.tsx`: The root route wrapping the entire application with router context (`queryClient`, `auth`), `<ScrollRestoration />`, and `<Outlet />`.
 - `src/routes/index.tsx`: Root URL redirect (`/` redirects to `/app`).
-- `src/routes/login.tsx`: Login page with guest guard.
-- `src/routes/forgot-password.tsx`, `src/routes/reset-password.tsx`: Password recovery.
-- `src/routes/signup/`: Onboarding flow (`index`, `verify`, `plan`, `payment`).
+- `src/routes/_auth/route.tsx`: Pathless layout route wrapping auth pages (`/login`, `/forgot-password`, `/reset-password`) with branded auth canvas layout and `<Outlet />`.
+- `src/routes/signup/route.tsx`: Directory layout route wrapping onboarding flow (`/signup/`, `/signup/verify`, `/signup/plan`, `/signup/payment`) with stepper and exit navigation.
 - `src/routes/welcome.tsx`: Post-onboarding celebration page.
-- `src/routes/app/route.tsx`: Protected layout wrapping customer pages in `AppShell` with an authentication guard.
+- `src/routes/app/route.tsx`: Protected layout wrapping customer pages with responsive sidebar navigation, collapse toggle, and authentication guard.
 - `src/routes/app/`: Customer dashboard routes:
   - `index.tsx`: Dashboard overview
   - `plans/index.tsx`: Plans list (supports `?new=1` search param)
@@ -84,7 +83,7 @@ Auth state is provided to TanStack Router via RouterContext in `src/router.tsx` 
         });
       }
     },
-    component: AppShell,
+    component: AppLayout,
   });
   ```
 - **Guest-Only Routes (`/login`, `/signup`)**:

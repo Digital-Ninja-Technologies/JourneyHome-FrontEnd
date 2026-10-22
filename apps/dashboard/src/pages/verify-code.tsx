@@ -3,7 +3,6 @@ import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { DemoNotice } from "@/components/demo-notice";
-import { OnboardingShell } from "@/components/onboarding-shell";
 import { OtpInput } from "@/components/otp-input";
 import { useAuth } from "../auth/auth-context";
 import { api, isUnsupported, UNSUPPORTED_MESSAGE } from "../lib/api";
@@ -45,14 +44,19 @@ export default function VerifyCode() {
   const complete = code.length === 6;
 
   return (
-    <OnboardingShell
-      step={2}
-      title="Verify it's"
-      accent="you."
-      subtitle={`We sent a 6-digit code to ${user?.email ?? "your email"}.`}
-      exitTo="/app"
-      width="max-w-[480px]"
-    >
+    <div className="flex w-full max-w-[480px] flex-col items-center gap-8">
+      <div className="flex flex-col gap-2 text-center">
+        <h1 className="font-sans text-4xl font-extrabold leading-[1.1] tracking-tight">
+          Verify it's{" "}
+          <span className="font-serif font-normal italic text-link">
+            you.
+          </span>
+        </h1>
+        <p className="text-sm leading-relaxed text-muted">
+          We sent a 6-digit code to {user?.email ?? "your email"}.
+        </p>
+      </div>
+      <div className="flex w-full flex-col gap-6">
       <DemoNotice>
         Use code <strong>{DEMO_CODE}</strong>.
       </DemoNotice>
@@ -143,6 +147,7 @@ export default function VerifyCode() {
           Skip for now — I&rsquo;ll verify later
         </Link>
       </form>
-    </OnboardingShell>
-  );
+    </div>
+  </div>
+);
 }

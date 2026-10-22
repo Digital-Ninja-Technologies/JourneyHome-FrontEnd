@@ -4,7 +4,6 @@ import { Label } from "@journeyhome/ui/components/label";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { AuthShell } from "@/components/auth-shell";
 import { DemoNotice } from "@/components/demo-notice";
 import { api, isUnsupported, UNSUPPORTED_MESSAGE, USE_MOCKS } from "../lib/api";
 import { DEMO_RESET_TOKEN } from "../mocks";
@@ -19,11 +18,18 @@ export default function ForgotPassword() {
 
   if (send.isSuccess) {
     return (
-      <AuthShell
-        title="Check your"
-        accent="email."
-        subtitle={`If an account exists for ${email}, we've sent a link to reset your password.`}
-      >
+      <>
+        <div className="flex flex-col gap-2 text-center">
+          <h1 className="font-sans text-4xl font-extrabold leading-[1.1] tracking-tight">
+            Check your{" "}
+            <span className="font-serif font-normal italic text-link">
+              email.
+            </span>
+          </h1>
+          <p className="text-sm leading-relaxed text-status-paused">
+            If an account exists for {email}, we've sent a link to reset your password.
+          </p>
+        </div>
         <DemoNotice>
           No email is sent.{" "}
           {USE_MOCKS && (
@@ -49,17 +55,24 @@ export default function ForgotPassword() {
           <Link to="/login" className="underline">
             Back to log in
           </Link>
-        </div>
-      </AuthShell>
+          </div>
+      </>
     );
   }
 
   return (
-    <AuthShell
-      title="Reset your"
-      accent="password."
-      subtitle="Enter the email on your account and we'll send a link to reset your password."
-    >
+    <>
+      <div className="flex flex-col gap-2 text-center">
+        <h1 className="font-sans text-4xl font-extrabold leading-[1.1] tracking-tight">
+          Reset your{" "}
+          <span className="font-serif font-normal italic text-link">
+            password.
+          </span>
+        </h1>
+        <p className="text-sm leading-relaxed text-status-paused">
+          Enter the email on your account and we'll send a link to reset your password.
+        </p>
+      </div>
       <DemoNotice />
       <form
         onSubmit={(e) => {
@@ -106,7 +119,7 @@ export default function ForgotPassword() {
         >
           Back to log in
         </Link>
-      </form>
-    </AuthShell>
+        </form>
+    </>
   );
 }

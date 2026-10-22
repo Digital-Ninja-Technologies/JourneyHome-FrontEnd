@@ -1,7 +1,6 @@
 import { Button } from "@journeyhome/ui/components/button";
 import { Link, Navigate, useSearch } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
-import { OnboardingShell } from "@/components/onboarding-shell";
 import { useStartCheckout } from "../lib/checkout";
 import { firstName, formatMoney } from "../lib/format";
 import { relationshipLabel } from "../lib/plans";
@@ -76,14 +75,19 @@ export default function OnboardingPayment() {
     return <Navigate to="/welcome" search={{ plan: plan._id }} replace />;
 
   return (
-    <OnboardingShell
-      step={4}
-      title="Make your first"
-      accent="payment."
-      subtitle="Your first contribution starts today; after that it's monthly."
-      exitTo="/app"
-      width="max-w-[480px]"
-    >
+    <div className="flex w-full max-w-[480px] flex-col items-center gap-8">
+      <div className="flex flex-col gap-2 text-center">
+        <h1 className="font-sans text-4xl font-extrabold leading-[1.1] tracking-tight">
+          Make your first{" "}
+          <span className="font-serif font-normal italic text-link">
+            payment.
+          </span>
+        </h1>
+        <p className="text-sm leading-relaxed text-muted">
+          Your first contribution starts today; after that it's monthly.
+        </p>
+      </div>
+      <div className="flex w-full flex-col gap-6">
       {!planId && (
         <p className="text-center text-sm text-muted">
           No plan selected.{" "}
@@ -107,6 +111,7 @@ export default function OnboardingPayment() {
         </p>
       )}
       {plan && <Checkout plan={plan} />}
-    </OnboardingShell>
+      </div>
+    </div>
   );
 }

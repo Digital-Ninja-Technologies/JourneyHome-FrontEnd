@@ -3,13 +3,12 @@ import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
-import { AuthShell } from "@/components/auth-shell";
 import { useAuth } from "../auth/auth-context";
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const search = useSearch({ from: "/login" });
+  const search = useSearch({ from: "/_auth/login" });
   const from = search.redirect || "/app";
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -33,11 +32,18 @@ export default function Login() {
   }
 
   return (
-    <AuthShell
-      title="Welcome"
-      accent="back."
-      subtitle="Log in to see your plans, payments, and upcoming services."
-    >
+    <>
+      <div className="flex flex-col gap-2 text-center">
+        <h1 className="font-sans text-4xl font-extrabold leading-[1.1] tracking-tight">
+          Welcome{" "}
+          <span className="font-serif font-normal italic text-link">
+            back.
+          </span>
+        </h1>
+        <p className="text-sm leading-relaxed text-status-paused">
+          Log in to see your plans, payments, and upcoming services.
+        </p>
+      </div>
       <form onSubmit={onSubmit} className="flex flex-col gap-8">
         <section className="flex flex-col gap-4 rounded-[20px] bg-card p-7 shadow-sm">
           <div className="flex flex-col gap-1.5">
@@ -96,7 +102,7 @@ export default function Login() {
             Create an account
           </Link>
         </div>
-      </form>
-    </AuthShell>
+        </form>
+    </>
   );
 }

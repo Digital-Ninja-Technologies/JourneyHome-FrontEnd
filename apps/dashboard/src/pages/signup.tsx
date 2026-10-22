@@ -3,7 +3,6 @@ import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
 import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { OnboardingShell } from "@/components/onboarding-shell";
 import { useAuth } from "../auth/auth-context";
 
 export default function Signup() {
@@ -35,14 +34,20 @@ export default function Signup() {
   }
 
   return (
-    <OnboardingShell
-      step={1}
-      title="Create your"
-      accent="account."
-      subtitle="Takes about two minutes. You'll set up your first plan right after."
-      width="max-w-[440px]"
-    >
-      <form onSubmit={onSubmit} className="flex flex-col gap-8">
+    <div className="flex w-full max-w-[440px] flex-col items-center gap-8">
+      <div className="flex flex-col gap-2 text-center">
+        <h1 className="font-sans text-4xl font-extrabold leading-[1.1] tracking-tight">
+          Create your{" "}
+          <span className="font-serif font-normal italic text-link">
+            account.
+          </span>
+        </h1>
+        <p className="text-sm leading-relaxed text-muted">
+          Takes about two minutes. You'll set up your first plan right after.
+        </p>
+      </div>
+      <div className="flex w-full flex-col gap-6">
+        <form onSubmit={onSubmit} className="flex flex-col gap-8">
         <section className="flex flex-col gap-4 rounded-[20px] bg-card p-7 shadow-sm">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="name">Full name</Label>
@@ -132,6 +137,7 @@ export default function Signup() {
           </Link>
         </div>
       </form>
-    </OnboardingShell>
-  );
+    </div>
+  </div>
+);
 }
