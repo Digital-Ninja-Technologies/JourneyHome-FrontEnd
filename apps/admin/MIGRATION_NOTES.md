@@ -93,6 +93,13 @@
 - Zero imports of `react-router-dom` remain in `apps/admin/src`.
 - Verified: `tsc --noEmit` and `vite build` succeed with 0 errors.
 
+## Stage 5: Dependency Cleanup
+
+- Removed `react-router-dom` dependency from `apps/admin/package.json`.
+- Ran `pnpm install` and updated lockfile.
+- Verified: `apps/admin/src` contains zero references to `react-router-dom`, `NavLink`, or `useLocation`.
+- Ran `pnpm --filter @journeyhome/admin typecheck` and `build`: PASSED with 0 errors.
+
 ---
 
 ## ROUTE CONTRACT (Verification Checklist)
