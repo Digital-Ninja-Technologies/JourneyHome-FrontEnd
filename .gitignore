@@ -8,3 +8,4 @@ dist
 .migration-baseline
 .output
 .nitro
+.vercel

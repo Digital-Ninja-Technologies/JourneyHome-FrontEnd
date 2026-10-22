@@ -120,7 +120,7 @@ function extractMeta(html: string) {
 }
 
 async function run() {
-  const targetPort = process.env.TARGET_PORT || "3001";
+  const targetPort = process.env.PORT || process.env.TARGET_PORT || "3000";
   const baseUrl = `http://localhost:${targetPort}`;
   console.log(`\n======================================================`);
   console.log(`Running SEO & Contract Verification against ${baseUrl}`);

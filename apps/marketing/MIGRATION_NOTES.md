@@ -248,5 +248,33 @@
     5. FAQ accordion defaults (first open, remaining closed) and toggle interactions work seamlessly.
   - All automated interactivity checks pass.
 
+---
+
+## Stage 7 Implementation: Monorepo, Build, and Deploy Wiring
+- **Turborepo Outputs (`turbo.json`):**
+  - Updated `"build"` task outputs to `["dist/**", ".output/**", ".vercel/output/**"]`.
+- **Port Realignment:**
+  - `apps/marketing/vite.config.ts`: Switched dev server port to standard port `3000`.
+  - `apps/marketing/package.json`: Moved Next.js dev server to port `3002` (`dev: "next dev --port 3002"`), and Start dev server to port `3000` (`dev:start: "vite dev --port 3000"`).
+  - Scripts `check:contract` and `test:interactivity` default to port `3000`.
+- **Vercel Deployment Compatibility:**
+  - Verified Nitro preset auto-detection (`NITRO_PRESET=vercel`) produces `.vercel/output` conforming to the Vercel Build Output API specification.
+  - Added `.vercel` to root `.gitignore`.
+- **Vercel Dashboard Setup Instructions:**
+  - **Framework Preset:** `Other` (do not select Next.js once cut over).
+  - **Root Directory:** Repository root (`/`) or `apps/marketing`.
+  - **Build Command (Monorepo Root):** `pnpm --filter @journeyhome/marketing build` (or `turbo run build --filter=@journeyhome/marketing`).
+  - **Output Directory:** `apps/marketing/.output` (or `.vercel/output` when built with Vercel preset).
+  - **Install Command:** `pnpm install`.
+  - **Environment Variables:**
+    - `VITE_API_URL` (e.g. `https://api.journeyhome.ng/api/v1`)
+    - `VITE_APP_URL` (e.g. `https://app.journeyhome.ng`)
+    - `VITE_SITE_ORIGIN` (e.g. `https://journeyhome.ng`)
+- **Whole-Monorepo Build Verification:**
+  - Ran `pnpm build`: builds `@journeyhome/dashboard`, `@journeyhome/admin`, `@journeyhome/marketing` in 2.6s.
+  - Ran `pnpm typecheck`: 4/4 packages pass with 0 errors.
+  - `apps/dashboard`, `apps/admin`, and `packages/ui` remain completely untouched.
+
+
 
 

@@ -1,14 +1,15 @@
 import { chromium } from "playwright";
 
 async function verify() {
-  console.log("Starting Stage 6 Interactivity Verification on port 3001...");
+  const port = process.env.PORT || "3000";
+  console.log(`Starting Stage 6 Interactivity Verification on port ${port}...`);
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
   const page = await context.newPage();
 
   // 1. Test Contact Page Form & Topic Pills
   console.log("1. Testing Contact Form...");
-  await page.goto("http://localhost:3001/contact", { waitUntil: "networkidle" });
+  await page.goto(`http://localhost:${port}/contact`, { waitUntil: "networkidle" });
 
   // Check initial topic button
   const startingPlanBtn = page.getByRole("button", { name: "Starting a plan" });
@@ -66,7 +67,7 @@ async function verify() {
 
   // 2. Test FAQ Accordion
   console.log("2. Testing FAQ Accordion...");
-  await page.goto("http://localhost:3001/faq", { waitUntil: "networkidle" });
+  await page.goto(`http://localhost:${port}/faq`, { waitUntil: "networkidle" });
   
   // First item is open by default (i === 0)
   const firstDetails = page.locator("details").first();
