@@ -22,7 +22,7 @@ Routing is powered by **TanStack Router** using file-based routing under `src/ro
 
 - `src/routes/__root.tsx`: Root route wrapping the application with typed router context (`queryClient`, `auth`), `<ScrollRestoration />`, and `<Outlet />`.
 - `src/routes/login.tsx`: Operations sign-in page with guest guard (redirects authenticated staff to preserved `redirect` target or `/`).
-- `src/routes/_protected/route.tsx`: Protected pathless layout route enforcing authentication in `beforeLoad` and rendering `AdminShell` (with sidebar navigation).
+- `src/routes/_protected/route.tsx`: Protected pathless layout route enforcing authentication in `beforeLoad` and rendering the admin shell layout with sidebar navigation and `<Outlet />`.
 - `src/routes/_protected/`: Authenticated staff pages:
   - `index.tsx`: Operations dashboard overview (`/`)
   - `users/index.tsx`: Customer directory list (`/users`)
@@ -162,7 +162,7 @@ Components use typed hooks:
 ## File Naming Conventions
 
 All source files in `src/` use lowercase kebab-case naming:
-- `components/admin-shell.tsx`
+- `routes/_protected/route.tsx`
 - `components/demo-notice.tsx`
 - `auth/auth-context.tsx`
 - `pages/service-request-detail.tsx`
