@@ -126,24 +126,39 @@
 - Test execution: All 9 smoke tests PASSED (8.9s).
 - Typecheck & Build: `tsc --noEmit` 0 errors, `vite build` 100% green.
 
+## Stage 7: Documentation & Final Wrap-up
+
+- Created `apps/admin/README.md` documenting:
+  - Routing architecture (file-based routing via `@tanstack/react-router` and `@tanstack/router-plugin`).
+  - Route tree structure under `src/routes/` with `_protected` layout.
+  - Authentication guard pattern (`beforeLoad`, RouterContext, `router.invalidate()`).
+  - Reusable Zod search schemas (`redirectSearchSchema` in `src/lib/search-schemas.ts`).
+  - Lowercase kebab-case naming conventions.
+  - Development and Playwright testing workflows.
+- Summary of Architectural Decisions & Trade-offs:
+  - **Pathless Layout (`_protected`):** Enforces authentication once at the layout boundary for all authenticated pages (`/`, `/users`, `/plans`, `/service-requests`, `/payments`, `/audit-log`, `/settings`), redirecting unauthenticated visitors to `/login?redirect=...`.
+  - **Tab-scoped sessions:** Preserved `sessionStorage` (`jh_admin_session`) so admin sessions remain isolated per browser tab as originally architected.
+  - **Automatic code-splitting:** Route chunks are split into individual modules (`autoCodeSplitting: true`), reducing the initial page load bundle by ~48 kB while providing prefetching on hover/intent.
+  - **Type-safe navigation:** All dynamic links (`/users/$id`, `/plans/$id`, `/service-requests/$id`) use strictly-typed `to` and `params={{ id }}` options.
+
 ---
 
 ## ROUTE CONTRACT (Verification Checklist)
 
-| #   | URL                    | Screen / Page          | Layout / Wrapper | Auth Required? | Params / Query Validated | Expected Behavior / Verification                                                                                   |
-| --- | ---------------------- | ---------------------- | ---------------- | -------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| 1   | `/login`               | `Login`                | Root (no shell)  | Guest-only     | `redirect?: string`      | Direct load shows sign-in form; if logged in redirects to `/`; on successful login navigates to `redirect` or `/`. |
-| 2   | `/`                    | `Dashboard`            | `AdminShell`     | Yes            | None                     | Direct load redirects to `/login` if signed out; operations overview, KPI cards, recent review queue items.        |
-| 3   | `/users`               | `Users`                | `AdminShell`     | Yes            | None                     | Direct load redirects to `/login` if signed out; users table, search by name/email, chips filter, pagination.      |
-| 4   | `/users/$id`           | `UserDetail`           | `AdminShell`     | Yes            | `$id: string` (path)     | Direct load redirects to `/login` if signed out; customer overview, linked plans, linked service requests.         |
-| 5   | `/plans`               | `Plans`                | `AdminShell`     | Yes            | None                     | Direct load redirects to `/login` if signed out; plans table, filter by status, search by owner or covered person. |
-| 6   | `/plans/$id`           | `PlanDetail`           | `AdminShell`     | Yes            | `$id: string` (path)     | Direct load redirects to `/login` if signed out; plan details, covered person, status transition dropdown & save.  |
-| 7   | `/service-requests`    | `ServiceRequests`      | `AdminShell`     | Yes            | None                     | Direct load redirects to `/login` if signed out; service requests grouped by status chips, links to detail.        |
-| 8   | `/service-requests/$id`| `ServiceRequestDetail` | `AdminShell`     | Yes            | `$id: string` (path)     | Direct load redirects to `/login` if signed out; request details, document review & verification, status actions.  |
-| 9   | `/payments`            | `Payments`             | `AdminShell`     | Yes            | None                     | Direct load redirects to `/login` if signed out; payment transactions table, monthly KPIs, CSV export.             |
-| 10  | `/audit-log`           | `AuditLog`             | `AdminShell`     | Yes            | None                     | Direct load redirects to `/login` if signed out; audit events stream, filters for admin/action, CSV export.        |
-| 11  | `/settings`            | `Settings`             | `AdminShell`     | Yes            | None                     | Direct load redirects to `/login` if signed out; package prices, notifications, session revoke, admin team (super).|
-| 12  | `/*` (wildcard)         | Fallback / Not Found   | Root             | No             | None                     | Any unrecognized path redirects to `/` (which guards to `/login` if unauthenticated).                              |
+| #   | URL                     | Screen / Page          | Layout / Wrapper | Auth Required? | Params / Query Validated | Status       | Verification Details                                                                                                |
+| --- | ----------------------- | ---------------------- | ---------------- | -------------- | ------------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------- |
+| 1   | `/login`                | `Login`                | Root (no shell)  | Guest-only     | `redirect?: string`      | Verified [x] | Direct load shows sign-in form; redirects to `/` or preserved `redirect` param when authenticated.                   |
+| 2   | `/`                     | `Dashboard`            | `AdminShell`     | Yes            | None                     | Verified [x] | Unauthenticated visits redirect to `/login?redirect=%2F`; authenticated visits load operations overview & KPIs.    |
+| 3   | `/users`                | `Users`                | `AdminShell`     | Yes            | None                     | Verified [x] | Unauthenticated visits redirect to `/login`; authenticated visits load users table, search box, and chips filter.   |
+| 4   | `/users/$id`            | `UserDetail`           | `AdminShell`     | Yes            | `$id: string` (path)     | Verified [x] | Resolves customer by ID; displays name, email, plans, and linked service requests.                                  |
+| 5   | `/plans`                | `Plans`                | `AdminShell`     | Yes            | None                     | Verified [x] | Unauthenticated visits redirect to `/login`; authenticated visits load plans table, status filter chips, and search.|
+| 6   | `/plans/$id`            | `PlanDetail`           | `AdminShell`     | Yes            | `$id: string` (path)     | Verified [x] | Resolves plan by ID; displays plan details, covered person, and status transition select form.                      |
+| 7   | `/service-requests`     | `ServiceRequests`      | `AdminShell`     | Yes            | None                     | Verified [x] | Unauthenticated visits redirect to `/login`; authenticated visits load requests grouped by status with chips.       |
+| 8   | `/service-requests/$id` | `ServiceRequestDetail` | `AdminShell`     | Yes            | `$id: string` (path)     | Verified [x] | Resolves request by ID; shows request details, documents review actions, and workflow decision buttons.             |
+| 9   | `/payments`             | `Payments`             | `AdminShell`     | Yes            | None                     | Verified [x] | Unauthenticated visits redirect to `/login`; authenticated visits load payments table, KPIs, and CSV export.        |
+| 10  | `/audit-log`            | `AuditLog`             | `AdminShell`     | Yes            | None                     | Verified [x] | Unauthenticated visits redirect to `/login`; authenticated visits load audit stream, filters, and CSV export.      |
+| 11  | `/settings`             | `Settings`             | `AdminShell`     | Yes            | None                     | Verified [x] | Unauthenticated visits redirect to `/login`; authenticated visits load package pricing, prefs, and admin team.      |
+| 12  | `/*` (wildcard)          | Fallback / Not Found   | Root             | No             | None                     | Verified [x] | Unrecognized URLs redirect to `/` (which redirects unauthenticated visitors to `/login`).                           |
 
 ---
 
