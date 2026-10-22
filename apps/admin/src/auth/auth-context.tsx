@@ -1,6 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { api, configureApi } from "../lib/api";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { api, configureApi } from "@/lib/api";
 
 export interface User {
   id: string;
@@ -55,16 +62,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [queryClient]);
 
   useEffect(() => {
-    configureApi({ getToken: () => session?.token ?? null, onUnauthorized: logout });
+    configureApi({
+      getToken: () => session?.token ?? null,
+      onUnauthorized: logout,
+    });
   }, [session, logout]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       user: session?.user ?? null,
-      isSuperAdmin: !!session && (session.user.isSuperAdmin || session.user.role === "super_admin"),
+      isSuperAdmin:
+        !!session &&
+        (session.user.isSuperAdmin || session.user.role === "super_admin"),
       logout,
       login: async (email, password) => {
-        const result = await api<Session>("/auth/admin/login", { body: { email, password } });
+        const result = await api<Session>("/auth/admin/login", {
+          body: { email, password },
+        });
         writeSession(result);
         setSession(result);
       },

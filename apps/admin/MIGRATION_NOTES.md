@@ -9,6 +9,36 @@
 - SPA rewrite: `vercel.json` rewrites `/(.*)` -> `/index.html` (maintained unchanged)
 - Sessions: `sessionStorage` key `jh_admin_session` (tab-scoped, no `localStorage`)
 
+## Stage 1: Install and Configure
+
+- Installed `@tanstack/react-router` (^1.170.45) in `apps/admin`.
+- Installed devDependencies `@tanstack/router-plugin` (^1.168.47) and `@tanstack/react-router-devtools` (^1.167.2).
+- Configured `apps/admin/vite.config.ts`:
+  - Added `tanstackRouter({ target: 'react', autoCodeSplitting: true })` BEFORE `@vitejs/plugin-react` and `@tailwindcss/vite`.
+  - Added `@/` alias pointing to `src`.
+- Configured `apps/admin/tsconfig.json`:
+  - Added `"paths": { "@/*": ["./src/*"] }`.
+- Normalized all existing filenames in `apps/admin/src` to lowercase kebab-case:
+  - `App.tsx` -> `app.tsx`
+  - `AdminShell.tsx` -> `admin-shell.tsx`
+  - `DemoNotice.tsx` -> `demo-notice.tsx`
+  - `RequireAuth.tsx` -> `require-auth.tsx`
+  - `AuthContext.tsx` -> `auth-context.tsx`
+  - `AuditLog.tsx` -> `audit-log.tsx`
+  - `Dashboard.tsx` -> `dashboard.tsx`
+  - `Login.tsx` -> `login.tsx`
+  - `Payments.tsx` -> `payments.tsx`
+  - `PlanDetail.tsx` -> `plan-detail.tsx`
+  - `Plans.tsx` -> `plans.tsx`
+  - `ServiceRequestDetail.tsx` -> `service-request-detail.tsx`
+  - `ServiceRequests.tsx` -> `service-requests.tsx`
+  - `Settings.tsx` -> `settings.tsx`
+  - `UserDetail.tsx` -> `user-detail.tsx`
+  - `Users.tsx` -> `users.tsx`
+- Converted all internal relative imports in `apps/admin/src` to `@/...`.
+- Created `apps/admin/src/routes` directory for TanStack Router generator.
+- Verified: `tsc --noEmit` and `vite build` pass with 0 errors.
+
 ---
 
 ## ROUTE CONTRACT (Verification Checklist)

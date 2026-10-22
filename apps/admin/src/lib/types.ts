@@ -1,6 +1,16 @@
 export type PlanStatus =
-  | "Pending" | "Active" | "Payment_Due" | "Overdue" | "Paused" | "Service_Request" | "Under_Review"
-  | "Approved" | "Service_Scheduled" | "Completed" | "Cancelled" | "Expired";
+  | "Pending"
+  | "Active"
+  | "Payment_Due"
+  | "Overdue"
+  | "Paused"
+  | "Service_Request"
+  | "Under_Review"
+  | "Approved"
+  | "Service_Scheduled"
+  | "Completed"
+  | "Cancelled"
+  | "Expired";
 
 export interface CoveredPerson {
   fullName: string;
@@ -41,7 +51,14 @@ export interface Plan {
   createdAt: string;
 }
 
-export type RequestStatus = "Submitted" | "Under_Review" | "More_Info_Required" | "Docs_Verified" | "Approved" | "Rejected" | "Cancelled";
+export type RequestStatus =
+  | "Submitted"
+  | "Under_Review"
+  | "More_Info_Required"
+  | "Docs_Verified"
+  | "Approved"
+  | "Rejected"
+  | "Cancelled";
 
 export interface ServiceRequest {
   _id: string;
@@ -83,7 +100,13 @@ export interface Package {
   isActive: boolean;
 }
 
-export type PaymentStatus = "Pending" | "Processing" | "Successful" | "Failed" | "Refunded" | "Cancelled";
+export type PaymentStatus =
+  | "Pending"
+  | "Processing"
+  | "Successful"
+  | "Failed"
+  | "Refunded"
+  | "Cancelled";
 
 export interface AdminPayment {
   _id: string;
@@ -116,5 +139,9 @@ export interface AdminMe {
   id: string;
   name: string;
   email: string;
-  preferences: { newServiceRequest: boolean; paymentFailed: boolean; weeklyDigest: boolean };
+  preferences: {
+    newServiceRequest: boolean;
+    paymentFailed: boolean;
+    weeklyDigest: boolean;
+  };
 }

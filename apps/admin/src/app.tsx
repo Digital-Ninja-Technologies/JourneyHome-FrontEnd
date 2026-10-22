@@ -1,17 +1,17 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import { AdminShell } from "./components/AdminShell";
-import { GuestOnly, RequireAuth } from "./components/RequireAuth";
-import AuditLog from "./pages/AuditLog";
-import Dashboard from "./pages/Dashboard";
-import Login from "./pages/Login";
-import Payments from "./pages/Payments";
-import PlanDetail from "./pages/PlanDetail";
-import Plans from "./pages/Plans";
-import ServiceRequestDetail from "./pages/ServiceRequestDetail";
-import ServiceRequests from "./pages/ServiceRequests";
-import Settings from "./pages/Settings";
-import UserDetail from "./pages/UserDetail";
-import Users from "./pages/Users";
+import { AdminShell } from "@/components/admin-shell";
+import { GuestOnly, RequireAuth } from "@/components/require-auth";
+import AuditLog from "@/pages/audit-log";
+import Dashboard from "@/pages/dashboard";
+import Login from "@/pages/login";
+import Payments from "@/pages/payments";
+import PlanDetail from "@/pages/plan-detail";
+import Plans from "@/pages/plans";
+import ServiceRequestDetail from "@/pages/service-request-detail";
+import ServiceRequests from "@/pages/service-requests";
+import Settings from "@/pages/settings";
+import UserDetail from "@/pages/user-detail";
+import Users from "@/pages/users";
 
 export default function App() {
   return (
@@ -27,7 +27,10 @@ export default function App() {
           <Route path="plans" element={<Plans />} />
           <Route path="plans/:id" element={<PlanDetail />} />
           <Route path="service-requests" element={<ServiceRequests />} />
-          <Route path="service-requests/:id" element={<ServiceRequestDetail />} />
+          <Route
+            path="service-requests/:id"
+            element={<ServiceRequestDetail />}
+          />
           <Route path="payments" element={<Payments />} />
           <Route path="audit-log" element={<AuditLog />} />
           <Route path="settings" element={<Settings />} />
