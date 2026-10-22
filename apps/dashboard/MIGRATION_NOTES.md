@@ -114,36 +114,43 @@
 - Test execution: All 8 smoke tests PASSED (19.2s).
 - Typecheck & Build: `tsc --noEmit` 0 errors, `vite build` 100% green.
 
-
-
-
-
-
+## Stage 7: Documentation & Final Wrap-up
+- Created `apps/dashboard/README.md` documenting:
+  - Routing architecture (file-based routing via `@tanstack/react-router` and `@tanstack/router-plugin`).
+  - Route tree generation and conventions.
+  - Authentication guard pattern (`beforeLoad`, RouterContext, `router.invalidate()`).
+  - Search parameters validation (`validateSearch`, type safety).
+  - Navigation patterns (`Link`, `useNavigate`).
+  - Development and Playwright testing commands.
+- Summary of Trade-offs and Intentional Deviations:
+  - **Automatic code-splitting:** Route components are split into lazy chunks (`autoCodeSplitting: true`), significantly reducing initial page load bundle size while preserving seamless client-side navigation and preloading on intent.
+  - **Search params coercion:** To guard against query parameter serialization differences between strings and unquoted numeric primitives (e.g. `?new=1`, `?card_added=1`), `validateSearch` normalizes non-null values with `String(val)`.
+  - **Dynamic redirect target casting:** Where arbitrary redirect URL strings are returned post-login, type assertion `to: redirectUrl as any` is used to permit dynamic string targets while maintaining strict typing across the rest of the application.
 
 ## Stage 0: Inventory & Route Contract
 
-### 1. Routes & Nesting Structure
-| Old Path | Layout / Wrapper | Component | Guard / Condition | Search Params / Dynamic Params |
-|---|---|---|---|---|
-| `/login` | `<GuestOnly />` | `Login` | Guest-only (redirects to `/app` if logged in) | `redirect` (or location state `from`) |
-| `/forgot-password` | `<GuestOnly />` | `ForgotPassword` | Guest-only (redirects to `/app` if logged in) | None |
-| `/reset-password` | `<GuestOnly />` | `ResetPassword` | Guest-only (redirects to `/app` if logged in) | `token?: string` |
-| `/signup` | Self-guarded | `Signup` | Guest-only (redirects to `/app` if logged in and not busy) | None |
-| `/signup/verify` | `<RequireAuth />` | `VerifyCode` | Requires Auth | None |
-| `/signup/plan` | `<RequireAuth />` | `OnboardingPlan` | Requires Auth | None |
-| `/signup/payment` | `<RequireAuth />` | `OnboardingPayment` | Requires Auth | `plan?: string` |
-| `/welcome` | `<RequireAuth />` | `Welcome` | Requires Auth | `plan?: string` |
-| `/app` | `<RequireAuth />` + `<AppShell />` | `Dashboard` (index) | Requires Auth | None |
-| `/app/plans` | `<RequireAuth />` + `<AppShell />` | `Plans` | Requires Auth | `new?: string` (`"1"` opens dialog) |
-| `/app/plans/:id` | `<RequireAuth />` + `<AppShell />` | `PlanDetail` | Requires Auth | `$id` (path param) |
-| `/app/service-requests` | `<RequireAuth />` + `<AppShell />` | `ServiceRequests` | Requires Auth | None |
-| `/app/service-requests/new` | `<RequireAuth />` + `<AppShell />` | `RequestService` | Requires Auth | `plan?: string` |
-| `/app/notifications` | `<RequireAuth />` + `<AppShell />` | `Notifications` | Requires Auth | None |
-| `/app/payments` | `<RequireAuth />` + `<AppShell />` | `Payments` | Requires Auth | `plan?: string` |
-| `/app/payments/new` | `<RequireAuth />` + `<AppShell />` | `MakePayment` | Requires Auth | `plan?: string` |
-| `/app/payments/callback` | `<RequireAuth />` + `<AppShell />` | `PaymentCallback` | Requires Auth | `reference?: string`, `trxref?: string` |
-| `/app/profile` | `<RequireAuth />` + `<AppShell />` | `Profile` | Requires Auth | `card_added?: string` |
-| `*` (wildcard) | Root | Redirect | N/A | Redirects to `/app` (replace) |
+### 1. Routes & Nesting Structure (Verified)
+| Path | Layout / Wrapper | Component | Guard / Condition | Search Params / Dynamic Params | Status |
+|---|---|---|---|---|---|
+| `/login` | Root | `Login` | Guest-only (redirects to `/app` or `redirect` param) | `redirect?: string` | Verified [x] |
+| `/forgot-password` | Root | `ForgotPassword` | Guest-only (redirects to `/app` if logged in) | None | Verified [x] |
+| `/reset-password` | Root | `ResetPassword` | Guest-only (redirects to `/app` if logged in) | `token?: string` | Verified [x] |
+| `/signup` | Root | `Signup` | Guest-only (redirects to `/app` if logged in) | None | Verified [x] |
+| `/signup/verify` | Root | `VerifyCode` | Requires Auth | None | Verified [x] |
+| `/signup/plan` | Root | `OnboardingPlan` | Requires Auth | None | Verified [x] |
+| `/signup/payment` | Root | `OnboardingPayment` | Requires Auth | `plan?: string` | Verified [x] |
+| `/welcome` | Root | `Welcome` | Requires Auth | `plan?: string` | Verified [x] |
+| `/app` | `AppShell` | `Dashboard` (index) | Requires Auth | None | Verified [x] |
+| `/app/plans` | `AppShell` | `Plans` | Requires Auth | `new?: string` (`"1"` opens dialog) | Verified [x] |
+| `/app/plans/$id` | `AppShell` | `PlanDetail` | Requires Auth | `$id` (path param) | Verified [x] |
+| `/app/service-requests` | `AppShell` | `ServiceRequests` | Requires Auth | None | Verified [x] |
+| `/app/service-requests/new` | `AppShell` | `RequestService` | Requires Auth | `plan?: string` | Verified [x] |
+| `/app/notifications` | `AppShell` | `Notifications` | Requires Auth | None | Verified [x] |
+| `/app/payments` | `AppShell` | `Payments` | Requires Auth | `plan?: string` | Verified [x] |
+| `/app/payments/new` | `AppShell` | `MakePayment` | Requires Auth | `plan?: string` | Verified [x] |
+| `/app/payments/callback` | `AppShell` | `PaymentCallback` | Requires Auth | `reference?: string`, `trxref?: string` | Verified [x] |
+| `/app/profile` | `AppShell` | `Profile` | Requires Auth | `card_added?: string` | Verified [x] |
+| `*` (wildcard) | Root | Redirect | N/A | Redirects to `/app` | Verified [x] | |
 
 ### 2. Route Guards & Auth Context
 - Storage mechanism: `jh_session` key in `localStorage` (if remember is checked) or `sessionStorage`.
