@@ -5,22 +5,32 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
+    "dev:start": "vite dev --port 3001",
+    "build:start": "vite build",
+    "start:start": "node .output/server/index.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@journeyhome/ui": "workspace:*",
+    "@tanstack/react-router": "^1.170.45",
+    "@tanstack/react-start": "^1.169.3",
     "lucide-react": "^1.60.0",
     "next": "^16.4.2",
+    "nitro": "3.0.260903-beta",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
     "postcss": "^8.5.31",
     "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2"
-  }
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  },
+  "type": "module"
 }
