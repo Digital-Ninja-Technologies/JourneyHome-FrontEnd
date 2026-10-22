@@ -18,7 +18,7 @@ export const router = createRouter({
     auth: {
       user: null,
       isSuperAdmin: false,
-      logout: void,
+      logout: () => {},
     },
   },
   defaultPreload: "intent",

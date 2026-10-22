@@ -1,7 +1,7 @@
 import { Select } from "@journeyhome/ui/components/select";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@tanstack/react-router";
 import { DemoNotice } from "@/components/demo-notice";
 import {
   PageHeader,
@@ -225,7 +225,11 @@ export default function Payments() {
               <tr key={p._id} className="border-t border-border">
                 <td className="px-3 py-4 font-bold">
                   {plans.has(p.plan) || dir.byId.has(p.owner) ? (
-                    <Link to={`/users/${p.owner}`} className="hover:underline">
+                    <Link
+                      to="/users/$id"
+                      params={{ id: p.owner }}
+                      className="hover:underline"
+                    >
                       {ownerOf(p)}
                     </Link>
                   ) : (
@@ -237,7 +241,11 @@ export default function Payments() {
                 </td>
                 <td className="px-3 py-4 text-ink-soft">
                   {plans.has(p.plan) ? (
-                    <Link to={`/plans/${p.plan}`} className="hover:underline">
+                    <Link
+                      to="/plans/$id"
+                      params={{ id: p.plan }}
+                      className="hover:underline"
+                    >
                       {planOf(p)}
                     </Link>
                   ) : (

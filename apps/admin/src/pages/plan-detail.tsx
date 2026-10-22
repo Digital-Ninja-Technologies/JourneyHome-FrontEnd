@@ -1,8 +1,8 @@
 import { Button } from "@journeyhome/ui/components/button";
 import { Select } from "@journeyhome/ui/components/select";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
 import {
   Card,
   CardTitle,
@@ -24,7 +24,7 @@ import { PLAN_STATUS, PLAN_TRANSITIONS } from "@/lib/status";
 import type { PlanStatus } from "@/lib/types";
 
 export default function PlanDetail() {
-  const { id } = useParams();
+  const { id } = useParams({ from: "/_protected/plans/$id" });
   const planQ = usePlan(id);
   const dir = useDirectory();
   const queryClient = useQueryClient();
@@ -79,7 +79,11 @@ export default function PlanDetail() {
             <CardTitle className="mb-5">Plan details</CardTitle>
             <div className="grid gap-6 sm:grid-cols-3">
               <Field label="Plan owner">
-                <Link to={`/users/${plan.owner}`} className="hover:underline">
+                <Link
+                  to="/users/$id"
+                  params={{ id: plan.owner }}
+                  className="hover:underline"
+                >
                   {dir.nameOf(plan.owner)}
                 </Link>
               </Field>

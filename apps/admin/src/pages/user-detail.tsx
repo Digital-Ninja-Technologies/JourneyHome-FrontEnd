@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "@tanstack/react-router";
 import { Card, CardTitle, PageHeader, Pill, QueryError } from "@/components/ui";
 import {
   capitalise,
@@ -10,7 +10,7 @@ import { useAllPlans, useAllRequests, useCustomers } from "@/lib/queries";
 import { PLAN_STATUS, REQUEST_STATUS } from "@/lib/status";
 
 export default function UserDetail() {
-  const { id } = useParams();
+  const { id } = useParams({ from: "/_protected/users/$id" });
   const customersQ = useCustomers();
   const plansQ = useAllPlans();
   const reqQ = useAllRequests();
@@ -76,7 +76,8 @@ export default function UserDetail() {
           return (
             <Link
               key={p._id}
-              to={`/plans/${p._id}`}
+              to="/plans/$id"
+              params={{ id: p._id }}
               className="flex items-center justify-between gap-4 border-t border-border py-4"
             >
               <div>
@@ -111,7 +112,8 @@ export default function UserDetail() {
           return (
             <Link
               key={r._id}
-              to={`/service-requests/${r._id}`}
+              to="/service-requests/$id"
+              params={{ id: r._id }}
               className="flex items-center justify-between gap-4 border-t border-border py-4"
             >
               <div>

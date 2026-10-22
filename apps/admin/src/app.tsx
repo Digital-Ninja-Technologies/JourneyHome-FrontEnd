@@ -8,7 +8,7 @@ export default function App() {
 
   useEffect(() => {
     router.invalidate();
-  }, [user]);
+  }, []);
 
   return (
     <RouterProvider

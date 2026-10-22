@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import ServiceRequestDetail from "@/pages/service-request-detail";
 
-export const Route = createFileRoute("/_authenticated/service-requests/$id")({
+export const Route = createFileRoute("/_protected/service-requests/$id")({
   component: ServiceRequestDetail,
 });

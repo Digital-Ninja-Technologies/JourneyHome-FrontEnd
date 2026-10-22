@@ -1,5 +1,5 @@
 import { cn } from "@journeyhome/ui/lib/utils";
-import { Link } from "react-router-dom";
+import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/auth/auth-context";
 import { Pill, QueryError } from "@/components/ui";
 import {
@@ -226,7 +226,8 @@ export default function Dashboard() {
               return (
                 <Link
                   key={r._id}
-                  to={`/service-requests/${r._id}`}
+                  to="/service-requests/$id"
+                  params={{ id: r._id }}
                   className="flex items-center justify-between gap-4 border-t border-border py-4"
                 >
                   <div>

@@ -1,4 +1,5 @@
 import { cn } from "@journeyhome/ui/lib/utils";
+import { Link, Outlet } from "@tanstack/react-router";
 import {
   Camera,
   CheckSquare,
@@ -8,7 +9,6 @@ import {
   Settings,
   Users,
 } from "lucide-react";
-import { Link, NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "@/auth/auth-context";
 import { initials } from "@/lib/format";
 
@@ -60,18 +60,13 @@ export function AdminShell() {
         </Link>
         <nav aria-label="Main" className="flex flex-col gap-1">
           {NAV.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
+            <Link
               key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                cn(
-                  "flex h-10 items-center gap-3 rounded-xl px-3.5 text-sm font-semibold",
-                  isActive
-                    ? "bg-[#2a2216] text-canvas"
-                    : "text-canvas/70 hover:text-canvas",
-                )
-              }
+              to={to as any}
+              activeOptions={{ exact: end }}
+              activeProps={{ className: "bg-[#2a2216] text-canvas" }}
+              inactiveProps={{ className: "text-canvas/70 hover:text-canvas" }}
+              className="flex h-10 items-center gap-3 rounded-xl px-3.5 text-sm font-semibold"
             >
               {({ isActive }) => (
                 <>
@@ -81,7 +76,7 @@ export function AdminShell() {
                   {label}
                 </>
               )}
-            </NavLink>
+            </Link>
           ))}
         </nav>
         <div className="mt-auto flex items-center gap-3 border-t border-canvas/10 pt-4">

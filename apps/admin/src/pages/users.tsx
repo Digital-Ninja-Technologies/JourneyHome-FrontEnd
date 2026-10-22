@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   Chips,
   PageHeader,
@@ -132,7 +132,8 @@ export default function Users() {
                 </td>
                 <td className="px-3 py-4">
                   <Link
-                    to={`/users/${c._id}`}
+                    to="/users/$id"
+                    params={{ id: c._id }}
                     className="font-semibold text-link underline"
                   >
                     View

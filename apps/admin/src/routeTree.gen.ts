@@ -10,26 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SplatRouteImport } from './routes/$'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as ProtectedRouteRouteImport } from './routes/_protected/route'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
-import { Route as AuthenticatedAuditLogRouteImport } from './routes/_authenticated/audit-log'
-import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
-import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedPlansIndexRouteImport } from './routes/_authenticated/plans/index'
-import { Route as AuthenticatedPlansIdRouteImport } from './routes/_authenticated/plans/$id'
-import { Route as AuthenticatedServiceRequestsIndexRouteImport } from './routes/_authenticated/service-requests/index'
-import { Route as AuthenticatedServiceRequestsIdRouteImport } from './routes/_authenticated/service-requests/$id'
-import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
-import { Route as AuthenticatedUsersIdRouteImport } from './routes/_authenticated/users/$id'
+import { Route as ProtectedIndexRouteImport } from './routes/_protected/index'
+import { Route as ProtectedAuditLogRouteImport } from './routes/_protected/audit-log'
+import { Route as ProtectedPaymentsRouteImport } from './routes/_protected/payments'
+import { Route as ProtectedSettingsRouteImport } from './routes/_protected/settings'
+import { Route as ProtectedPlansIndexRouteImport } from './routes/_protected/plans/index'
+import { Route as ProtectedPlansIdRouteImport } from './routes/_protected/plans/$id'
+import { Route as ProtectedServiceRequestsIndexRouteImport } from './routes/_protected/service-requests/index'
+import { Route as ProtectedServiceRequestsIdRouteImport } from './routes/_protected/service-requests/$id'
+import { Route as ProtectedUsersIndexRouteImport } from './routes/_protected/users/index'
+import { Route as ProtectedUsersIdRouteImport } from './routes/_protected/users/$id'
 
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
   path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+const ProtectedRouteRoute = ProtectedRouteRouteImport.update({
+  id: '/_protected',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -37,108 +37,108 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+const ProtectedIndexRoute = ProtectedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => ProtectedRouteRoute,
 } as any)
-const AuthenticatedAuditLogRoute = AuthenticatedAuditLogRouteImport.update({
+const ProtectedAuditLogRoute = ProtectedAuditLogRouteImport.update({
   id: '/audit-log',
   path: '/audit-log',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => ProtectedRouteRoute,
 } as any)
-const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
+const ProtectedPaymentsRoute = ProtectedPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => ProtectedRouteRoute,
 } as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+const ProtectedSettingsRoute = ProtectedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => ProtectedRouteRoute,
 } as any)
-const AuthenticatedPlansIndexRoute = AuthenticatedPlansIndexRouteImport.update({
+const ProtectedPlansIndexRoute = ProtectedPlansIndexRouteImport.update({
   id: '/plans/',
   path: '/plans/',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => ProtectedRouteRoute,
 } as any)
-const AuthenticatedPlansIdRoute = AuthenticatedPlansIdRouteImport.update({
+const ProtectedPlansIdRoute = ProtectedPlansIdRouteImport.update({
   id: '/plans/$id',
   path: '/plans/$id',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => ProtectedRouteRoute,
 } as any)
-const AuthenticatedServiceRequestsIndexRoute =
-  AuthenticatedServiceRequestsIndexRouteImport.update({
+const ProtectedServiceRequestsIndexRoute =
+  ProtectedServiceRequestsIndexRouteImport.update({
     id: '/service-requests/',
     path: '/service-requests/',
-    getParentRoute: () => AuthenticatedRoute,
+    getParentRoute: () => ProtectedRouteRoute,
   } as any)
-const AuthenticatedServiceRequestsIdRoute =
-  AuthenticatedServiceRequestsIdRouteImport.update({
+const ProtectedServiceRequestsIdRoute =
+  ProtectedServiceRequestsIdRouteImport.update({
     id: '/service-requests/$id',
     path: '/service-requests/$id',
-    getParentRoute: () => AuthenticatedRoute,
+    getParentRoute: () => ProtectedRouteRoute,
   } as any)
-const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
+const ProtectedUsersIndexRoute = ProtectedUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => ProtectedRouteRoute,
 } as any)
-const AuthenticatedUsersIdRoute = AuthenticatedUsersIdRouteImport.update({
+const ProtectedUsersIdRoute = ProtectedUsersIdRouteImport.update({
   id: '/users/$id',
   path: '/users/$id',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => ProtectedRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof ProtectedIndexRoute
   '/$': typeof SplatRoute
-  '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
-  '/audit-log': typeof AuthenticatedAuditLogRoute
-  '/payments': typeof AuthenticatedPaymentsRoute
-  '/settings': typeof AuthenticatedSettingsRoute
-  '/plans/$id': typeof AuthenticatedPlansIdRoute
-  '/service-requests/$id': typeof AuthenticatedServiceRequestsIdRoute
-  '/users/$id': typeof AuthenticatedUsersIdRoute
-  '/plans/': typeof AuthenticatedPlansIndexRoute
-  '/service-requests/': typeof AuthenticatedServiceRequestsIndexRoute
-  '/users/': typeof AuthenticatedUsersIndexRoute
+  '/audit-log': typeof ProtectedAuditLogRoute
+  '/payments': typeof ProtectedPaymentsRoute
+  '/settings': typeof ProtectedSettingsRoute
+  '/plans/$id': typeof ProtectedPlansIdRoute
+  '/service-requests/$id': typeof ProtectedServiceRequestsIdRoute
+  '/users/$id': typeof ProtectedUsersIdRoute
+  '/plans/': typeof ProtectedPlansIndexRoute
+  '/service-requests/': typeof ProtectedServiceRequestsIndexRoute
+  '/users/': typeof ProtectedUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/$': typeof SplatRoute
   '/login': typeof LoginRoute
-  '/audit-log': typeof AuthenticatedAuditLogRoute
-  '/payments': typeof AuthenticatedPaymentsRoute
-  '/settings': typeof AuthenticatedSettingsRoute
-  '/': typeof AuthenticatedIndexRoute
-  '/plans/$id': typeof AuthenticatedPlansIdRoute
-  '/service-requests/$id': typeof AuthenticatedServiceRequestsIdRoute
-  '/users/$id': typeof AuthenticatedUsersIdRoute
-  '/plans': typeof AuthenticatedPlansIndexRoute
-  '/service-requests': typeof AuthenticatedServiceRequestsIndexRoute
-  '/users': typeof AuthenticatedUsersIndexRoute
+  '/audit-log': typeof ProtectedAuditLogRoute
+  '/payments': typeof ProtectedPaymentsRoute
+  '/settings': typeof ProtectedSettingsRoute
+  '/': typeof ProtectedIndexRoute
+  '/plans/$id': typeof ProtectedPlansIdRoute
+  '/service-requests/$id': typeof ProtectedServiceRequestsIdRoute
+  '/users/$id': typeof ProtectedUsersIdRoute
+  '/plans': typeof ProtectedPlansIndexRoute
+  '/service-requests': typeof ProtectedServiceRequestsIndexRoute
+  '/users': typeof ProtectedUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/_protected': typeof ProtectedRouteRouteWithChildren
   '/$': typeof SplatRoute
-  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
-  '/_authenticated/audit-log': typeof AuthenticatedAuditLogRoute
-  '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
-  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/plans/$id': typeof AuthenticatedPlansIdRoute
-  '/_authenticated/service-requests/$id': typeof AuthenticatedServiceRequestsIdRoute
-  '/_authenticated/users/$id': typeof AuthenticatedUsersIdRoute
-  '/_authenticated/plans/': typeof AuthenticatedPlansIndexRoute
-  '/_authenticated/service-requests/': typeof AuthenticatedServiceRequestsIndexRoute
-  '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
+  '/_protected/audit-log': typeof ProtectedAuditLogRoute
+  '/_protected/payments': typeof ProtectedPaymentsRoute
+  '/_protected/settings': typeof ProtectedSettingsRoute
+  '/_protected/': typeof ProtectedIndexRoute
+  '/_protected/plans/$id': typeof ProtectedPlansIdRoute
+  '/_protected/service-requests/$id': typeof ProtectedServiceRequestsIdRoute
+  '/_protected/users/$id': typeof ProtectedUsersIdRoute
+  '/_protected/plans/': typeof ProtectedPlansIndexRoute
+  '/_protected/service-requests/': typeof ProtectedServiceRequestsIndexRoute
+  '/_protected/users/': typeof ProtectedUsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/$'
     | '/'
+    | '/$'
     | '/login'
     | '/audit-log'
     | '/payments'
@@ -165,24 +165,24 @@ export interface FileRouteTypes {
     | '/users'
   id:
     | '__root__'
+    | '/_protected'
     | '/$'
-    | '/_authenticated'
     | '/login'
-    | '/_authenticated/audit-log'
-    | '/_authenticated/payments'
-    | '/_authenticated/settings'
-    | '/_authenticated/'
-    | '/_authenticated/plans/$id'
-    | '/_authenticated/service-requests/$id'
-    | '/_authenticated/users/$id'
-    | '/_authenticated/plans/'
-    | '/_authenticated/service-requests/'
-    | '/_authenticated/users/'
+    | '/_protected/audit-log'
+    | '/_protected/payments'
+    | '/_protected/settings'
+    | '/_protected/'
+    | '/_protected/plans/$id'
+    | '/_protected/service-requests/$id'
+    | '/_protected/users/$id'
+    | '/_protected/plans/'
+    | '/_protected/service-requests/'
+    | '/_protected/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  ProtectedRouteRoute: typeof ProtectedRouteRouteWithChildren
   SplatRoute: typeof SplatRoute
-  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
 }
 
@@ -195,11 +195,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
+    '/_protected': {
+      id: '/_protected'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteImport
+      preLoaderRoute: typeof ProtectedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -209,113 +209,112 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/': {
-      id: '/_authenticated/'
+    '/_protected/': {
+      id: '/_protected/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      preLoaderRoute: typeof ProtectedIndexRouteImport
+      parentRoute: typeof ProtectedRouteRoute
     }
-    '/_authenticated/audit-log': {
-      id: '/_authenticated/audit-log'
+    '/_protected/audit-log': {
+      id: '/_protected/audit-log'
       path: '/audit-log'
       fullPath: '/audit-log'
-      preLoaderRoute: typeof AuthenticatedAuditLogRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      preLoaderRoute: typeof ProtectedAuditLogRouteImport
+      parentRoute: typeof ProtectedRouteRoute
     }
-    '/_authenticated/payments': {
-      id: '/_authenticated/payments'
+    '/_protected/payments': {
+      id: '/_protected/payments'
       path: '/payments'
       fullPath: '/payments'
-      preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      preLoaderRoute: typeof ProtectedPaymentsRouteImport
+      parentRoute: typeof ProtectedRouteRoute
     }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
+    '/_protected/settings': {
+      id: '/_protected/settings'
       path: '/settings'
       fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      preLoaderRoute: typeof ProtectedSettingsRouteImport
+      parentRoute: typeof ProtectedRouteRoute
     }
-    '/_authenticated/plans/': {
-      id: '/_authenticated/plans/'
+    '/_protected/plans/': {
+      id: '/_protected/plans/'
       path: '/plans'
       fullPath: '/plans/'
-      preLoaderRoute: typeof AuthenticatedPlansIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      preLoaderRoute: typeof ProtectedPlansIndexRouteImport
+      parentRoute: typeof ProtectedRouteRoute
     }
-    '/_authenticated/plans/$id': {
-      id: '/_authenticated/plans/$id'
+    '/_protected/plans/$id': {
+      id: '/_protected/plans/$id'
       path: '/plans/$id'
       fullPath: '/plans/$id'
-      preLoaderRoute: typeof AuthenticatedPlansIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      preLoaderRoute: typeof ProtectedPlansIdRouteImport
+      parentRoute: typeof ProtectedRouteRoute
     }
-    '/_authenticated/service-requests/': {
-      id: '/_authenticated/service-requests/'
+    '/_protected/service-requests/': {
+      id: '/_protected/service-requests/'
       path: '/service-requests'
       fullPath: '/service-requests/'
-      preLoaderRoute: typeof AuthenticatedServiceRequestsIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      preLoaderRoute: typeof ProtectedServiceRequestsIndexRouteImport
+      parentRoute: typeof ProtectedRouteRoute
     }
-    '/_authenticated/service-requests/$id': {
-      id: '/_authenticated/service-requests/$id'
+    '/_protected/service-requests/$id': {
+      id: '/_protected/service-requests/$id'
       path: '/service-requests/$id'
       fullPath: '/service-requests/$id'
-      preLoaderRoute: typeof AuthenticatedServiceRequestsIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      preLoaderRoute: typeof ProtectedServiceRequestsIdRouteImport
+      parentRoute: typeof ProtectedRouteRoute
     }
-    '/_authenticated/users/': {
-      id: '/_authenticated/users/'
+    '/_protected/users/': {
+      id: '/_protected/users/'
       path: '/users'
       fullPath: '/users/'
-      preLoaderRoute: typeof AuthenticatedUsersIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      preLoaderRoute: typeof ProtectedUsersIndexRouteImport
+      parentRoute: typeof ProtectedRouteRoute
     }
-    '/_authenticated/users/$id': {
-      id: '/_authenticated/users/$id'
+    '/_protected/users/$id': {
+      id: '/_protected/users/$id'
       path: '/users/$id'
       fullPath: '/users/$id'
-      preLoaderRoute: typeof AuthenticatedUsersIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      preLoaderRoute: typeof ProtectedUsersIdRouteImport
+      parentRoute: typeof ProtectedRouteRoute
     }
   }
 }
 
-interface AuthenticatedRouteChildren {
-  AuthenticatedAuditLogRoute: typeof AuthenticatedAuditLogRoute
-  AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
-  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-  AuthenticatedPlansIdRoute: typeof AuthenticatedPlansIdRoute
-  AuthenticatedServiceRequestsIdRoute: typeof AuthenticatedServiceRequestsIdRoute
-  AuthenticatedUsersIdRoute: typeof AuthenticatedUsersIdRoute
-  AuthenticatedPlansIndexRoute: typeof AuthenticatedPlansIndexRoute
-  AuthenticatedServiceRequestsIndexRoute: typeof AuthenticatedServiceRequestsIndexRoute
-  AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
+interface ProtectedRouteRouteChildren {
+  ProtectedAuditLogRoute: typeof ProtectedAuditLogRoute
+  ProtectedPaymentsRoute: typeof ProtectedPaymentsRoute
+  ProtectedSettingsRoute: typeof ProtectedSettingsRoute
+  ProtectedIndexRoute: typeof ProtectedIndexRoute
+  ProtectedPlansIdRoute: typeof ProtectedPlansIdRoute
+  ProtectedServiceRequestsIdRoute: typeof ProtectedServiceRequestsIdRoute
+  ProtectedUsersIdRoute: typeof ProtectedUsersIdRoute
+  ProtectedPlansIndexRoute: typeof ProtectedPlansIndexRoute
+  ProtectedServiceRequestsIndexRoute: typeof ProtectedServiceRequestsIndexRoute
+  ProtectedUsersIndexRoute: typeof ProtectedUsersIndexRoute
 }
 
-const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAuditLogRoute: AuthenticatedAuditLogRoute,
-  AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
-  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedPlansIdRoute: AuthenticatedPlansIdRoute,
-  AuthenticatedServiceRequestsIdRoute: AuthenticatedServiceRequestsIdRoute,
-  AuthenticatedUsersIdRoute: AuthenticatedUsersIdRoute,
-  AuthenticatedPlansIndexRoute: AuthenticatedPlansIndexRoute,
-  AuthenticatedServiceRequestsIndexRoute:
-    AuthenticatedServiceRequestsIndexRoute,
-  AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
+const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
+  ProtectedAuditLogRoute: ProtectedAuditLogRoute,
+  ProtectedPaymentsRoute: ProtectedPaymentsRoute,
+  ProtectedSettingsRoute: ProtectedSettingsRoute,
+  ProtectedIndexRoute: ProtectedIndexRoute,
+  ProtectedPlansIdRoute: ProtectedPlansIdRoute,
+  ProtectedServiceRequestsIdRoute: ProtectedServiceRequestsIdRoute,
+  ProtectedUsersIdRoute: ProtectedUsersIdRoute,
+  ProtectedPlansIndexRoute: ProtectedPlansIndexRoute,
+  ProtectedServiceRequestsIndexRoute: ProtectedServiceRequestsIndexRoute,
+  ProtectedUsersIndexRoute: ProtectedUsersIndexRoute,
 }
 
-const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
-  AuthenticatedRouteChildren,
+const ProtectedRouteRouteWithChildren = ProtectedRouteRoute._addFileChildren(
+  ProtectedRouteRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
+  ProtectedRouteRoute: ProtectedRouteRouteWithChildren,
   SplatRoute: SplatRoute,
-  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport

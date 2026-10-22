@@ -1,6 +1,6 @@
 import { Button } from "@journeyhome/ui/components/button";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/auth/auth-context";
 
 const MARKETING_URL = import.meta.env.VITE_MARKETING_URL ?? "/";
@@ -8,7 +8,8 @@ const MARKETING_URL = import.meta.env.VITE_MARKETING_URL ?? "/";
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const from = (useLocation().state as { from?: string } | null)?.from ?? "/";
+  const search = useSearch({ from: "/login" });
+  const from = search.redirect || "/";
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -19,7 +20,7 @@ export default function Login() {
     setError(null);
     try {
       await login(String(d.get("email")).trim(), String(d.get("password")));
-      navigate(from, { replace: true });
+      navigate({ to: from as any, replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign in failed");
       setBusy(false);

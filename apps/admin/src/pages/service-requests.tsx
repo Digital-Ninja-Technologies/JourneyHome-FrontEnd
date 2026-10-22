@@ -1,6 +1,6 @@
 import { cn } from "@journeyhome/ui/lib/utils";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { Chips, PageHeader, Pill, QueryError } from "@/components/ui";
 import { formatDate } from "@/lib/format";
 import { useAllPlans, useAllRequests, useDirectory } from "@/lib/queries";
@@ -77,7 +77,8 @@ export default function ServiceRequests() {
           return (
             <Link
               key={r._id}
-              to={`/service-requests/${r._id}`}
+              to="/service-requests/$id"
+              params={{ id: r._id }}
               className={cn(
                 "flex items-center justify-between gap-4 rounded-2xl border-l-4 bg-white px-6 py-5",
                 BORDER[tone],

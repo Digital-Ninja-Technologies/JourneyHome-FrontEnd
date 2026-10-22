@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { AdminShell } from "@/components/admin-shell";
 
-export const Route = createFileRoute("/_authenticated")({
+export const Route = createFileRoute("/_protected")({
   beforeLoad: ({ context, location }) => {
     if (!context.auth.user) {
       throw redirect({

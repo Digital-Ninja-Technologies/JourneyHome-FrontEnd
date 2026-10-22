@@ -1,6 +1,6 @@
 import { Select } from "@journeyhome/ui/components/select";
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@tanstack/react-router";
 import { DemoNotice } from "@/components/demo-notice";
 import { PageHeader, QueryError, SearchBox } from "@/components/ui";
 import { isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/api";
@@ -172,10 +172,8 @@ export default function AuditLog() {
         )}
         <ul>
           {rows.slice(0, shown).map((e) => {
-            const link =
-              e.resourceType === "ServiceRequest" && requests.has(e.resourceId)
-                ? `/service-requests/${e.resourceId}`
-                : null;
+            const isRequest =
+              e.resourceType === "ServiceRequest" && requests.has(e.resourceId);
             const who = actorName(e);
             const text = sentence(e);
             const head = text.slice(who.length);
@@ -192,10 +190,14 @@ export default function AuditLog() {
                 </time>
                 <p>
                   <strong>{who}</strong>
-                  {link ? (
+                  {isRequest ? (
                     <>
                       {head.slice(0, head.length - resource(e).length)}
-                      <Link to={link} className="text-link underline">
+                      <Link
+                        to="/service-requests/$id"
+                        params={{ id: e.resourceId }}
+                        className="text-link underline"
+                      >
                         {resource(e)}
                       </Link>
                     </>

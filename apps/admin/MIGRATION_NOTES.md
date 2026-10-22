@@ -62,18 +62,36 @@
   - `/login` (`src/routes/login.tsx`): validated search `redirect?: string`, guest guard redirecting authenticated users to `redirect` param or `/`.
   - `/_authenticated` (`src/routes/_authenticated.tsx`): pathless layout route enforcing auth guard in `beforeLoad` (redirecting to `/login?redirect=...`) and rendering `AdminShell`.
   - `/` (`src/routes/_authenticated/index.tsx`): `Dashboard`
-  - `/users/` (`src/routes/_authenticated/users/index.tsx`): `Users`
-  - `/users/$id` (`src/routes/_authenticated/users/$id.tsx`): `UserDetail` with dynamic param `$id`
-  - `/plans/` (`src/routes/_authenticated/plans/index.tsx`): `Plans`
-  - `/plans/$id` (`src/routes/_authenticated/plans/$id.tsx`): `PlanDetail` with dynamic param `$id`
-  - `/service-requests/` (`src/routes/_authenticated/service-requests/index.tsx`): `ServiceRequests`
-  - `/service-requests/$id` (`src/routes/_authenticated/service-requests/$id.tsx`): `ServiceRequestDetail` with dynamic param `$id`
-  - `/payments` (`src/routes/_authenticated/payments.tsx`): `Payments`
-  - `/audit-log` (`src/routes/_authenticated/audit-log.tsx`): `AuditLog`
-  - `/settings` (`src/routes/_authenticated/settings.tsx`): `Settings`
+  - `/users/` (`src/routes/_protected/users/index.tsx`): `Users`
+  - `/users/$id` (`src/routes/_protected/users/$id.tsx`): `UserDetail` with dynamic param `$id`
+  - `/plans/` (`src/routes/_protected/plans/index.tsx`): `Plans`
+  - `/plans/$id` (`src/routes/_protected/plans/$id.tsx`): `PlanDetail` with dynamic param `$id`
+  - `/service-requests/` (`src/routes/_protected/service-requests/index.tsx`): `ServiceRequests`
+  - `/service-requests/$id` (`src/routes/_protected/service-requests/$id.tsx`): `ServiceRequestDetail` with dynamic param `$id`
+  - `/payments` (`src/routes/_protected/payments.tsx`): `Payments`
+  - `/audit-log` (`src/routes/_protected/audit-log.tsx`): `AuditLog`
+  - `/settings` (`src/routes/_protected/settings.tsx`): `Settings`
   - `/$` (`src/routes/$.tsx`): wildcard splat route redirecting to `/`
 - Generated typed `src/routeTree.gen.ts` with all 13 route nodes.
 - Verified: `tsc --noEmit` and `vite build` pass with 0 errors.
+
+## Stage 4: Migrate Codebase (Components, Hooks, Pages)
+
+- Replaced all `react-router-dom` imports across all components and pages with `@tanstack/react-router`:
+  - `src/components/admin-shell.tsx`: Replaced `Link`, `NavLink`, and `Outlet` with `@tanstack/react-router` `Link` (with `activeProps`, `inactiveProps`, `activeOptions={{ exact: end }}`) and `Outlet`.
+  - Deleted dead file `src/components/require-auth.tsx` (replaced by route `beforeLoad` guards).
+  - `src/pages/login.tsx`: Migrated to `useNavigate` and `useSearch({ from: "/login" })`, navigating to validated `redirect` query parameter on submit.
+  - `src/pages/dashboard.tsx`: Migrated `Link` to `@tanstack/react-router` with typed `to="/service-requests/$id" params={{ id: r._id }}`.
+  - `src/pages/users.tsx`: Migrated `Link` to `@tanstack/react-router` with typed `to="/users/$id" params={{ id: c._id }}`.
+  - `src/pages/user-detail.tsx`: Migrated `Link` and `useParams({ from: "/_protected/users/$id" })` to `@tanstack/react-router`, with typed links to `/plans/$id` and `/service-requests/$id`.
+  - `src/pages/plans.tsx`: Migrated `Link` to `@tanstack/react-router` with typed `to="/users/$id"` and `to="/plans/$id"`.
+  - `src/pages/plan-detail.tsx`: Migrated `Link` and `useParams({ from: "/_protected/plans/$id" })` to `@tanstack/react-router` with typed `to="/users/$id"`.
+  - `src/pages/service-requests.tsx`: Migrated `Link` to `@tanstack/react-router` with typed `to="/service-requests/$id"`.
+  - `src/pages/service-request-detail.tsx`: Migrated `Link` and `useParams({ from: "/_protected/service-requests/$id" })` to `@tanstack/react-router` with typed `to="/users/$id"`.
+  - `src/pages/payments.tsx`: Migrated `Link` to `@tanstack/react-router` with typed `to="/users/$id"` and `to="/plans/$id"`.
+  - `src/pages/audit-log.tsx`: Migrated `Link` to `@tanstack/react-router` with typed `to="/service-requests/$id"`.
+- Zero imports of `react-router-dom` remain in `apps/admin/src`.
+- Verified: `tsc --noEmit` and `vite build` succeed with 0 errors.
 
 ---
 

@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import {
   Chips,
   PageHeader,
@@ -109,7 +109,11 @@ export default function Plans() {
                     {p.coveredPerson.fullName}
                   </td>
                   <td className="px-3 py-4 text-ink-soft">
-                    <Link to={`/users/${p.owner}`} className="hover:underline">
+                    <Link
+                      to="/users/$id"
+                      params={{ id: p.owner }}
+                      className="hover:underline"
+                    >
                       {dir.nameOf(p.owner)}
                     </Link>
                   </td>
@@ -124,7 +128,8 @@ export default function Plans() {
                   </td>
                   <td className="px-3 py-4">
                     <Link
-                      to={`/plans/${p._id}`}
+                      to="/plans/$id"
+                      params={{ id: p._id }}
                       className="font-semibold text-link underline"
                     >
                       View

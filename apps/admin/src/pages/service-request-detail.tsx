@@ -1,8 +1,8 @@
 import { Button } from "@journeyhome/ui/components/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link, useParams } from "@tanstack/react-router";
 import { FileText } from "lucide-react";
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
 import {
   Card,
   CardTitle,
@@ -34,7 +34,9 @@ const DOC_STATUS: Record<
 };
 
 export default function ServiceRequestDetail() {
-  const { id } = useParams();
+  const { id } = useParams({
+    from: "/_protected/service-requests/$id",
+  });
   const q = useRequest(id);
   const plansQ = useAllPlans();
   const dir = useDirectory();
@@ -131,7 +133,11 @@ export default function ServiceRequestDetail() {
             <CardTitle className="mb-5">Request details</CardTitle>
             <div className="grid gap-6 sm:grid-cols-3">
               <Field label="Plan owner">
-                <Link to={`/users/${r.owner}`} className="hover:underline">
+                <Link
+                  to="/users/$id"
+                  params={{ id: r.owner }}
+                  className="hover:underline"
+                >
                   {dir.nameOf(r.owner)}
                 </Link>
               </Field>
