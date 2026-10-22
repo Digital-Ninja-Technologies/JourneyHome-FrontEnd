@@ -1,3 +1,6 @@
+import { createServerFn } from "@tanstack/react-start";
+import { API_URL } from "./config";
+
 export interface Package {
   _id: string;
   name: string;
@@ -14,10 +17,9 @@ export interface Package {
  * Placeholder packages for the marketing site, mirroring the design mockups
  * (Pricing.dc.html for tiers/features, OnboardingPlan/CreatePlan/Plans.dc.html
  * for the ₦5,000 / ₦10,000 / ₦18,000 monthly amounts used throughout).
- * Swap this for a real API call once a packages endpoint is deployed and
- * reachable from production — see lib/config.ts's API_URL.
+ * Used as fallback if the backend API is unreachable or returns invalid data.
  */
-const DUMMY_PACKAGES: Package[] = [
+export const DUMMY_PACKAGES: Package[] = [
   {
     _id: "basic",
     name: "Basic",
@@ -58,10 +60,64 @@ const DUMMY_PACKAGES: Package[] = [
   },
 ];
 
-/** Returns the packages to display. Static for now — see DUMMY_PACKAGES above. */
-export async function getPackages(): Promise<Package[] | null> {
-  return [...DUMMY_PACKAGES].sort((a, b) => a.monthlyContributionMinor - b.monthlyContributionMinor);
+function isValidPackage(p: unknown): p is Package {
+  if (typeof p !== "object" || p === null) return false;
+  const obj = p as Record<string, unknown>;
+  return (
+    typeof obj._id === "string" &&
+    typeof obj.name === "string" &&
+    typeof obj.monthlyContributionMinor === "number" &&
+    typeof obj.currency === "string"
+  );
 }
+
+interface CacheEntry {
+  data: Package[];
+  timestamp: number;
+}
+
+let packageCache: CacheEntry | null = null;
+const CACHE_TTL_MS = 300 * 1000; // 5-minute in-memory cache TTL (300s)
+
+/**
+ * Server Function: fetches package pricing from the backend (/api/v1/packages)
+ * on the server during SSR. Caches response in memory for 300s (5 minutes).
+ * If the API is unreachable, gracefully falls back to design-approved dummy packages.
+ */
+export const fetchPackages = createServerFn({ method: "GET" }).handler(async () => {
+  const now = Date.now();
+  if (packageCache && now - packageCache.timestamp < CACHE_TTL_MS) {
+    return packageCache.data;
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(`${API_URL}/packages`, {
+      signal: controller.signal,
+      headers: { Accept: "application/json" },
+    });
+    clearTimeout(timeout);
+
+    if (res.ok) {
+      const json = await res.json();
+      const list = Array.isArray(json) ? json : json?.data;
+      if (Array.isArray(list) && list.length > 0 && list.every(isValidPackage)) {
+        const sorted = list.sort((a, b) => a.monthlyContributionMinor - b.monthlyContributionMinor);
+        packageCache = { data: sorted, timestamp: now };
+        return sorted;
+      }
+    }
+  } catch {
+    // Backend unreachable or offline; fallback cleanly
+  }
+
+  const fallback = [...DUMMY_PACKAGES].sort((a, b) => a.monthlyContributionMinor - b.monthlyContributionMinor);
+  packageCache = { data: fallback, timestamp: now };
+  return fallback;
+});
+
+export const getPackages = fetchPackages;
 
 /** Money is stored in minor units (kobo for NGN). */
 export function formatMoney(minor: number, currency = "NGN") {

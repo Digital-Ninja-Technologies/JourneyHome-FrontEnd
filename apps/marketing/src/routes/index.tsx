@@ -8,6 +8,9 @@ import { images } from "../lib/images";
 import { getPackages } from "../lib/packages";
 
 export const Route = createFileRoute("/")({
+  headers: () => ({
+    "Cache-Control": "public, s-maxage=300, stale-while-revalidate=31535700",
+  }),
   loader: async () => {
     const packages = await getPackages();
     return { packages };

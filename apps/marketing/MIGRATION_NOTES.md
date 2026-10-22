@@ -185,3 +185,21 @@
   - Verified full client-side navigation between all 8 routes, browser history back/forward, and page reload.
   - Captured Playwright screenshots of all 8 routes in `apps/marketing/.migration-baseline/screenshots-start/`.
   - Next.js app in `app/` remains fully runnable and build passes.
+
+---
+
+## Stage 4 Implementation: Data Loading & Caching (Pricing)
+- **Server Function (`src/lib/packages.ts`):**
+  - Implemented `fetchPackages` via `createServerFn({ method: "GET" })`.
+  - Calls backend `/api/v1/packages` with 4-second timeout and JSON parsing.
+  - Runtime validation checks for array of valid package entities (`_id`, `name`, `monthlyContributionMinor`, `currency`).
+  - Graceful fallback: If backend is offline or network fails, automatically falls back to design-approved `DUMMY_PACKAGES` without crashing the page or throwing.
+- **5-Minute Revalidation & Caching Strategy:**
+  - **In-Memory Server-Side TTL Cache:** A server-side cache with a 300-second (5-minute) TTL (`CACHE_TTL_MS = 300 * 1000`) prevents redundant backend network calls during repeated SSR executions.
+  - **Edge CDN Cache-Control Headers:** Configured `headers: () => ({ "Cache-Control": "public, s-maxage=300, stale-while-revalidate=31535700" })` on `/` and `/pricing`.
+  - **Vercel Caching Semantics vs Next.js ISR:**
+    - Next.js ISR uses a proprietary background regeneration worker that writes static HTML snapshots to disk.
+    - TanStack Start on Vercel with Nitro relies on standard HTTP Edge caching (`s-maxage=300, stale-while-revalidate=...`). When deployed to Vercel, Vercel Edge CDN caches the SSR HTML response at edge nodes globally for 5 minutes. Requests within 300s are served directly from the Edge cache. Subsequent requests receive the stale cached copy immediately while triggering an asynchronous background revalidation of the server function/SSR route.
+- **Verification:**
+  - Raw server HTML from `curl http://localhost:3001/` and `curl http://localhost:3001/pricing` contains all tiers (`Basic`, `Standard`, `Premium`) and pricing (`₦5,000`, `₦10,000`, `₦18,000`) before hydration.
+

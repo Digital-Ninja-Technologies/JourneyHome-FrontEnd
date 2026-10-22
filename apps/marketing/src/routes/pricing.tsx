@@ -4,6 +4,9 @@ import { Accent, Container, PageHero } from "../components/Section";
 import { getPackages } from "../lib/packages";
 
 export const Route = createFileRoute("/pricing")({
+  headers: () => ({
+    "Cache-Control": "public, s-maxage=300, stale-while-revalidate=31535700",
+  }),
   loader: async () => {
     const packages = await getPackages();
     return { packages };
