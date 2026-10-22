@@ -4,15 +4,16 @@ import { Photo } from "../components/Photo";
 import { Accent, Container, CtaBand, Eyebrow, PageHero } from "../components/Section";
 import { CONTACT_EMAIL, SIGNUP_URL } from "../lib/config";
 import { images } from "../lib/images";
+import { createPageHead } from "../lib/seo";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      {
-        title: "About us · Journey Home",
-      },
-    ],
-  }),
+  head: () =>
+    createPageHead({
+      title: "About us",
+      description:
+        "Learn about Journey Home's mission, values, and why we believe in memorial savings with dignity and transparency.",
+      path: "/about",
+    }),
   component: About,
 });
 

@@ -203,3 +203,28 @@
 - **Verification:**
   - Raw server HTML from `curl http://localhost:3001/` and `curl http://localhost:3001/pricing` contains all tiers (`Basic`, `Standard`, `Premium`) and pricing (`₦5,000`, `₦10,000`, `₦18,000`) before hydration.
 
+---
+
+## Stage 5 Implementation: SEO & Metadata
+- **Metadata Generation Utility (`src/lib/seo.ts`):**
+  - Created typed helper `createPageHead` generating comprehensive SEO metadata for every route.
+  - Generates `<title>`, `<meta name="description">`, `<meta property="og:title">`, `<meta property="og:description">`, `<meta property="og:url">`, `<meta property="og:image">`, `<meta property="og:type">`, `<meta name="twitter:card">`, `<meta name="twitter:title">`, `<meta name="twitter:description">`, `<meta name="twitter:image">`, and `<meta name="robots">`.
+  - Generates self-referencing canonical URL: `<link rel="canonical" href="https://journeyhome.ng/<path>">`.
+  - Configured across all 8 routes (`/`, `/how-it-works`, `/pricing`, `/about`, `/faq`, `/contact`, `/terms`, `/privacy`).
+- **404 Metadata:**
+  - Root `notFoundComponent` renders `<title>404: This page could not be found. · Journey Home</title>` and `<meta name="robots" content="noindex, nofollow" />`, hoisted during SSR.
+- **Static Assets (`public/`):**
+  - Copied `icon.svg` (`image/svg+xml`) and `apple-icon.png` (`image/png`) to `apps/marketing/public/`.
+  - Added `public/robots.txt` declaring `User-agent: *`, `Allow: /`, and `Sitemap: https://journeyhome.ng/sitemap.xml`.
+- **Dynamic Sitemap Route (`src/routes/sitemap[.]xml.ts`):**
+  - Implemented server route with `server: { handlers: { GET: async () => ... } }`.
+  - Returns `application/xml; charset=utf-8` with `Cache-Control: public, max-age=3600, s-maxage=86400`.
+  - Lists all 8 public routes with accurate `changefreq` and `priority` attributes.
+- **Automated Verification Script (`scripts/check-contract.ts`):**
+  - Added `check:contract` script (`pnpm --filter marketing check:contract`).
+  - Automated test asserts status codes, `<title>`, meta description, canonical URLs, robots meta, OpenGraph tags, Twitter card tags, `robots.txt`, and `sitemap.xml`.
+  - All automated checks pass (100% contract compliance).
+- **Dual Build Coexistence:**
+  - Next.js (`pnpm --filter marketing build`) and Start (`pnpm --filter marketing build:start`) both pass cleanly.
+
+

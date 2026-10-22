@@ -1,15 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { LegalPage } from "../components/LegalPage";
 import { CONTACT_EMAIL } from "../lib/config";
+import { createPageHead } from "../lib/seo";
 
 export const Route = createFileRoute("/privacy")({
-  head: () => ({
-    meta: [
-      {
-        title: "Privacy policy · Journey Home",
-      },
-    ],
-  }),
+  head: () =>
+    createPageHead({
+      title: "Privacy policy",
+      description:
+        "Read Journey Home's privacy policy and learn how we protect your personal and financial information.",
+      path: "/privacy",
+    }),
   component: Privacy,
 });
 

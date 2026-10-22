@@ -3,15 +3,16 @@ import { Photo } from "../components/Photo";
 import { Accent, Container, CtaBand, PageHero } from "../components/Section";
 import { SIGNUP_URL } from "../lib/config";
 import { images } from "../lib/images";
+import { createPageHead } from "../lib/seo";
 
 export const Route = createFileRoute("/how-it-works")({
-  head: () => ({
-    meta: [
-      {
-        title: "How it works · Journey Home",
-      },
-    ],
-  }),
+  head: () =>
+    createPageHead({
+      title: "How it works",
+      description:
+        "See how Journey Home helps families save toward burial photography and videography in four simple steps.",
+      path: "/how-it-works",
+    }),
   component: HowItWorks,
 });
 

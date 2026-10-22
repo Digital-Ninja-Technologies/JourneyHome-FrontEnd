@@ -1,14 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Accent, Container, PageHero } from "../components/Section";
+import { createPageHead } from "../lib/seo";
 
 export const Route = createFileRoute("/faq")({
-  head: () => ({
-    meta: [
-      {
-        title: "FAQ · Journey Home",
-      },
-    ],
-  }),
+  head: () =>
+    createPageHead({
+      title: "FAQ",
+      description:
+        "Frequently asked questions about Journey Home savings plans, payments, photographers, and safety.",
+      path: "/faq",
+    }),
   component: FAQ,
 });
 

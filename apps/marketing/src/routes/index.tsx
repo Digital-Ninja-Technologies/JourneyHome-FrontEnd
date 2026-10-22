@@ -6,6 +6,7 @@ import { Accent, Container, Eyebrow } from "../components/Section";
 import { SIGNUP_URL } from "../lib/config";
 import { images } from "../lib/images";
 import { getPackages } from "../lib/packages";
+import { createPageHead } from "../lib/seo";
 
 export const Route = createFileRoute("/")({
   headers: () => ({
@@ -15,13 +16,7 @@ export const Route = createFileRoute("/")({
     const packages = await getPackages();
     return { packages };
   },
-  head: () => ({
-    meta: [
-      {
-        title: "Journey Home — Save ahead. Prepare with dignity.",
-      },
-    ],
-  }),
+  head: () => createPageHead({ path: "/" }),
   component: Home,
 });
 

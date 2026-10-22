@@ -1,15 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { LegalPage } from "../components/LegalPage";
 import { CONTACT_EMAIL } from "../lib/config";
+import { createPageHead } from "../lib/seo";
 
 export const Route = createFileRoute("/terms")({
-  head: () => ({
-    meta: [
-      {
-        title: "Plan terms & conditions · Journey Home",
-      },
-    ],
-  }),
+  head: () =>
+    createPageHead({
+      title: "Plan terms & conditions",
+      description:
+        "Review the plan terms and conditions for Journey Home savings plans and memorial services.",
+      path: "/terms",
+    }),
   component: Terms,
 });
 

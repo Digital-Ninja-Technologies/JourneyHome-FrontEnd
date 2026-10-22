@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PackageCards, PackagesUnavailable } from "../components/PackageCards";
 import { Accent, Container, PageHero } from "../components/Section";
 import { getPackages } from "../lib/packages";
+import { createPageHead } from "../lib/seo";
 
 export const Route = createFileRoute("/pricing")({
   headers: () => ({
@@ -11,13 +12,13 @@ export const Route = createFileRoute("/pricing")({
     const packages = await getPackages();
     return { packages };
   },
-  head: () => ({
-    meta: [
-      {
-        title: "Pricing · Journey Home",
-      },
-    ],
-  }),
+  head: () =>
+    createPageHead({
+      title: "Pricing",
+      description:
+        "Compare Journey Home pricing and coverage packages. Choose the plan that suits your family.",
+      path: "/pricing",
+    }),
   component: Pricing,
 });
 

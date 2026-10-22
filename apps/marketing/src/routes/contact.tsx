@@ -3,15 +3,16 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { ContactForm } from "../components/ContactForm";
 import { Accent, Container, PageHero } from "../components/Section";
 import { CONTACT_EMAIL } from "../lib/config";
+import { createPageHead } from "../lib/seo";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      {
-        title: "Contact · Journey Home",
-      },
-    ],
-  }),
+  head: () =>
+    createPageHead({
+      title: "Contact",
+      description:
+        "Get in touch with Journey Home. We're here to answer your questions and assist your family.",
+      path: "/contact",
+    }),
   component: Contact,
 });
 

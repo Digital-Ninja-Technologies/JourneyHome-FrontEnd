@@ -10,11 +10,6 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Journey Home — Save ahead. Prepare with dignity." },
-      {
-        name: "description",
-        content: "Families save a little each month toward professional photography and videography for a loved one's burial.",
-      },
     ],
     links: [
       { rel: "icon", href: "/icon.svg", type: "image/svg+xml" },
@@ -45,16 +40,20 @@ function RootComponent() {
 
 function NotFoundComponent() {
   return (
-    <main className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-      <div className="flex items-center gap-5">
-        <h1 className="border-r border-foreground/30 pr-5 text-2xl font-medium leading-[49px]">
-          404
-        </h1>
-        <h2 className="m-0 text-sm font-normal leading-[49px]">
-          This page could not be found.
-        </h2>
-      </div>
-    </main>
+    <>
+      <title>404: This page could not be found. · Journey Home</title>
+      <meta name="robots" content="noindex, nofollow" />
+      <main className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+        <div className="flex items-center gap-5">
+          <h1 className="border-r border-foreground/30 pr-5 text-2xl font-medium leading-[49px]">
+            404
+          </h1>
+          <h2 className="m-0 text-sm font-normal leading-[49px]">
+            This page could not be found.
+          </h2>
+        </div>
+      </main>
+    </>
   );
 }
 
