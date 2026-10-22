@@ -7,6 +7,16 @@
 - Port: 5173
 - SPA rewrite: `vercel.json` rewrites `/(.*)` -> `/index.html` (maintained unchanged)
 
+## Stage 1: Install and Configure
+- Installed `@tanstack/react-router` (^1.170.45) in `apps/dashboard`.
+- Installed devDependencies `@tanstack/router-plugin` (^1.168.47) and `@tanstack/react-router-devtools` (^1.167.2).
+- Configured `apps/dashboard/vite.config.ts`:
+  - Added `tanstackRouter({ target: 'react', autoCodeSplitting: true })` BEFORE `@vitejs/plugin-react`.
+  - Retained `@tailwindcss/vite` and existing Vite setup.
+- Created `apps/dashboard/src/routes` directory for file-based routing.
+- Verified TypeScript include configuration (`tsconfig.json` includes `src`, which contains generated `routeTree.gen.ts`).
+
+
 ## Stage 0: Inventory & Route Contract
 
 ### 1. Routes & Nesting Structure
