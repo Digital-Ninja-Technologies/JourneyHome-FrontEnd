@@ -13,7 +13,11 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { DemoNotice } from "@/components/demo-notice";
-import { useAuth } from "../auth/auth-context";
+import {
+  useLogoutMutation,
+  useSessionUser,
+  useUpdateUserMutation,
+} from "@/modules/auth";
 import { api, isUnsupported, UNSUPPORTED_MESSAGE } from "../lib/api";
 import { formatMonthYearLong, initials } from "../lib/format";
 import { MARKETING_URL } from "../lib/plans";
@@ -52,7 +56,8 @@ const PREFS: { key: keyof Me["preferences"]; title: string; body: string }[] = [
 ];
 
 function PersonalInfo({ me }: { me?: Me }) {
-  const { user, updateUser } = useAuth();
+  const user = useSessionUser();
+  const updateUserMutation = useUpdateUserMutation();
   const queryClient = useQueryClient();
   const [saved, setSaved] = useState(false);
   const save = useMutation({
@@ -60,7 +65,7 @@ function PersonalInfo({ me }: { me?: Me }) {
       api<Me>("/auth/me", { method: "PATCH", body }),
     onSuccess: (_d, body) => {
       setSaved(true);
-      updateUser({ name: body.name, email: body.email });
+      updateUserMutation.mutate({ name: body.name, email: body.email });
       void queryClient.invalidateQueries({ queryKey: ["me"] });
     },
   });
@@ -412,15 +417,13 @@ function ChangePassword() {
 }
 
 function CloseAccount() {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
+  const logoutMutation = useLogoutMutation();
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
   const close = useMutation({
     mutationFn: () => api("/auth/me", { method: "DELETE" }),
     onSuccess: () => {
-      logout();
-      navigate({ to: "/login", replace: true });
+      logoutMutation.mutate();
     },
   });
   return (

@@ -2,7 +2,7 @@ import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { AlertCircle, Bell, Gift, Plus } from "lucide-react";
 import { PAYMENT_TEXT, StatusPill } from "@/components/status-pill";
-import { useAuth } from "../auth/auth-context";
+import { useSessionUser } from "@/modules/auth";
 import {
   capitalise,
   daysUntil,
@@ -189,7 +189,7 @@ function RecentPayments({
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const user = useSessionUser();
   const plansQ = usePlans();
   const paymentsQ = usePayments();
   const now = new Date();

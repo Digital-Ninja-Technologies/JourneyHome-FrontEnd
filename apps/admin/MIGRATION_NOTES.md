@@ -275,4 +275,70 @@ Routes live at the ROOT (`/`), not under `/app`:
 - Replaced all direct `import.meta.env` access across `src/` with `env` from `#/env/client`.
 - Updated `.env.example`, root `turbo.json` with `globalEnv` and task env passthrough, and `README.md` Vercel deployment documentation.
 
+### Stage 3: Query-Driven Admin Auth & AuthContext Elimination
+- **Eliminated `AuthProvider` and `AuthContext`**:
+  - Removed `src/auth/auth-context.tsx`.
+  - Stored admin session in TanStack Query under query key `["auth", "admin-session"]` (`adminSessionQueryOptions()`) with `staleTime: Infinity`.
+  - Configured `@journeyhome/api-client` in `src/lib/api-client.ts` to read `jh_admin_session` token from `sessionStorage` and trigger 401 unauthenticated redirect.
+  - Implemented `useAdminLoginMutation()` with synchronous cache seeding via `queryClient.setQueryData(["auth", "admin-session"], session)`.
+  - Implemented `useAdminLogoutMutation()` clearing cache, deleting session token, and routing to `/login`.
+  - Created role-checking hooks (`useAdminUser()`, `useIsSuperAdmin()`) ensuring strict permission enforcement on sensitive screens like `settings.tsx` (super_admin only for invite/revoke).
+- **Router Route Guarding (`src/routes/_protected/route.tsx` & `src/routes/login.tsx`)**:
+  - Route loaders use `context.queryClient.ensureQueryData(adminSessionQueryOptions())`.
+  - Unauthenticated access redirects to `/login?redirect=<target>` with safe internal redirect parsing.
+  - Authenticated visits to `/login` redirect to `/` (dashboard).
+
+### Stage 4: Feature Modularization (Vertical Slices)
+Created vertical slices under `src/modules/`:
+- `modules/auth/`:
+  - `api.ts`: `adminLogin()`, `getAdminSession()`, `adminLogout()`.
+  - `query-options.ts`: `adminSessionQueryOptions()`.
+  - `mutations.ts`: `useAdminLoginMutation()`, `useAdminLogoutMutation()`.
+  - `components/login-form.tsx`: `react-hook-form` + `zodResolver` + `@journeyhome/schemas` `adminLoginSchema`.
+- `modules/customers/`:
+  - `api.ts`: `getCustomers()`, `getCustomer(id)`.
+  - `query-options.ts`: `customersQueryOptions()`, `customerDetailQueryOptions(id)`.
+- `modules/plans/`:
+  - `api.ts`: `getAllPlans()`, `getPlan(id)`, `updatePlanStatus(id, status, reason)`.
+  - `query-options.ts`: `adminPlansQueryOptions()`, `adminPlanDetailQueryOptions(id)`.
+  - `mutations.ts`: `useUpdatePlanStatusMutation()`.
+- `modules/service-requests/`:
+  - `api.ts`: `getAllServiceRequests()`, `getServiceRequest(id)`, `updateServiceRequestStatus()`, `verifyDocument()`.
+  - `query-options.ts`: `adminServiceRequestsQueryOptions()`, `adminServiceRequestDetailQueryOptions(id)`.
+  - `mutations.ts`: `useUpdateServiceRequestStatusMutation()`, `useVerifyDocumentMutation()`.
+- `modules/payments/`:
+  - `api.ts`: `getAllPayments()`.
+  - `query-options.ts`: `adminPaymentsQueryOptions()`.
+- `modules/packages/`:
+  - `api.ts`: `getAdminPackages()`, `updatePackagePrice()`.
+  - `query-options.ts`: `adminPackagesQueryOptions()`.
+  - `mutations.ts`: `useUpdatePackagePriceMutation()`.
+- `modules/audit-log/`:
+  - `api.ts`: `getAuditLogs()`.
+  - `query-options.ts`: `auditLogsQueryOptions()`.
+- `modules/admin-team/`:
+  - `api.ts`: `getAdminUsers()`, `inviteAdminUser()`, `revokeAdminUser()`.
+  - `query-options.ts`: `adminUsersQueryOptions()`.
+  - `mutations.ts`: `useInviteAdminUserMutation()`, `useRevokeAdminUserMutation()`.
+
+### Stage 5: TanStack Query Infrastructure & Devtools
+- Created `src/lib/query-client.ts`:
+  - Configured `makeQueryClient({ onUnauthorized })` with 5min `staleTime`, 30min `gcTime`, smart 4xx non-retry vs 5xx retry logic.
+- Integrated `QueryClientProvider` and `ReactQueryDevtools` into `src/router.tsx` via router `Wrap` property.
+
+### Stage 6: Error Boundaries & React Deduplication
+- Created class-based `ErrorBoundary` and `AsyncBoundary` in `src/components/async-boundary.tsx` to prevent hook dispatch mismatches in React 19.
+- Added `dedupe: ["react", "react-dom"]` to `vite.config.ts`.
+- Created `CatchBoundary` in `src/components/catch-boundary.tsx` wired into `__root.tsx` and `_protected/route.tsx`.
+
+### Stage 7: Local Mock Seam & End-to-End Operation
+- When `VITE_USE_MOCKS=true` (or `import.meta.env.DEV`), `src/mocks/index.ts` intercepts network calls:
+  - Supported Demo Credentials:
+    - Super Admin: `admin@journeyhome.ng` / `Admin123!` (role: `super_admin`)
+    - Standard Staff: `staff@journeyhome.ng` / `Admin123!` (role: `admin`)
+    - Legacy Demo Admin: `admin@journeyhome.test` / `Admin123!` (role: `super_admin`)
+  - Handles customer listings, plan details, status transitions, service requests, packages, payments, audit logs, and admin team members.
+- Validated with 9/9 Playwright smoke tests passing green.
+
+
 

@@ -16,7 +16,8 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
-import { useAuth } from "@/auth/auth-context";
+import { CatchBoundary } from "@/components/catch-boundary";
+import { sessionQueryOptions, useLogoutMutation } from "@/modules/auth";
 
 const NAV = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -38,21 +39,26 @@ function readCollapsed() {
 }
 
 export const Route = createFileRoute("/app")({
-  beforeLoad: ({ context, location }) => {
-    if (!context.auth.user) {
+  beforeLoad: async ({ context, location }) => {
+    const session = await context.queryClient.query(
+      sessionQueryOptions(),
+    );
+    if (!session?.user) {
       throw redirect({
         to: "/login",
         search: { redirect: location.href },
       });
     }
+    return { session, user: session.user };
   },
   component: AppLayout,
+  errorComponent: CatchBoundary,
 });
 
 function AppLayout() {
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { logout } = useAuth();
+  const logoutMutation = useLogoutMutation();
 
   function toggle() {
     setCollapsed((c) => {
@@ -212,7 +218,8 @@ function AppLayout() {
             <span className={cn(collapsed && "md:hidden")}>Back to site</span>
           </a>
           <button
-            onClick={logout}
+            type="button"
+            onClick={() => logoutMutation.mutate()}
             title={collapsed ? "Log out" : undefined}
             className={cn(
               "flex h-10 items-center gap-3 rounded-xl px-3.5 text-sm font-semibold text-canvas/70 hover:text-canvas",

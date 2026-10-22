@@ -3,14 +3,14 @@ import { Link, useSearch } from "@tanstack/react-router";
 import { Bell, Check, Plus } from "lucide-react";
 import { useEffect } from "react";
 import { StatusPill } from "@/components/status-pill";
-import { useAuth } from "../auth/auth-context";
+import { useSessionUser } from "@/modules/auth";
 import { setOnboardingPlan } from "../lib/checkout";
 import { firstName, formatDate, formatMoney } from "../lib/format";
 import { relationshipLabel } from "../lib/plans";
 import { usePlan } from "../lib/queries";
 
 export default function Welcome() {
-  const { user } = useAuth();
+  const user = useSessionUser();
   const { plan: planId } = useSearch({ from: "/welcome" });
   const planQ = usePlan(planId);
   const plan = planQ.data;

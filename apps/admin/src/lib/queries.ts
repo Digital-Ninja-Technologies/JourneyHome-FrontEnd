@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/auth/auth-context";
 import { api } from "@/lib/api";
 import type {
   AdminMe,
@@ -12,9 +11,10 @@ import type {
   ServiceDocument,
   ServiceRequest,
 } from "@/lib/types";
+import { useAdminUser } from "@/modules/auth";
 
 function useAdminQuery<T>(key: unknown[], path: string, enabled = true) {
-  const { user } = useAuth();
+  const user = useAdminUser();
   return useQuery({
     queryKey: [...key, user?.id],
     queryFn: () => api<T>(path),

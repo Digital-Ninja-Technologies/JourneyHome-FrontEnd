@@ -27,3 +27,28 @@
 - Removed legacy `src/lib/env.ts` and updated `src/lib/config.ts` and `src/routes/sitemap[.]xml.ts`.
 - Updated `.env.example`, `.env`, root `turbo.json` with `globalEnv` and task env passthrough, and `README.md` Vercel deployment documentation.
 
+### Stage 3 & 4: Feature Modularization & Query Architecture
+- Created vertical slices under `src/modules/`:
+  - `modules/packages/`:
+    - `api.ts`: typed fetch for live packages using `@journeyhome/api-client` and `@journeyhome/schemas`.
+    - `query-options.ts`: `packagesQueryOptions()` with 5min `staleTime` and fallback dummy packages.
+- Wired TanStack Start SSR prefetching in routes:
+  - `src/routes/index.tsx`: `loader: ({ context }) => void context.queryClient.ensureQueryData(packagesQueryOptions())`.
+  - `src/routes/pricing.tsx`: `loader: ({ context }) => void context.queryClient.ensureQueryData(packagesQueryOptions())` and consumed via `useSuspenseQuery(packagesQueryOptions())`.
+
+### Stage 5: TanStack Start SSR Query Integration
+- Created `src/lib/query-client.ts`:
+  - `makeQueryClient()` configuring 5min `staleTime` and 30min `gcTime`.
+- Wired into TanStack Start in `src/router.tsx`:
+  - Context setup: `context: { queryClient }`.
+  - `setupRouterSsrQueryIntegration({ router, queryClient })` for transparent dehydration/hydration during Nitro SSR.
+  - Included `ReactQueryDevtools` in development mode.
+
+### Stage 6: Error Boundaries & Catch Boundaries
+- Created class-based `ErrorBoundary` and `AsyncBoundary` in `src/components/async-boundary.tsx`.
+- Created `CatchBoundary` in `src/components/catch-boundary.tsx` wired into `__root.tsx`.
+
+### Stage 7: Build & Type Safety
+- Verified zero build or TypeScript errors across the SSR bundle.
+
+

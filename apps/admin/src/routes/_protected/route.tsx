@@ -9,8 +9,13 @@ import {
   Settings,
   Users,
 } from "lucide-react";
-import { useAuth } from "@/auth/auth-context";
+import { CatchBoundary } from "@/components/catch-boundary";
 import { initials } from "@/lib/format";
+import {
+  adminSessionQueryOptions,
+  useAdminLogoutMutation,
+  useAdminUser,
+} from "@/modules/auth";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -23,8 +28,11 @@ const NAV = [
 ];
 
 export const Route = createFileRoute("/_protected")({
-  beforeLoad: ({ context, location }) => {
-    if (!context.auth.user) {
+  beforeLoad: async ({ context, location }) => {
+    const session = await context.queryClient.ensureQueryData(
+      adminSessionQueryOptions(),
+    );
+    if (!session?.user) {
       throw redirect({
         to: "/login",
         search: {
@@ -32,12 +40,15 @@ export const Route = createFileRoute("/_protected")({
         },
       });
     }
+    return { session, user: session.user };
   },
   component: ProtectedLayout,
+  errorComponent: CatchBoundary,
 });
 
 function ProtectedLayout() {
-  const { user, logout } = useAuth();
+  const user = useAdminUser();
+  const logoutMutation = useAdminLogoutMutation();
   return (
     <div className="flex min-h-screen">
       <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col gap-6 bg-sidebar p-5 text-canvas">
@@ -100,7 +111,8 @@ function ProtectedLayout() {
           <div className="min-w-0 text-sm">
             <div className="truncate font-semibold">{user?.name}</div>
             <button
-              onClick={logout}
+              type="button"
+              onClick={() => logoutMutation.mutate()}
               className="text-xs text-canvas/60 underline"
             >
               Sign out

@@ -2,7 +2,7 @@ import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { AlertCircle, Bell, Camera, Check, CreditCard } from "lucide-react";
 import { useState } from "react";
-import { useAuth } from "../auth/auth-context";
+import { useSessionUser } from "@/modules/auth";
 import {
   describeNotification,
   formatNotificationTime,
@@ -25,7 +25,7 @@ const TONE: Record<NoteTone, { icon: typeof Bell; box: string }> = {
 };
 
 export default function Notifications() {
-  const { user } = useAuth();
+  const user = useSessionUser();
   const notesQ = useNotifications();
   const plansQ = usePlans();
   const [seen, setSeen] = useState(() => (user ? readSeen(user.id) : null));

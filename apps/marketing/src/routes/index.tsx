@@ -1,3 +1,4 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	Calendar,
@@ -13,16 +14,15 @@ import { PackageCards, PackagesUnavailable } from "../components/PackageCards";
 import { Accent, Container, Eyebrow } from "../components/Section";
 import { SIGNUP_URL } from "../lib/config";
 import { images } from "../lib/images";
-import { getPackages } from "../lib/packages";
 import { createPageHead } from "../lib/seo";
+import { packagesQueryOptions } from "../modules/packages";
 
 export const Route = createFileRoute("/")({
 	headers: () => ({
 		"Cache-Control": "public, s-maxage=300, stale-while-revalidate=31535700",
 	}),
-	loader: async () => {
-		const packages = await getPackages();
-		return { packages };
+	loader: async ({ context }) => {
+		await context.queryClient.ensureQueryData(packagesQueryOptions());
 	},
 	head: () => createPageHead({ path: "/" }),
 	component: Home,
@@ -75,7 +75,7 @@ const STEPS = [
 ];
 
 function Home() {
-	const { packages } = Route.useLoaderData();
+	const { data: packages } = useSuspenseQuery(packagesQueryOptions());
 
 	return (
 		<main>

@@ -22,9 +22,11 @@ truth instead of guessing at layout or scope.
 A production web app implementing the screens in `/mockups`, wired to the
 existing backend:
 - `apps/marketing`: Public marketing site powered by **TanStack Start** (React 19 + Vite + Nitro SSR/Edge caching)
-- `apps/dashboard`: Authenticated customer app (**React + Vite + React Router**)
-- `apps/admin`: Ops console (**React + Vite + React Router**)
-- `packages/ui`: Shared UI tokens and components (@journeyhome/ui)
+- `apps/dashboard`: Authenticated customer app (**React 19 + Vite + TanStack Router SPA**)
+- `apps/admin`: Ops console (**React 19 + Vite + TanStack Router SPA**)
+- `packages/ui`: Shared UI tokens, formatters, and components (`@journeyhome/ui`)
+- `packages/api-client`: Shared HTTP client factory with typed envelopes and 401 callbacks (`@journeyhome/api-client`)
+- `packages/schemas`: Shared domain schemas, backend enums, and search query validation (`@journeyhome/schemas`)
 
 - **Backend repo:** `Digital-Ninja-Technologies/journey_home_backend`
   (Express + TypeScript + PostgreSQL/Prisma + JWT auth, REST at `/api/v1`). Its
@@ -123,19 +125,21 @@ frontend can support it. Don't silently re-add it to the UI without that.
    anyone.
 
 ## Repo layout (monorepo)
-
+ 
 pnpm workspaces + Turborepo.
-
+ 
 ```
 apps/
-  dashboard/   # Vite + React + React Router — customer app + onboarding (port 5173)
-  admin/       # Vite + React + React Router — internal admin console (port 5174)
-  marketing/   # Next.js — public marketing site (port 3000)
+  dashboard/   # Vite + React 19 + TanStack Router — customer app + onboarding (port 5173)
+  admin/       # Vite + React 19 + TanStack Router — internal admin console (port 5174)
+  marketing/   # TanStack Start (Vite + Nitro SSR) — public marketing site (port 3000)
 packages/
-  ui/          # @journeyhome/ui — shared shadcn-style components + Tailwind v4 theme tokens
+  ui/          # @journeyhome/ui — shared shadcn-style components + Tailwind theme tokens + formatters
+  api-client/  # @journeyhome/api-client — typed HTTP client with Bearer auth & error envelopes
+  schemas/     # @journeyhome/schemas — shared Zod domain models, enums & query params
 ```
-
-Commands: `pnpm install`, `pnpm dev`, `pnpm build`, `pnpm typecheck`.
+ 
+Commands: `pnpm install`, `pnpm dev`, `pnpm build`, `pnpm test`, `pnpm typecheck`, `pnpm lint`.
 Add a shadcn component from `packages/ui` with `pnpm dlx shadcn@latest add <name>`.
 
 ### Marketing site (`apps/marketing`)
@@ -208,14 +212,19 @@ Signup → Verify (`/signup/verify`) → First plan (`/signup/plan`) → Payment
 - After Paystack, the return page (`/app/payments/callback`) sends new customers to the welcome screen using a
   `sessionStorage` flag set at the payment step; any other first payment shows the normal "Payment received" page.
 
-### Demo mode (screens whose backend endpoints don't exist yet)
+### Demo mode (Local operation without backend)
 
-Verification code, forgot/reset password, Profile & settings (including saved cards and notification preferences),
-and the admin Payments, Audit log, preferences and session-revoke screens are built against the contract in
-`docs/BACKEND_CONTRACT.md`. In dev (`pnpm dev`) they talk to a **simulated server** kept in the browser
-(`apps/*/src/mocks`): verification code `123456`, reset link `/reset-password?token=demo-token`, and so on. Set
-`VITE_USE_MOCKS=false` to turn it off in dev (or `true` to force it on in a build). Production builds have it off by
-default, and a server that returns 404 for one of these endpoints produces a clear "not available yet" message.
+In local development (`pnpm dev`) or when `VITE_USE_MOCKS=true`, all apps talk to a **simulated server** in the browser (`apps/*/src/mocks`):
+- **Customer credentials:**
+  - Email: `demo@journeyhome.ng`
+  - Password: `Password123!`
+- **Admin credentials:**
+  - Super Admin: `admin@journeyhome.ng` / `Admin123!`
+  - Standard Staff: `staff@journeyhome.ng` / `Admin123!`
+- **Verification Code:** `123456`
+- **Reset Password Token:** `/reset-password?token=demo-token`
+
+Set `VITE_USE_MOCKS=false` to connect to the live backend server.
 
 ## Deploying to Vercel
 
@@ -223,7 +232,7 @@ Three Vercel projects, one per app, all linked to this repo with a different **R
 
 | Project | Root Directory | Framework |
 |---|---|---|
-| `journeyhome-marketing` | `apps/marketing` | Next.js |
+| `journeyhome-marketing` | `apps/marketing` | TanStack Start (Nitro SSR) |
 | `journeyhome-dashboard` | `apps/dashboard` | Vite (SPA rewrite in `vercel.json`) |
 | `journeyhome-admin` | `apps/admin` | Vite (SPA rewrite in `vercel.json`) |
 
@@ -233,4 +242,5 @@ Environment variables are baked in at build time, so **redeploy after changing t
 - dashboard: `VITE_API_BASE_URL` (backend, ending in `/api/v1`), `VITE_MARKETING_URL` (marketing origin URL), `VITE_APP_URL`
 - admin: `VITE_API_BASE_URL` (backend, ending in `/api/v1`), `VITE_MARKETING_URL` (marketing origin URL)
 
-Demo mode is off in these builds, so screens whose endpoints the backend lacks show a "not available yet" message.
+Demo mode is off in these production builds, connecting directly to the real API backend.
+

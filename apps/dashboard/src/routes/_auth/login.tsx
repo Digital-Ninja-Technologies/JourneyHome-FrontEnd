@@ -1,15 +1,28 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { AsyncBoundary } from "@/components/async-boundary";
 import { redirectSearchSchema } from "@/lib/search-schemas";
-import Login from "@/pages/login";
+import { LoginForm } from "@/modules/auth/components/login-form";
+import { sessionQueryOptions } from "@/modules/auth";
 
 export const Route = createFileRoute("/_auth/login")({
   validateSearch: (search) => redirectSearchSchema.parse(search),
-  beforeLoad: ({ context, search }) => {
-    if (context.auth.user) {
+  beforeLoad: async ({ context, search }) => {
+    const session = await context.queryClient.ensureQueryData(
+      sessionQueryOptions(),
+    );
+    if (session?.user) {
       throw redirect({
-        to: search.redirect || "/app",
+        to: (search.redirect as any) || "/app",
       });
     }
   },
-  component: Login,
+  component: LoginPage,
 });
+
+function LoginPage() {
+  return (
+    <AsyncBoundary>
+      <LoginForm />
+    </AsyncBoundary>
+  );
+}
