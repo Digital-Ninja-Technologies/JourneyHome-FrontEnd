@@ -142,3 +142,24 @@
 - `/apple-icon.png`: 200 OK (`image/png`)
 - `/sitemap.xml`: 200 OK (`application/xml`), includes all 8 public routes (to be added in Stage 5)
 - `/robots.txt`: 200 OK (`text/plain`), allows indexing, points to sitemap (to be added in Stage 5)
+
+---
+
+## Stage 1 Implementation: Scaffold TanStack Start
+- Installed `@tanstack/react-start` (`^1.169.3`), `@tanstack/react-router` (`^1.170.45`), `nitro` (`3.0.260903-beta`), `vite` (`^8.3.4`), `@vitejs/plugin-react` (`^6.1.2`), `@tailwindcss/vite` (`^4.3.3`).
+- Created `apps/marketing/vite.config.ts` configuring TanStack Start, Nitro, React, Tailwind v4, and `@/` path alias.
+- Created `src/styles/globals.css` with `@journeyhome/ui` styling and tokens.
+- Created `src/routes/__root.tsx` document shell with `<HeadContent />`, `<Scripts />`, Google Fonts links, `<SiteHeader />`, and `<SiteFooter />`.
+- Created placeholder `src/routes/index.tsx` and configured `src/router.tsx` (`createRouter`, `getRouter`).
+- Verified `routeTree.gen.ts` generation and dev server boot on port 3001.
+
+---
+
+## Stage 2 Implementation: Shared Infrastructure
+- **Env vars (`src/lib/env.ts`):** Created typed environment access mapping `VITE_API_URL` (fallback `NEXT_PUBLIC_API_URL`), `VITE_APP_URL` (fallback `NEXT_PUBLIC_APP_URL`), and `VITE_SITE_ORIGIN` (fallback `NEXT_PUBLIC_SITE_ORIGIN`). Dual keys added to `.env.example`.
+- **Helpers (`src/lib/`):** Ported `images.ts`, `packages.ts`, and updated `config.ts`.
+- **Components (`src/components/`):** Ported `Photo.tsx`, `Section.tsx`, `PackageCards.tsx`, `LegalPage.tsx`, `ContactForm.tsx`.
+- **Images:** Plain `<img>` elements used with `loading="lazy"` where applicable and `object-cover`. Static WebP assets served from `public/images/`.
+- **Fonts:** Added `<link rel="preconnect">` and Google Fonts `<link rel="stylesheet">` directly into root document head in `src/routes/__root.tsx`.
+- **Link usage convention:** TanStack Router `<Link to="...">` used for all internal routing; plain `<a href="...">` used for external links (dashboard login/signup, mailto).
+- Verified whole-monorepo `pnpm typecheck` and `pnpm --filter @journeyhome/marketing build` (Next.js baseline remains fully runnable).
