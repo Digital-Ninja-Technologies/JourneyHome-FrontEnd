@@ -39,6 +39,20 @@
 - Created `apps/admin/src/routes` directory for TanStack Router generator.
 - Verified: `tsc --noEmit` and `vite build` pass with 0 errors.
 
+## Stage 2: Root Route, Router Instance, and Providers
+
+- Created `src/routes/__root.tsx` with `createRootRouteWithContext<RouterContext>()`:
+  - Typed context includes `queryClient: QueryClient` and `auth: { user: User | null; isSuperAdmin: boolean; logout: () => void }`.
+  - Added `<Outlet />` component.
+- Created `src/router.tsx`:
+  - Configured `createRouter` with `routeTree`, context defaults, `defaultPreload: 'intent'`, `scrollRestoration: true`, and `defaultNotFoundComponent: () => <Navigate to="/" replace />`.
+  - Added global module augmentation `Register { router: typeof router }`.
+- Updated `src/main.tsx` and `src/app.tsx`:
+  - Removed `BrowserRouter` from `main.tsx`.
+  - Mounted `<RouterProvider router={router} context={{ queryClient, auth: { user, isSuperAdmin, logout } }} />` inside `QueryClientProvider` and `AuthProvider`.
+  - In `app.tsx`, connected `router.invalidate()` to `user` state changes to ensure immediate re-evaluation on auth transitions.
+- Verified: `tsc --noEmit` and `vite build` pass cleanly with 0 errors.
+
 ---
 
 ## ROUTE CONTRACT (Verification Checklist)
