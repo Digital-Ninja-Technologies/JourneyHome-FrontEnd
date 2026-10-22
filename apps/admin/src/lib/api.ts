@@ -1,7 +1,8 @@
+import { env } from "#/env/client";
 import { ApiError } from "@/lib/errors";
 import { mockRequest, NOT_MOCKED } from "@/mocks";
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3043/api/v1";
+const BASE_URL = env.VITE_API_BASE_URL;
 
 export { ApiError, isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/errors";
 
@@ -9,9 +10,7 @@ export { ApiError, isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/errors";
  * Demo mode simulates endpoints the backend doesn't have yet (admin payments list, audit log, preferences,
  * session revoke). On by default in dev; set VITE_USE_MOCKS=true/false to override.
  */
-export const USE_MOCKS: boolean = import.meta.env.VITE_USE_MOCKS
-  ? import.meta.env.VITE_USE_MOCKS === "true"
-  : import.meta.env.DEV;
+export const USE_MOCKS: boolean = env.VITE_USE_MOCKS;
 
 let getToken: () => string | null = () => null;
 let onUnauthorized: () => void = () => {};

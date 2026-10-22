@@ -17,10 +17,11 @@ import {
   nextBirthday,
 } from "../lib/format";
 import { canPayNow, isDue, LIVE } from "../lib/plans";
+import { env } from "#/env/client";
 import { usePayments, usePlans } from "../lib/queries";
 import type { Payment, Plan } from "../lib/types";
 
-const MARKETING_URL = import.meta.env.VITE_MARKETING_URL ?? "";
+const MARKETING_URL = env.VITE_MARKETING_URL;
 const HIDDEN = new Set<Plan["status"]>(["Cancelled", "Expired"]);
 
 function dueLabel(p: Plan) {

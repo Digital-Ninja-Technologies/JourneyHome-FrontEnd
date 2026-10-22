@@ -141,8 +141,8 @@ Add a shadcn component from `packages/ui` with `pnpm dlx shadcn@latest add <name
 ### Marketing site (`apps/marketing`)
 
 All seven public pages are built (Home, How it works, Pricing, FAQ, Contact, Terms, Privacy).
-Copy `.env.example`: `NEXT_PUBLIC_API_URL` (backend, used for live package pricing on Home and
-Pricing, revalidated every 5 minutes) and `NEXT_PUBLIC_APP_URL` (the dashboard, for Log in /
+Copy `.env.example`: `VITE_API_BASE_URL` (backend, default `http://localhost:4000/api/v1`, used for live package pricing on Home and
+Pricing, revalidated every 5 minutes) and `VITE_APP_URL` (the dashboard, for Log in /
 Get started links).
 
 - **Photos:** the mockups reference design-tool blob URLs that aren't in this repo, so photos
@@ -173,7 +173,7 @@ Get started links).
 ### Admin console (`apps/admin`)
 
 Separate app on its own origin, so routes are at the root (`/users`, `/plans`, `/service-requests`, …) rather than
-under `/admin`. Sessions live in `sessionStorage` (tab only). Copy `.env.example` (`VITE_API_URL`, `VITE_MARKETING_URL`).
+under `/admin`. Sessions live in `sessionStorage` (tab only). Copy `.env.example` (`VITE_API_BASE_URL`, `VITE_MARKETING_URL`).
 
 Built against the backend's admin endpoints: login, customers, all plans (+ status changes using the backend's
 transition rules), the full service-request review workflow (start review, approve/flag documents, mark verified,
@@ -229,8 +229,8 @@ Three Vercel projects, one per app, all linked to this repo with a different **R
 
 Environment variables are baked in at build time, so **redeploy after changing them**:
 
-- marketing: `NEXT_PUBLIC_API_URL` (backend, ending in `/api/v1`), `NEXT_PUBLIC_APP_URL` (dashboard URL)
-- dashboard: `VITE_API_URL`, `VITE_MARKETING_URL`
-- admin: `VITE_API_URL`, `VITE_MARKETING_URL`
+- marketing: `VITE_API_BASE_URL` (backend, ending in `/api/v1`), `VITE_APP_URL` (dashboard URL), `VITE_SITE_URL` (marketing origin URL)
+- dashboard: `VITE_API_BASE_URL` (backend, ending in `/api/v1`), `VITE_MARKETING_URL` (marketing origin URL), `VITE_APP_URL`
+- admin: `VITE_API_BASE_URL` (backend, ending in `/api/v1`), `VITE_MARKETING_URL` (marketing origin URL)
 
 Demo mode is off in these builds, so screens whose endpoints the backend lacks show a "not available yet" message.

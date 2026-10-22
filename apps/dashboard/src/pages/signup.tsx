@@ -1,3 +1,4 @@
+import { env } from "#/env/client";
 import { Button } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
@@ -98,14 +99,14 @@ export default function Signup() {
             <span>
               I agree to the{" "}
               <a
-                href={`${import.meta.env.VITE_MARKETING_URL ?? ""}/terms`}
+                href={`${env.VITE_MARKETING_URL}/terms`}
                 className="font-bold text-link underline"
               >
                 terms &amp; conditions
               </a>{" "}
               and{" "}
               <a
-                href={`${import.meta.env.VITE_MARKETING_URL ?? ""}/privacy`}
+                href={`${env.VITE_MARKETING_URL}/privacy`}
                 className="font-bold text-link underline"
               >
                 privacy policy

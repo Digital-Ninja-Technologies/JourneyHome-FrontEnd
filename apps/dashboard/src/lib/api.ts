@@ -1,17 +1,16 @@
+import { env } from "#/env/client";
 import { mockRequest, NOT_MOCKED } from "../mocks";
 import { ApiError } from "./errors";
 
 export { ApiError, isUnsupported, UNSUPPORTED_MESSAGE } from "./errors";
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3043/api/v1";
+const BASE_URL = env.VITE_API_BASE_URL;
 
 /**
  * Demo mode simulates the endpoints the backend doesn't have yet (verification codes, password reset,
  * profile, saved cards). On by default in dev; set VITE_USE_MOCKS=true/false to override.
  */
-export const USE_MOCKS: boolean = import.meta.env.VITE_USE_MOCKS
-  ? import.meta.env.VITE_USE_MOCKS === "true"
-  : import.meta.env.DEV;
+export const USE_MOCKS: boolean = env.VITE_USE_MOCKS;
 
 let getToken: () => string | null = () => null;
 let onUnauthorized: () => void = () => {};

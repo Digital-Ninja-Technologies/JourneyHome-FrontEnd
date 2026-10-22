@@ -1,3 +1,4 @@
+import { env } from "#/env/client";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
 import {
@@ -200,7 +201,7 @@ function AppLayout() {
           )}
         >
           <a
-            href={import.meta.env.VITE_MARKETING_URL ?? "/"}
+            href={env.VITE_MARKETING_URL}
             title={collapsed ? "Back to site" : undefined}
             className={cn(
               "flex h-10 items-center gap-3 rounded-xl px-3.5 text-sm font-semibold text-canvas/70 hover:text-canvas",

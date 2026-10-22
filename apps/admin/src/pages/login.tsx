@@ -1,9 +1,10 @@
+import { env } from "#/env/client";
 import { Button } from "@journeyhome/ui/components/button";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "@/auth/auth-context";
 
-const MARKETING_URL = import.meta.env.VITE_MARKETING_URL ?? "/";
+const MARKETING_URL = env.VITE_MARKETING_URL;
 
 export default function Login() {
   const { login } = useAuth();

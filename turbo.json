@@ -1,7 +1,29 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "VITE_API_BASE_URL",
+    "VITE_MARKETING_URL",
+    "VITE_APP_URL",
+    "VITE_SITE_URL",
+    "VITE_USE_MOCKS",
+    "APP_URL",
+    "SITE_URL",
+    "LOG_LEVEL"
+  ],
   "tasks": {
-    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", ".output/**", ".vercel/output/**"] },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".output/**", ".vercel/output/**"],
+      "env": [
+        "VITE_API_BASE_URL",
+        "VITE_MARKETING_URL",
+        "VITE_APP_URL",
+        "VITE_SITE_URL",
+        "VITE_USE_MOCKS",
+        "APP_URL",
+        "SITE_URL"
+      ]
+    },
     "typecheck": { "dependsOn": ["^typecheck"] },
     "test": { "dependsOn": ["^test"] },
     "lint": {},

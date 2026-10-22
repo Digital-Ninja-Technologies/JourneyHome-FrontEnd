@@ -265,3 +265,14 @@ Routes live at the ROOT (`/`), not under `/app`:
 - Added `@journeyhome/ui/lib/format` exporting shared currency and date formatters.
 - Consumed `@journeyhome/schemas` in `apps/admin/src/lib/search-schemas.ts`.
 
+### Stage 2: Environment Validation with t3-env
+- Installed `@t3-oss/env-core`.
+- Created `src/env/client.ts` with prefix `"VITE_"`, validating:
+  - `VITE_API_BASE_URL`: URL default `http://localhost:4000/api/v1` (replacing `VITE_API_URL`).
+  - `VITE_MARKETING_URL`: URL default `http://localhost:3000`.
+  - `VITE_USE_MOCKS`: string `"true"`/`"false"` -> boolean transformation (defaulting to dev mode in development, false in production).
+- Added `#/` alias to `tsconfig.json` and `vite.config.ts`.
+- Replaced all direct `import.meta.env` access across `src/` with `env` from `#/env/client`.
+- Updated `.env.example`, root `turbo.json` with `globalEnv` and task env passthrough, and `README.md` Vercel deployment documentation.
+
+
