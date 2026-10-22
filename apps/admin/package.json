@@ -6,6 +6,7 @@
     "dev": "vite --port 5174",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
+    "test": "playwright test",
     "generate-routes": "tsr generate",
     "preview": "vite preview",
     "email": "dotenv run -f .env.local -- email dev --dir src/modules/emails/templates",

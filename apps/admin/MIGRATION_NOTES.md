@@ -100,6 +100,32 @@
 - Verified: `apps/admin/src` contains zero references to `react-router-dom`, `NavLink`, or `useLocation`.
 - Ran `pnpm --filter @journeyhome/admin typecheck` and `build`: PASSED with 0 errors.
 
+## Stage 6: Verification & Automated Smoke Tests
+
+- Bundle size comparison:
+  - **Stage 0 Baseline:**
+    - HTML: 0.40 kB (gzip: 0.27 kB)
+    - CSS: 25.33 kB (gzip: 5.63 kB)
+    - JS: 389.27 kB (gzip: 118.31 kB) in a single monolithic bundle.
+  - **Stage 6 TanStack Router:**
+    - HTML: 0.73 kB (gzip: 0.35 kB)
+    - CSS: 25.84 kB (gzip: 5.70 kB)
+    - JS: Code-split across 28 chunks.
+    - Initial page load bundle (`index-*.js`): ~341 kB (gzip: ~105 kB) — **~48 kB reduction in initial payload**.
+    - Individual route chunks (0.09 kB to 8.6 kB) are prefetched and lazy-loaded on intent.
+- Added Playwright test suite (`apps/admin/tests/admin.spec.ts`) with 9 automated smoke tests covering all required flows:
+  1. `Login page loads without console errors` (clean console, visible sign-in form).
+  2. `Auth-guard redirects unauthenticated user to /login with redirect param` (verified on `/`, `/users`, `/plans`, `/service-requests`, `/payments`, `/audit-log`, `/settings`).
+  3. `Guest-guard redirects authenticated user away from /login` (redirects to `/` or preserved `redirect` query parameter).
+  4. `Navigation between key pages works for authenticated staff in AdminShell` (verified sidebar links, page headers, tables, chips, and content on `/`, `/users`, `/plans`, `/service-requests`, `/payments`, `/audit-log`, `/settings`).
+  5. `Dynamic route loads with param (/users/$id)` (verified customer name, email, plans count).
+  6. `Dynamic route loads with param (/plans/$id)` (verified covered person, balance, status transition dropdown).
+  7. `Dynamic route loads with param (/service-requests/$id)` (verified requester, venue, documents review).
+  8. `Wildcard / unknown route redirects to /` (verified fallback catch-all).
+  9. `Login submission navigates to redirect target` (verified form submission with return redirect).
+- Test execution: All 9 smoke tests PASSED (8.9s).
+- Typecheck & Build: `tsc --noEmit` 0 errors, `vite build` 100% green.
+
 ---
 
 ## ROUTE CONTRACT (Verification Checklist)
