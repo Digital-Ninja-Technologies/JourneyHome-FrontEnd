@@ -1,16 +1,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { Pill } from "@/components/status-pill";
-import { formatDay } from "../lib/format";
-import { useServiceRequest } from "../lib/queries";
+import { formatDay } from "@/lib/format";
+import { useServiceRequest } from "@/lib/queries";
 import {
   DOC_LABEL,
   openServiceDocument,
   REQUIRED_DOCS,
   uploadServiceDocument,
   validateFile,
-} from "../lib/serviceRequests";
-import type { DocumentType, ServiceDocument } from "../lib/types";
+} from "@/lib/service-requests";
+import type { DocumentType, ServiceDocument } from "@/lib/types";
 
 const TONE = {
   Pending: "review",

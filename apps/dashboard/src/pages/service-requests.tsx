@@ -2,15 +2,15 @@ import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { RequestDocuments } from "@/components/request-documents";
 import { Pill } from "@/components/status-pill";
-import { formatDay } from "../lib/format";
-import { usePlans, useServiceRequests } from "../lib/queries";
+import { formatDay } from "@/lib/format";
+import { usePlans, useServiceRequests } from "@/lib/queries";
 import {
   ELIGIBLE_PLAN,
   requestMessage,
   requestState,
   STEPS,
-} from "../lib/serviceRequests";
-import type { Plan, ServiceRequest } from "../lib/types";
+} from "@/lib/service-requests";
+import type { Plan, ServiceRequest } from "@/lib/types";
 
 const HOW = [
   [

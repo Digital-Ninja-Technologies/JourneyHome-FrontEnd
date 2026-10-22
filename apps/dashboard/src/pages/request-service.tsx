@@ -7,17 +7,17 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Info, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { api } from "../lib/api";
-import { formatMoney } from "../lib/format";
-import { usePlans } from "../lib/queries";
+import { api } from "@/lib/api";
+import { formatMoney } from "@/lib/format";
+import { usePlans } from "@/lib/queries";
 import {
   DOC_LABEL,
   ELIGIBLE_PLAN,
   REQUIRED_DOCS,
   uploadServiceDocument,
   validateFile,
-} from "../lib/serviceRequests";
-import type { DocumentType, ServiceRequest } from "../lib/types";
+} from "@/lib/service-requests";
+import type { DocumentType, ServiceRequest } from "@/lib/types";
 
 const STATES = [
   "Abia",
