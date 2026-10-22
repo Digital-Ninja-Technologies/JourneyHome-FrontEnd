@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import VerifyCode from "../../pages/VerifyCode";
+import VerifyCode from "@/pages/verify-code";
 
 export const Route = createFileRoute("/signup/verify")({
   beforeLoad: ({ context, location }) => {

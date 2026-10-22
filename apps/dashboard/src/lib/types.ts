@@ -1,8 +1,24 @@
 export type PlanStatus =
-  | "Pending" | "Active" | "Payment_Due" | "Overdue" | "Paused" | "Service_Request" | "Under_Review"
-  | "Approved" | "Service_Scheduled" | "Completed" | "Cancelled" | "Expired";
+  | "Pending"
+  | "Active"
+  | "Payment_Due"
+  | "Overdue"
+  | "Paused"
+  | "Service_Request"
+  | "Under_Review"
+  | "Approved"
+  | "Service_Scheduled"
+  | "Completed"
+  | "Cancelled"
+  | "Expired";
 
-export type PaymentStatus = "Pending" | "Processing" | "Successful" | "Failed" | "Refunded" | "Cancelled";
+export type PaymentStatus =
+  | "Pending"
+  | "Processing"
+  | "Successful"
+  | "Failed"
+  | "Refunded"
+  | "Cancelled";
 
 export interface CoveredPerson {
   fullName: string;
@@ -51,9 +67,18 @@ export interface Package {
 }
 
 export type ServiceRequestStatus =
-  | "Submitted" | "Under_Review" | "More_Info_Required" | "Docs_Verified" | "Approved" | "Rejected" | "Cancelled";
+  | "Submitted"
+  | "Under_Review"
+  | "More_Info_Required"
+  | "Docs_Verified"
+  | "Approved"
+  | "Rejected"
+  | "Cancelled";
 
-export type DocumentType = "Death_Certificate" | "Valid_Identification" | "Other_Proof";
+export type DocumentType =
+  | "Death_Certificate"
+  | "Valid_Identification"
+  | "Other_Proof";
 
 export interface ServiceRequest {
   _id: string;

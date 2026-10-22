@@ -1,4 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { api, configureApi } from "../lib/api";
 
 export interface User {
@@ -17,7 +24,12 @@ interface AuthResult {
 interface AuthContextValue {
   user: User | null;
   login: (email: string, password: string, remember: boolean) => Promise<void>;
-  signup: (name: string, email: string, password: string, phone?: string) => Promise<void>;
+  signup: (
+    name: string,
+    email: string,
+    password: string,
+    phone?: string,
+  ) => Promise<void>;
   updateUser: (patch: Partial<Pick<User, "name" | "email">>) => void;
   logout: () => void;
 }
@@ -31,7 +43,8 @@ interface Session extends AuthResult {
 
 function readSession(): Session | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY) ?? sessionStorage.getItem(STORAGE_KEY);
+    const raw =
+      localStorage.getItem(STORAGE_KEY) ?? sessionStorage.getItem(STORAGE_KEY);
     return raw ? (JSON.parse(raw) as Session) : null;
   } catch {
     return null;
@@ -42,7 +55,11 @@ function writeSession(session: Session | null) {
   try {
     localStorage.removeItem(STORAGE_KEY);
     sessionStorage.removeItem(STORAGE_KEY);
-    if (session) (session.remember ? localStorage : sessionStorage).setItem(STORAGE_KEY, JSON.stringify(session));
+    if (session)
+      (session.remember ? localStorage : sessionStorage).setItem(
+        STORAGE_KEY,
+        JSON.stringify(session),
+      );
   } catch {
     /* storage unavailable; session lasts until reload */
   }
@@ -51,7 +68,9 @@ function writeSession(session: Session | null) {
 // The customer app only admits customers; admins use the separate admin console.
 function assertCustomer(user: User) {
   if (user.role === "admin" || user.role === "super_admin") {
-    throw new Error("This is the customer app. Please use the admin console to log in.");
+    throw new Error(
+      "This is the customer app. Please use the admin console to log in.",
+    );
   }
 }
 
@@ -64,7 +83,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    configureApi({ getToken: () => session?.token ?? null, onUnauthorized: logout });
+    configureApi({
+      getToken: () => session?.token ?? null,
+      onUnauthorized: logout,
+    });
   }, [session, logout]);
 
   const start = useCallback((result: AuthResult, remember: boolean) => {
@@ -79,10 +101,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user: session?.user ?? null,
       logout,
       login: async (email, password, remember) =>
-        start(await api<AuthResult>("/auth/login", { body: { email, password } }), remember),
+        start(
+          await api<AuthResult>("/auth/login", { body: { email, password } }),
+          remember,
+        ),
       // `phone` isn't stored by the current backend; it is sent so it can be kept once supported.
       signup: async (name, email, password, phone) =>
-        start(await api<AuthResult>("/auth/signup", { body: { name, email, password, role: "customer", ...(phone && { phone }) } }), true),
+        start(
+          await api<AuthResult>("/auth/signup", {
+            body: {
+              name,
+              email,
+              password,
+              role: "customer",
+              ...(phone && { phone }),
+            },
+          }),
+          true,
+        ),
       updateUser: (patch) =>
         setSession((cur) => {
           if (!cur) return cur;

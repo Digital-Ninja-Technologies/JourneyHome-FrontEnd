@@ -1,14 +1,9 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import Welcome from "../pages/Welcome";
-
-interface WelcomeSearch {
-  plan?: string;
-}
+import { planSearchSchema } from "@/lib/search-schemas";
+import Welcome from "@/pages/welcome";
 
 export const Route = createFileRoute("/welcome")({
-  validateSearch: (search: Record<string, unknown>): WelcomeSearch => ({
-    plan: search.plan != null ? String(search.plan) : undefined,
-  }),
+  validateSearch: (search) => planSearchSchema.parse(search),
   beforeLoad: ({ context, location }) => {
     if (!context.auth.user) {
       throw redirect({

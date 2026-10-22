@@ -1,13 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import RequestService from "../../../pages/RequestService";
-
-interface RequestServiceSearch {
-  plan?: string;
-}
+import { planSearchSchema } from "@/lib/search-schemas";
+import RequestService from "@/pages/request-service";
 
 export const Route = createFileRoute("/app/service-requests/new")({
-  validateSearch: (search: Record<string, unknown>): RequestServiceSearch => ({
-    plan: search.plan != null ? String(search.plan) : undefined,
-  }),
+  validateSearch: (search) => planSearchSchema.parse(search),
   component: RequestService,
 });

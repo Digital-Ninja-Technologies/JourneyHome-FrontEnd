@@ -1,8 +1,18 @@
-import { useRef } from "react";
 import { cn } from "@journeyhome/ui/lib/utils";
+import { useRef } from "react";
 
 /** Six single-digit boxes with auto-advance, backspace and paste support. */
-export function OtpInput({ value, onChange, length = 6, invalid }: { value: string; onChange: (v: string) => void; length?: number; invalid?: boolean }) {
+export function OtpInput({
+  value,
+  onChange,
+  length = 6,
+  invalid,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  length?: number;
+  invalid?: boolean;
+}) {
   const refs = useRef<(HTMLInputElement | null)[]>([]);
   const digits = Array.from({ length }, (_, i) => value[i] ?? "");
 
@@ -13,11 +23,17 @@ export function OtpInput({ value, onChange, length = 6, invalid }: { value: stri
   }
 
   return (
-    <div className="flex justify-center gap-2.5" role="group" aria-label="Verification code">
+    <div
+      className="flex justify-center gap-2.5"
+      role="group"
+      aria-label="Verification code"
+    >
       {digits.map((d, i) => (
         <input
           key={i}
-          ref={(el) => { refs.current[i] = el; }}
+          ref={(el) => {
+            refs.current[i] = el;
+          }}
           value={d}
           inputMode="numeric"
           autoComplete={i === 0 ? "one-time-code" : "off"}
@@ -35,7 +51,10 @@ export function OtpInput({ value, onChange, length = 6, invalid }: { value: stri
             if (e.key === "ArrowRight") refs.current[i + 1]?.focus();
           }}
           onPaste={(e) => {
-            const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, length);
+            const pasted = e.clipboardData
+              .getData("text")
+              .replace(/\D/g, "")
+              .slice(0, length);
             if (!pasted) return;
             e.preventDefault();
             onChange(pasted);

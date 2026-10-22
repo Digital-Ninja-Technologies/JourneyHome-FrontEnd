@@ -1,13 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import MakePayment from "../../../pages/MakePayment";
-
-interface MakePaymentSearch {
-  plan?: string;
-}
+import { planSearchSchema } from "@/lib/search-schemas";
+import MakePayment from "@/pages/make-payment";
 
 export const Route = createFileRoute("/app/payments/new")({
-  validateSearch: (search: Record<string, unknown>): MakePaymentSearch => ({
-    plan: search.plan != null ? String(search.plan) : undefined,
-  }),
+  validateSearch: (search) => planSearchSchema.parse(search),
   component: MakePayment,
 });

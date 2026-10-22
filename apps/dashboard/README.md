@@ -47,6 +47,7 @@ Routing is powered by **TanStack Router** using file-based routing under `src/ro
    - For a dynamic route, e.g. `/app/documents/:docId`: create `src/routes/app/documents/$docId.tsx`.
 
 2. **Define the route definition**:
+
    ```tsx
    import { createFileRoute } from "@tanstack/react-router";
    import MyPage from "../../pages/MyPage";
@@ -67,11 +68,12 @@ Routing is powered by **TanStack Router** using file-based routing under `src/ro
 Auth state is provided to TanStack Router via RouterContext in `src/router.tsx` and updated dynamically in `src/App.tsx`:
 
 ```tsx
-<RouterProvider router={router} context={{ queryClient, auth: { user } }} />
+<RouterProvider router={router} context={{ queryClient, auth: { user } }} />;
 ```
 
 - When `user` state transitions, `App.tsx` calls `router.invalidate()` so that all active routes re-evaluate `beforeLoad`.
 - **Protected Layout (`src/routes/app/route.tsx`)**:
+
   ```tsx
   export const Route = createFileRoute("/app")({
     beforeLoad: ({ context, location }) => {
@@ -86,6 +88,7 @@ Auth state is provided to TanStack Router via RouterContext in `src/router.tsx` 
   });
   ```
 - **Guest-Only Routes (`/login`, `/signup`)**:
+
   ```tsx
   beforeLoad: ({ context, search }) => {
     if (context.auth.user) {
@@ -102,20 +105,21 @@ All search parameters are typed and validated using `validateSearch`:
 
 ```tsx
 interface PlansSearch {
-  new?: string;
+	new?: string;
 }
 
 export const Route = createFileRoute("/app/plans/")({
-  validateSearch: (search: Record<string, unknown>): PlansSearch => ({
-    new: search.new != null ? String(search.new) : undefined,
-  }),
-  component: Plans,
+	validateSearch: (search: Record<string, unknown>): PlansSearch => ({
+		new: search.new != null ? String(search.new) : undefined,
+	}),
+	component: Plans,
 });
 ```
 
 Components use typed hooks:
 - **Read search params**: `const search = useSearch({ from: "/app/plans/" });`
 - **Update search params**:
+
   ```tsx
   const navigate = useNavigate({ from: "/app/plans/" });
   navigate({ search: { new: "1" }, replace: true });
@@ -126,6 +130,7 @@ Components use typed hooks:
 ### Navigation & Links
 
 - **Active Links**:
+
   ```tsx
   <Link
     to="/app/plans"
@@ -137,6 +142,7 @@ Components use typed hooks:
   </Link>
   ```
 - **Dynamic Param Links**:
+
   ```tsx
   <Link to="/app/plans/$id" params={{ id: plan._id }}>View Plan</Link>
   ```

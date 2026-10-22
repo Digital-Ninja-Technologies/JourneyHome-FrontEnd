@@ -29,18 +29,44 @@ export function planStatusLabel(s: PlanStatus) {
   return PLAN[s]?.[0] ?? s;
 }
 
-export type Tone = "active" | "due" | "review" | "approved" | "paused" | "cancelled";
+export type Tone =
+  | "active"
+  | "due"
+  | "review"
+  | "approved"
+  | "paused"
+  | "cancelled";
 
-export function Pill({ label, tone, className }: { label: string; tone: Tone; className?: string }) {
+export function Pill({
+  label,
+  tone,
+  className,
+}: {
+  label: string;
+  tone: Tone;
+  className?: string;
+}) {
   return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold", TONES[tone], className)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold",
+        TONES[tone],
+        className,
+      )}
+    >
       <span className="size-1.5 rounded-full bg-current" />
       {label}
     </span>
   );
 }
 
-export function StatusPill({ status, className }: { status: PlanStatus; className?: string }) {
+export function StatusPill({
+  status,
+  className,
+}: {
+  status: PlanStatus;
+  className?: string;
+}) {
   const [label, tone] = PLAN[status] ?? [status, "paused"];
   return <Pill label={label} tone={tone as Tone} className={className} />;
 }

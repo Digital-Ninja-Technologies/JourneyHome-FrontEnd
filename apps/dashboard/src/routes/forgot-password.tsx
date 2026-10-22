@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import ForgotPassword from "../pages/ForgotPassword";
+import ForgotPassword from "@/pages/forgot-password";
 
 export const Route = createFileRoute("/forgot-password")({
   beforeLoad: ({ context }) => {

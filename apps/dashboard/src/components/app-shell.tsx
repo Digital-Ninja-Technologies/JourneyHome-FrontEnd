@@ -1,8 +1,21 @@
-import { useState } from "react";
-import { Link, Outlet } from "@tanstack/react-router";
-import { ArrowLeft, Bell, ChevronLeft, ChevronRight, CreditCard, Camera, FileText, LayoutDashboard, LogOut, Menu, User, X } from "lucide-react";
 import { cn } from "@journeyhome/ui/lib/utils";
-import { useAuth } from "../auth/AuthContext";
+import { Link, Outlet } from "@tanstack/react-router";
+import {
+  ArrowLeft,
+  Bell,
+  Camera,
+  ChevronLeft,
+  ChevronRight,
+  CreditCard,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  User,
+  X,
+} from "lucide-react";
+import { useState } from "react";
+import { useAuth } from "../auth/auth-context";
 
 const NAV = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -62,15 +75,44 @@ export function AppShell() {
           collapsed ? "md:w-[72px] md:items-center md:px-3" : "md:w-[248px]",
         )}
       >
-        <div className={cn("flex items-center", collapsed ? "md:flex-col md:gap-3.5" : "justify-between")}>
-          <Link to="/app" className="flex items-center gap-2.5" aria-label="Journey Home" onClick={closeMobile}>
+        <div
+          className={cn(
+            "flex items-center",
+            collapsed ? "md:flex-col md:gap-3.5" : "justify-between",
+          )}
+        >
+          <Link
+            to="/app"
+            className="flex items-center gap-2.5"
+            aria-label="Journey Home"
+            onClick={closeMobile}
+          >
             <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden>
-              <path d="M16 56 V30 A16 16 0 0 1 48 30 V56" fill="none" stroke="#FBF9F4" strokeWidth="4.5" strokeLinecap="round" />
+              <path
+                d="M16 56 V30 A16 16 0 0 1 48 30 V56"
+                fill="none"
+                stroke="#FBF9F4"
+                strokeWidth="4.5"
+                strokeLinecap="round"
+              />
               <circle cx="32" cy="40" r="6" fill="#D4A55A" />
-              <line x1="8" y1="56" x2="56" y2="56" stroke="#FBF9F4" strokeWidth="4.5" strokeLinecap="round" />
+              <line
+                x1="8"
+                y1="56"
+                x2="56"
+                y2="56"
+                stroke="#FBF9F4"
+                strokeWidth="4.5"
+                strokeLinecap="round"
+              />
             </svg>
             {!(collapsed && !mobileOpen) && (
-              <span className={cn("font-serif text-[22px]", collapsed && "hidden md:inline")}>
+              <span
+                className={cn(
+                  "font-serif text-[22px]",
+                  collapsed && "hidden md:inline",
+                )}
+              >
                 Journey <span className="italic text-accent">Home</span>
               </span>
             )}
@@ -81,7 +123,11 @@ export function AppShell() {
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             className="hidden rounded-md p-1 text-canvas/60 hover:text-canvas md:inline-flex"
           >
-            {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
+            {collapsed ? (
+              <ChevronRight className="size-4" />
+            ) : (
+              <ChevronLeft className="size-4" />
+            )}
           </button>
           <button
             type="button"
@@ -114,9 +160,15 @@ export function AppShell() {
           ))}
         </nav>
 
-        <div className={cn("mt-auto flex flex-col gap-3 rounded-2xl border border-canvas/20 p-5", collapsed && "md:hidden")}>
+        <div
+          className={cn(
+            "mt-auto flex flex-col gap-3 rounded-2xl border border-canvas/20 p-5",
+            collapsed && "md:hidden",
+          )}
+        >
           <div className="font-serif text-lg leading-snug">
-            When the time comes, <span className="italic text-accent">we&rsquo;re here.</span>
+            When the time comes,{" "}
+            <span className="italic text-accent">we&rsquo;re here.</span>
           </div>
           <div className="text-xs leading-relaxed text-canvas/70">
             Submit documents and we&rsquo;ll coordinate everything, with care.
@@ -129,7 +181,12 @@ export function AppShell() {
             Request service
           </Link>
         </div>
-        <div className={cn("flex flex-col gap-1", collapsed && "md:mt-auto md:items-center")}>
+        <div
+          className={cn(
+            "flex flex-col gap-1",
+            collapsed && "md:mt-auto md:items-center",
+          )}
+        >
           <a
             href={import.meta.env.VITE_MARKETING_URL ?? "/"}
             title={collapsed ? "Back to site" : undefined}
@@ -157,11 +214,29 @@ export function AppShell() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-canvas px-4 py-3.5 md:hidden">
-          <Link to="/app" className="flex items-center gap-2" aria-label="Journey Home">
+          <Link
+            to="/app"
+            className="flex items-center gap-2"
+            aria-label="Journey Home"
+          >
             <svg width="24" height="24" viewBox="0 0 64 64" aria-hidden>
-              <path d="M16 56 V30 A16 16 0 0 1 48 30 V56" fill="none" stroke="#0F2420" strokeWidth="4.5" strokeLinecap="round" />
+              <path
+                d="M16 56 V30 A16 16 0 0 1 48 30 V56"
+                fill="none"
+                stroke="#0F2420"
+                strokeWidth="4.5"
+                strokeLinecap="round"
+              />
               <circle cx="32" cy="40" r="6" fill="#D4A55A" />
-              <line x1="8" y1="56" x2="56" y2="56" stroke="#0F2420" strokeWidth="4.5" strokeLinecap="round" />
+              <line
+                x1="8"
+                y1="56"
+                x2="56"
+                y2="56"
+                stroke="#0F2420"
+                strokeWidth="4.5"
+                strokeLinecap="round"
+              />
             </svg>
             <span className="font-serif text-lg text-foreground">
               Journey <span className="italic text-link">Home</span>

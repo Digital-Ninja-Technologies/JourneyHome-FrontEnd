@@ -1,13 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import Plans from "../../../pages/Plans";
-
-interface PlansSearch {
-  new?: string;
-}
+import { plansSearchSchema } from "@/lib/search-schemas";
+import Plans from "@/pages/plans";
 
 export const Route = createFileRoute("/app/plans/")({
-  validateSearch: (search: Record<string, unknown>): PlansSearch => ({
-    new: search.new != null ? String(search.new) : undefined,
-  }),
+  validateSearch: (search) => plansSearchSchema.parse(search),
   component: Plans,
 });
