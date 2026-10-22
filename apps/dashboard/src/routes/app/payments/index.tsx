@@ -7,7 +7,7 @@ interface PaymentsSearch {
 
 export const Route = createFileRoute("/app/payments/")({
   validateSearch: (search: Record<string, unknown>): PaymentsSearch => ({
-    plan: typeof search.plan === "string" ? search.plan : undefined,
+    plan: search.plan != null ? String(search.plan) : undefined,
   }),
   component: Payments,
 });

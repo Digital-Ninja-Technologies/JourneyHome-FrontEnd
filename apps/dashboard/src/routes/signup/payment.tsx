@@ -7,7 +7,7 @@ interface OnboardingPaymentSearch {
 
 export const Route = createFileRoute("/signup/payment")({
   validateSearch: (search: Record<string, unknown>): OnboardingPaymentSearch => ({
-    plan: typeof search.plan === "string" ? search.plan : undefined,
+    plan: search.plan != null ? String(search.plan) : undefined,
   }),
   beforeLoad: ({ context, location }) => {
     if (!context.auth.user) {

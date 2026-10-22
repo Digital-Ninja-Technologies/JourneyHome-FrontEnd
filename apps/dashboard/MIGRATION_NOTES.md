@@ -87,6 +87,34 @@
 - Verified: `apps/dashboard/src` contains zero references to `react-router-dom`, `useSearchParams`, or `NavLink`.
 - Ran `pnpm --filter @journeyhome/dashboard typecheck` and `build`: PASSED with 0 errors.
 
+## Stage 6: Verification & Automated Smoke Tests
+- Bundle size comparison:
+  - **Stage 0 Baseline:**
+    - HTML: 0.39 kB (gzip: 0.27 kB)
+    - CSS: 31.10 kB (gzip: 6.50 kB)
+    - JS: 485.87 kB (gzip: 153.94 kB) in a single monolithic bundle.
+  - **Stage 6 TanStack Router:**
+    - HTML: 0.55 kB (gzip: 0.31 kB)
+    - CSS: 31.10 kB (gzip: 6.50 kB)
+    - JS: Code-split across 51 chunks.
+    - Initial page load bundle (`index` + `link` + `utils`): ~358 kB (gzip: ~115 kB) — **~127 kB reduction in initial payload**.
+    - Individual route chunks (0.5 kB to 12 kB) are prefetched and lazy-loaded on intent.
+    - Total size across all chunks combined: ~482 kB (gzip: ~152 kB).
+- Search parameter validator robustness:
+  - Upgraded all `validateSearch` functions to coerce string/number parameters safely using `search.param != null ? String(search.param) : undefined` across all routes.
+- Added Playwright test suite (`apps/dashboard/tests/dashboard.spec.ts`) with 8 automated smoke tests covering all required flows:
+  1. `Login page loads without console errors` (clean console, no runtime errors).
+  2. `Auth-guard redirects unauthenticated user to /login` (preserves redirect return target).
+  3. `Navigation between key pages works for authenticated user` (`/app`, `/app/plans`, `/app/payments`, `/app/service-requests`, `/app/profile`) with active navigation styles and verified content rendering.
+  4. `Dynamic route loads with param (/app/plans/$id)` (verified `$id` param resolution).
+  5. `Route with search params preserves and updates them` (verified `card_added=1` search param banner, param dismissal, and `/app/payments?plan=...` filter).
+  6. `Onboarding step-through works for authenticated user` (verified `/signup/verify`, `/signup/plan`, `/signup/payment?plan=...`, and `/welcome?plan=...`).
+  7. `Paystack callback route handles query params without crashing` (verified `reference` and `trxref` handling).
+  8. `Wildcard / unknown route redirects to /app or /login` (verified catch-all redirect).
+- Test execution: All 8 smoke tests PASSED (19.2s).
+- Typecheck & Build: `tsc --noEmit` 0 errors, `vite build` 100% green.
+
+
 
 
 

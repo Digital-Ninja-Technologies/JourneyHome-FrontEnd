@@ -7,7 +7,7 @@ interface LoginSearch {
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search: Record<string, unknown>): LoginSearch => ({
-    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+    redirect: search.redirect != null ? String(search.redirect) : undefined,
   }),
   beforeLoad: ({ context, search }) => {
     if (context.auth.user) {

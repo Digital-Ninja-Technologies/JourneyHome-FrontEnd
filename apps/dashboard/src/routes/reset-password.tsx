@@ -7,7 +7,7 @@ interface ResetPasswordSearch {
 
 export const Route = createFileRoute("/reset-password")({
   validateSearch: (search: Record<string, unknown>): ResetPasswordSearch => ({
-    token: typeof search.token === "string" ? search.token : undefined,
+    token: search.token != null ? String(search.token) : undefined,
   }),
   beforeLoad: ({ context }) => {
     if (context.auth.user) {

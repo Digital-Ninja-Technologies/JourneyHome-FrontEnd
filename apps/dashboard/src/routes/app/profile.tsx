@@ -7,7 +7,7 @@ interface ProfileSearch {
 
 export const Route = createFileRoute("/app/profile")({
   validateSearch: (search: Record<string, unknown>): ProfileSearch => ({
-    card_added: typeof search.card_added === "string" ? search.card_added : undefined,
+    card_added: search.card_added != null ? String(search.card_added) : undefined,
   }),
   component: Profile,
 });

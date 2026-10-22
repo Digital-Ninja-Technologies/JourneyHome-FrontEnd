@@ -7,7 +7,7 @@ interface WelcomeSearch {
 
 export const Route = createFileRoute("/welcome")({
   validateSearch: (search: Record<string, unknown>): WelcomeSearch => ({
-    plan: typeof search.plan === "string" ? search.plan : undefined,
+    plan: search.plan != null ? String(search.plan) : undefined,
   }),
   beforeLoad: ({ context, location }) => {
     if (!context.auth.user) {

@@ -7,7 +7,7 @@ interface RequestServiceSearch {
 
 export const Route = createFileRoute("/app/service-requests/new")({
   validateSearch: (search: Record<string, unknown>): RequestServiceSearch => ({
-    plan: typeof search.plan === "string" ? search.plan : undefined,
+    plan: search.plan != null ? String(search.plan) : undefined,
   }),
   component: RequestService,
 });

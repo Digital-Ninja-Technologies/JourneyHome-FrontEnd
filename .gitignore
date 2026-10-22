@@ -10,3 +10,5 @@ dist
 .nitro
 .vercel
 .tanstack
+test-results
+playwright-report

@@ -8,8 +8,8 @@ interface PaymentCallbackSearch {
 
 export const Route = createFileRoute("/app/payments/callback")({
   validateSearch: (search: Record<string, unknown>): PaymentCallbackSearch => ({
-    reference: typeof search.reference === "string" ? search.reference : undefined,
-    trxref: typeof search.trxref === "string" ? search.trxref : undefined,
+    reference: search.reference != null ? String(search.reference) : undefined,
+    trxref: search.trxref != null ? String(search.trxref) : undefined,
   }),
   component: PaymentCallback,
 });

@@ -7,7 +7,7 @@ interface MakePaymentSearch {
 
 export const Route = createFileRoute("/app/payments/new")({
   validateSearch: (search: Record<string, unknown>): MakePaymentSearch => ({
-    plan: typeof search.plan === "string" ? search.plan : undefined,
+    plan: search.plan != null ? String(search.plan) : undefined,
   }),
   component: MakePayment,
 });
