@@ -29,6 +29,32 @@
   - In `App.tsx`, hooked `router.invalidate()` to `user` state changes so auth transitions automatically trigger route re-evaluation.
 - Verified: App boots to root route with providers intact, dev server runs without errors.
 
+## Stage 3: Create the Routes
+- Created all 19 route files according to the route contract:
+  - `/` (`src/routes/index.tsx`): redirects to `/app`
+  - `/login` (`src/routes/login.tsx`): validated search `redirect?: string`, guest guard redirecting to `redirect` param or `/app`
+  - `/forgot-password` (`src/routes/forgot-password.tsx`): guest guard redirecting to `/app`
+  - `/reset-password` (`src/routes/reset-password.tsx`): validated search `token?: string`, guest guard redirecting to `/app`
+  - `/signup/` (`src/routes/signup/index.tsx`): guest guard redirecting to `/app`
+  - `/signup/verify` (`src/routes/signup/verify.tsx`): auth guard redirecting to `/login` with redirect search param
+  - `/signup/plan` (`src/routes/signup/plan.tsx`): auth guard redirecting to `/login` with redirect search param
+  - `/signup/payment` (`src/routes/signup/payment.tsx`): validated search `plan?: string`, auth guard
+  - `/welcome` (`src/routes/welcome.tsx`): validated search `plan?: string`, auth guard
+  - `/app` layout (`src/routes/app/route.tsx`): renders `AppShell` with `<Outlet />`, enforces auth guard on all nested `/app/*` routes
+  - `/app/` (`src/routes/app/index.tsx`): `Dashboard`
+  - `/app/plans/` (`src/routes/app/plans/index.tsx`): `Plans`, validated search `new?: string`
+  - `/app/plans/$id` (`src/routes/app/plans/$id.tsx`): `PlanDetail` with dynamic param `$id`
+  - `/app/service-requests/` (`src/routes/app/service-requests/index.tsx`): `ServiceRequests`
+  - `/app/service-requests/new` (`src/routes/app/service-requests/new.tsx`): `RequestService`, validated search `plan?: string`
+  - `/app/notifications` (`src/routes/app/notifications.tsx`): `Notifications`
+  - `/app/payments/` (`src/routes/app/payments/index.tsx`): `Payments`, validated search `plan?: string`
+  - `/app/payments/new` (`src/routes/app/payments/new.tsx`): `MakePayment`, validated search `plan?: string`
+  - `/app/payments/callback` (`src/routes/app/payments/callback.tsx`): `PaymentCallback`, validated search `reference?: string`, `trxref?: string`
+  - `/app/profile` (`src/routes/app/profile.tsx`): `Profile`, validated search `card_added?: string`
+- Generated `src/routeTree.gen.ts` with all 19 route nodes and full type safety.
+- Verified: `pnpm --filter @journeyhome/dashboard typecheck` and `build` succeed with 0 errors.
+
+
 
 
 ## Stage 0: Inventory & Route Contract

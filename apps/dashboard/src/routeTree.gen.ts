@@ -9,27 +9,462 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteRouteImport } from './routes/app/route'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AppNotificationsRouteImport } from './routes/app/notifications'
+import { Route as AppProfileRouteImport } from './routes/app/profile'
+import { Route as SignupIndexRouteImport } from './routes/signup/index'
+import { Route as SignupPaymentRouteImport } from './routes/signup/payment'
+import { Route as SignupPlanRouteImport } from './routes/signup/plan'
+import { Route as SignupVerifyRouteImport } from './routes/signup/verify'
+import { Route as AppPaymentsIndexRouteImport } from './routes/app/payments/index'
+import { Route as AppPaymentsCallbackRouteImport } from './routes/app/payments/callback'
+import { Route as AppPaymentsNewRouteImport } from './routes/app/payments/new'
+import { Route as AppPlansIndexRouteImport } from './routes/app/plans/index'
+import { Route as AppPlansIdRouteImport } from './routes/app/plans/$id'
+import { Route as AppServiceRequestsIndexRouteImport } from './routes/app/service-requests/index'
+import { Route as AppServiceRequestsNewRouteImport } from './routes/app/service-requests/new'
 
-export interface FileRoutesByFullPath {}
-export interface FileRoutesByTo {}
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const SignupIndexRoute = SignupIndexRouteImport.update({
+  id: '/signup/',
+  path: '/signup/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupPaymentRoute = SignupPaymentRouteImport.update({
+  id: '/signup/payment',
+  path: '/signup/payment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupPlanRoute = SignupPlanRouteImport.update({
+  id: '/signup/plan',
+  path: '/signup/plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupVerifyRoute = SignupVerifyRouteImport.update({
+  id: '/signup/verify',
+  path: '/signup/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppPaymentsIndexRoute = AppPaymentsIndexRouteImport.update({
+  id: '/payments/',
+  path: '/payments/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppPaymentsCallbackRoute = AppPaymentsCallbackRouteImport.update({
+  id: '/payments/callback',
+  path: '/payments/callback',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppPaymentsNewRoute = AppPaymentsNewRouteImport.update({
+  id: '/payments/new',
+  path: '/payments/new',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppPlansIndexRoute = AppPlansIndexRouteImport.update({
+  id: '/plans/',
+  path: '/plans/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppPlansIdRoute = AppPlansIdRouteImport.update({
+  id: '/plans/$id',
+  path: '/plans/$id',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppServiceRequestsIndexRoute = AppServiceRequestsIndexRouteImport.update({
+  id: '/service-requests/',
+  path: '/service-requests/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppServiceRequestsNewRoute = AppServiceRequestsNewRouteImport.update({
+  id: '/service-requests/new',
+  path: '/service-requests/new',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/app': typeof AppRouteRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/welcome': typeof WelcomeRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/signup/payment': typeof SignupPaymentRoute
+  '/signup/plan': typeof SignupPlanRoute
+  '/signup/verify': typeof SignupVerifyRoute
+  '/app/': typeof AppIndexRoute
+  '/signup/': typeof SignupIndexRoute
+  '/app/payments/callback': typeof AppPaymentsCallbackRoute
+  '/app/payments/new': typeof AppPaymentsNewRoute
+  '/app/plans/$id': typeof AppPlansIdRoute
+  '/app/service-requests/new': typeof AppServiceRequestsNewRoute
+  '/app/payments/': typeof AppPaymentsIndexRoute
+  '/app/plans/': typeof AppPlansIndexRoute
+  '/app/service-requests/': typeof AppServiceRequestsIndexRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/welcome': typeof WelcomeRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/signup/payment': typeof SignupPaymentRoute
+  '/signup/plan': typeof SignupPlanRoute
+  '/signup/verify': typeof SignupVerifyRoute
+  '/app': typeof AppIndexRoute
+  '/signup': typeof SignupIndexRoute
+  '/app/payments/callback': typeof AppPaymentsCallbackRoute
+  '/app/payments/new': typeof AppPaymentsNewRoute
+  '/app/plans/$id': typeof AppPlansIdRoute
+  '/app/service-requests/new': typeof AppServiceRequestsNewRoute
+  '/app/payments': typeof AppPaymentsIndexRoute
+  '/app/plans': typeof AppPlansIndexRoute
+  '/app/service-requests': typeof AppServiceRequestsIndexRoute
+}
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/app': typeof AppRouteRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/welcome': typeof WelcomeRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/signup/payment': typeof SignupPaymentRoute
+  '/signup/plan': typeof SignupPlanRoute
+  '/signup/verify': typeof SignupVerifyRoute
+  '/app/': typeof AppIndexRoute
+  '/signup/': typeof SignupIndexRoute
+  '/app/payments/callback': typeof AppPaymentsCallbackRoute
+  '/app/payments/new': typeof AppPaymentsNewRoute
+  '/app/plans/$id': typeof AppPlansIdRoute
+  '/app/service-requests/new': typeof AppServiceRequestsNewRoute
+  '/app/payments/': typeof AppPaymentsIndexRoute
+  '/app/plans/': typeof AppPlansIndexRoute
+  '/app/service-requests/': typeof AppServiceRequestsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: never
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/welcome'
+    | '/app/notifications'
+    | '/app/profile'
+    | '/signup/payment'
+    | '/signup/plan'
+    | '/signup/verify'
+    | '/app/'
+    | '/signup/'
+    | '/app/payments/callback'
+    | '/app/payments/new'
+    | '/app/plans/$id'
+    | '/app/service-requests/new'
+    | '/app/payments/'
+    | '/app/plans/'
+    | '/app/service-requests/'
   fileRoutesByTo: FileRoutesByTo
-  to: never
-  id: '__root__'
+  to:
+    | '/'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/welcome'
+    | '/app/notifications'
+    | '/app/profile'
+    | '/signup/payment'
+    | '/signup/plan'
+    | '/signup/verify'
+    | '/app'
+    | '/signup'
+    | '/app/payments/callback'
+    | '/app/payments/new'
+    | '/app/plans/$id'
+    | '/app/service-requests/new'
+    | '/app/payments'
+    | '/app/plans'
+    | '/app/service-requests'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/welcome'
+    | '/app/notifications'
+    | '/app/profile'
+    | '/signup/payment'
+    | '/signup/plan'
+    | '/signup/verify'
+    | '/app/'
+    | '/signup/'
+    | '/app/payments/callback'
+    | '/app/payments/new'
+    | '/app/plans/$id'
+    | '/app/service-requests/new'
+    | '/app/payments/'
+    | '/app/plans/'
+    | '/app/service-requests/'
   fileRoutesById: FileRoutesById
 }
-export interface RootRouteChildren {}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  AppRouteRoute: typeof AppRouteRouteWithChildren
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  WelcomeRoute: typeof WelcomeRoute
+  SignupPaymentRoute: typeof SignupPaymentRoute
+  SignupPlanRoute: typeof SignupPlanRoute
+  SignupVerifyRoute: typeof SignupVerifyRoute
+  SignupIndexRoute: typeof SignupIndexRoute
 }
 
-const rootRouteChildren: RootRouteChildren = {}
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/notifications': {
+      id: '/app/notifications'
+      path: '/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/signup/': {
+      id: '/signup/'
+      path: '/signup'
+      fullPath: '/signup/'
+      preLoaderRoute: typeof SignupIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup/payment': {
+      id: '/signup/payment'
+      path: '/signup/payment'
+      fullPath: '/signup/payment'
+      preLoaderRoute: typeof SignupPaymentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup/plan': {
+      id: '/signup/plan'
+      path: '/signup/plan'
+      fullPath: '/signup/plan'
+      preLoaderRoute: typeof SignupPlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup/verify': {
+      id: '/signup/verify'
+      path: '/signup/verify'
+      fullPath: '/signup/verify'
+      preLoaderRoute: typeof SignupVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/payments/': {
+      id: '/app/payments/'
+      path: '/payments'
+      fullPath: '/app/payments/'
+      preLoaderRoute: typeof AppPaymentsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/payments/callback': {
+      id: '/app/payments/callback'
+      path: '/payments/callback'
+      fullPath: '/app/payments/callback'
+      preLoaderRoute: typeof AppPaymentsCallbackRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/payments/new': {
+      id: '/app/payments/new'
+      path: '/payments/new'
+      fullPath: '/app/payments/new'
+      preLoaderRoute: typeof AppPaymentsNewRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/plans/': {
+      id: '/app/plans/'
+      path: '/plans'
+      fullPath: '/app/plans/'
+      preLoaderRoute: typeof AppPlansIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/plans/$id': {
+      id: '/app/plans/$id'
+      path: '/plans/$id'
+      fullPath: '/app/plans/$id'
+      preLoaderRoute: typeof AppPlansIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/service-requests/': {
+      id: '/app/service-requests/'
+      path: '/service-requests'
+      fullPath: '/app/service-requests/'
+      preLoaderRoute: typeof AppServiceRequestsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/service-requests/new': {
+      id: '/app/service-requests/new'
+      path: '/service-requests/new'
+      fullPath: '/app/service-requests/new'
+      preLoaderRoute: typeof AppServiceRequestsNewRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+  }
+}
+
+interface AppRouteRouteChildren {
+  AppNotificationsRoute: typeof AppNotificationsRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppPaymentsCallbackRoute: typeof AppPaymentsCallbackRoute
+  AppPaymentsNewRoute: typeof AppPaymentsNewRoute
+  AppPlansIdRoute: typeof AppPlansIdRoute
+  AppServiceRequestsNewRoute: typeof AppServiceRequestsNewRoute
+  AppPaymentsIndexRoute: typeof AppPaymentsIndexRoute
+  AppPlansIndexRoute: typeof AppPlansIndexRoute
+  AppServiceRequestsIndexRoute: typeof AppServiceRequestsIndexRoute
+}
+
+const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppNotificationsRoute: AppNotificationsRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppPaymentsCallbackRoute: AppPaymentsCallbackRoute,
+  AppPaymentsNewRoute: AppPaymentsNewRoute,
+  AppPlansIdRoute: AppPlansIdRoute,
+  AppServiceRequestsNewRoute: AppServiceRequestsNewRoute,
+  AppPaymentsIndexRoute: AppPaymentsIndexRoute,
+  AppPlansIndexRoute: AppPlansIndexRoute,
+  AppServiceRequestsIndexRoute: AppServiceRequestsIndexRoute,
+}
+
+const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
+  AppRouteRouteChildren,
+)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  AppRouteRoute: AppRouteRouteWithChildren,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  WelcomeRoute: WelcomeRoute,
+  SignupPaymentRoute: SignupPaymentRoute,
+  SignupPlanRoute: SignupPlanRoute,
+  SignupVerifyRoute: SignupVerifyRoute,
+  SignupIndexRoute: SignupIndexRoute,
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
