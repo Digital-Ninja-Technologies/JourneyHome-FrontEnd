@@ -22,9 +22,16 @@ export function getOnboardingPlan(): string | null {
 }
 
 /** Starts the first-contribution checkout for a Pending plan and sends the browser to Paystack. */
-export function useStartCheckout(planId: string, opts: { onboarding?: boolean } = {}) {
+export function useStartCheckout(
+  planId: string,
+  opts: { onboarding?: boolean } = {},
+) {
   return useMutation({
-    mutationFn: () => api<{ authorizationUrl: string }>(`/payments/plans/${planId}/initialize-initial`, { method: "POST" }),
+    mutationFn: () =>
+      api<{ authorizationUrl: string }>(
+        `/payments/plans/${planId}/initialize-initial`,
+        { method: "POST" },
+      ),
     onSuccess: (data) => {
       if (opts.onboarding) setOnboardingPlan(planId);
       window.location.assign(data.authorizationUrl);

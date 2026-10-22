@@ -1,5 +1,5 @@
-import type { Tone } from "../components/ui";
-import type { PlanStatus, RequestStatus } from "./types";
+import type { Tone } from "@/components/ui";
+import type { PlanStatus, RequestStatus } from "@/lib/types";
 
 export const PLAN_STATUS: Record<PlanStatus, [label: string, tone: Tone]> = {
   Pending: ["Pending", "paused"],
@@ -16,7 +16,10 @@ export const PLAN_STATUS: Record<PlanStatus, [label: string, tone: Tone]> = {
   Expired: ["Expired", "paused"],
 };
 
-export const REQUEST_STATUS: Record<RequestStatus, [label: string, tone: Tone]> = {
+export const REQUEST_STATUS: Record<
+  RequestStatus,
+  [label: string, tone: Tone]
+> = {
   Submitted: ["New", "review"],
   Under_Review: ["Under review", "review"],
   More_Info_Required: ["Awaiting customer", "due"],
@@ -27,10 +30,23 @@ export const REQUEST_STATUS: Record<RequestStatus, [label: string, tone: Tone]> 
 };
 
 /** Plans making monthly contributions. */
-export const LIVE_PLAN = new Set<PlanStatus>(["Active", "Payment_Due", "Overdue"]);
+export const LIVE_PLAN = new Set<PlanStatus>([
+  "Active",
+  "Payment_Due",
+  "Overdue",
+]);
 /** Requests that still need an admin's attention. */
-export const NEEDS_REVIEW = new Set<RequestStatus>(["Submitted", "Under_Review", "Docs_Verified"]);
-export const OPEN_REQUEST = new Set<RequestStatus>(["Submitted", "Under_Review", "More_Info_Required", "Docs_Verified"]);
+export const NEEDS_REVIEW = new Set<RequestStatus>([
+  "Submitted",
+  "Under_Review",
+  "Docs_Verified",
+]);
+export const OPEN_REQUEST = new Set<RequestStatus>([
+  "Submitted",
+  "Under_Review",
+  "More_Info_Required",
+  "Docs_Verified",
+]);
 
 /** Mirrors the backend's allowed plan status transitions. */
 export const PLAN_TRANSITIONS: Record<PlanStatus, PlanStatus[]> = {

@@ -1,27 +1,37 @@
 {
-  "name": "@journeyhome/dashboard",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite --port 5173",
-    "build": "tsc --noEmit && vite build",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@journeyhome/ui": "workspace:*",
-    "@tanstack/react-query": "^5.104.5",
-    "lucide-react": "^1.60.0",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "react-router-dom": "^7.18.4"
-  },
-  "devDependencies": {
-    "@tailwindcss/vite": "^4.3.3",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.2",
-    "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2",
-    "vite": "^8.3.4"
-  }
+	"name": "@journeyhome/dashboard",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite --port 5173",
+		"build": "tsc --noEmit && vite build",
+		"typecheck": "tsc --noEmit",
+		"test": "playwright test",
+		"preview": "vite preview",
+
+		"generate-routes": "tsr generate",
+
+		"format": "biome format",
+		"lint": "biome lint",
+		"check": "biome check"
+	},
+	"dependencies": {
+		"@journeyhome/ui": "workspace:*",
+		"@tanstack/react-query": "^5.104.5",
+		"@tanstack/react-router": "^1.170.45",
+		"lucide-react": "^1.60.0",
+		"react": "^19.3.1",
+		"react-dom": "^19.3.1"
+	},
+	"devDependencies": {
+		"@tailwindcss/vite": "^4.3.3",
+		"@tanstack/react-router-devtools": "^1.167.2",
+		"@tanstack/router-plugin": "^1.168.47",
+		"@types/react": "^19.3.0",
+		"@types/react-dom": "^19.3.0",
+		"@vitejs/plugin-react": "^6.1.2",
+		"tailwindcss": "^4.3.3",
+		"typescript": "^7.0.2",
+		"vite": "^8.3.4"
+	}
 }

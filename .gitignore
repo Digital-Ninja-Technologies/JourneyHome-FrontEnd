@@ -5,3 +5,10 @@ dist
 .env*
 !.env.example
 *.tsbuildinfo
+.migration-baseline
+.output
+.nitro
+.vercel
+.tanstack
+test-results
+playwright-report
