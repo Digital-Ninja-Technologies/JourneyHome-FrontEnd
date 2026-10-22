@@ -11,7 +11,7 @@ import { Switch } from "@journeyhome/ui/components/switch";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DemoNotice } from "@/components/demo-notice";
 import { useAuth } from "../auth/auth-context";
 import { api, isUnsupported, UNSUPPORTED_MESSAGE } from "../lib/api";
@@ -158,8 +158,10 @@ function PaymentMethods() {
   const queryClient = useQueryClient();
   const navigate = useNavigate({ from: "/app/profile" });
   const search = useSearch({ from: "/app/profile" });
-  const refresh = () =>
-    void queryClient.invalidateQueries({ queryKey: ["cards"] });
+  const refresh = useCallback(
+    () => void queryClient.invalidateQueries({ queryKey: ["cards"] }),
+    [queryClient],
+  );
 
   const remove = useMutation({
     mutationFn: (id: string) =>
@@ -175,9 +177,9 @@ function PaymentMethods() {
     onSuccess: (d) => window.location.assign(d.authorizationUrl),
   });
   const justAdded = search.card_added === "1";
+  // biome-ignore lint/correctness/useExhaustiveDependencies: initial mount refresh
   useEffect(() => {
     if (justAdded) refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [justAdded, refresh]);
 
   const unsupported = isUnsupported(cardsQ.error);

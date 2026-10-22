@@ -16,6 +16,8 @@
 		"check": "biome check"
 	},
 	"dependencies": {
+		"@journeyhome/api-client": "workspace:*",
+		"@journeyhome/schemas": "workspace:*",
 		"@journeyhome/ui": "workspace:*",
 		"@tanstack/react-query": "^5.104.5",
 		"@tanstack/react-router": "^1.170.45",

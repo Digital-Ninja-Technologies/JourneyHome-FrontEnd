@@ -287,3 +287,18 @@ Total 23 files importing `react-router-dom`:
 | 17  | `/app/notifications`        | `Notifications`      | Yes                        | None                                    | Direct load redirects to `/login` if signed out; lists event notifications with unread indicators and links.                    |
 | 18  | `/app/profile`              | `Profile`            | Yes                        | `card_added?: string`                   | Direct load redirects to `/login` if signed out; profile, saved cards (`?card_added=1` banner), notifications, change password. |
 | 19  | `/*` (invalid)              | Not Found / Wildcard | No                         | None                                    | Any unrecognized path redirects to `/app` (which guards to `/login` if unauthenticated).                                        |
+
+## Modularization & Query Architecture
+
+### Stage 1: Shared Packages
+- Created `@journeyhome/api-client`:
+  - `createApiClient({ baseUrl, getAuthToken, onUnauthorized })` factory returning typed `apiClient<T>(endpoint, options)`.
+  - Added JSON headers, `AbortSignal.timeout(60000)` default, safe 204/empty response handling, Bearer token injection, structured JSON / text error parsing, 401 callback dispatch.
+  - Added 7 unit tests covering success, 204, JSON errors, HTML errors, network failure, 401 callback, and timeout signals.
+- Created `@journeyhome/schemas`:
+  - Enforced exact backend domain status enums (`PlanStatus`, `PaymentStatus`, `ServiceRequestStatus`, `DocumentType`, `DocumentVerificationStatus`, `UserRole`, `PaymentPurpose`).
+  - Added Zod schemas for auth, plans, payments, service requests, packages, notifications, users, search/pagination, and `apiResponseSchema` envelope.
+  - Added 15 unit tests covering validation, enums, and open-redirect sanitization.
+- Added `@journeyhome/ui/lib/format` exporting shared currency and date formatters.
+- Consumed `@journeyhome/schemas` in `apps/dashboard/src/lib/search-schemas.ts`.
+
