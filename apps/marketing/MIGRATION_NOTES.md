@@ -227,4 +227,26 @@
 - **Dual Build Coexistence:**
   - Next.js (`pnpm --filter marketing build`) and Start (`pnpm --filter marketing build:start`) both pass cleanly.
 
+---
+
+## Stage 6 Implementation: Contact Form & Remaining Interactivity
+- **Contact Form Mailto Encoding Verification:**
+  - Verified `src/components/ContactForm.tsx` matches the baseline contract.
+  - Submitting the form with name, phone, email, message, and topic selection correctly generates and opens the mailto URL with recipient `hello@journeyhome.ng`, URI-encoded `subject`, and structured `body`.
+- **Framework Boundaries & Directives Audit:**
+  - Grepped `src/` for Next.js imports (`next/*`): 0 matches.
+  - Grepped `src/` for `'use client'` / `"use client"`: 0 matches.
+  - Grepped `src/` for `'use server'` / `"use server"`: 0 matches.
+  - Grepped `src/` for `NEXT_PUBLIC_`: Confined solely to `src/lib/env.ts` as fallback transition mapping.
+- **Automated Interactivity Verification Script (`scripts/verify-stage6-interactivity.ts`):**
+  - Added `test:interactivity` script (`pnpm --filter marketing test:interactivity`).
+  - Automated Playwright browser tests verify:
+    1. Initial topic button is active with `aria-pressed="true"`.
+    2. Clicking alternative topic updates `aria-pressed` states.
+    3. Input fields retain user entry.
+    4. Form submission generates standard mailto format with all required payload fields.
+    5. FAQ accordion defaults (first open, remaining closed) and toggle interactions work seamlessly.
+  - All automated interactivity checks pass.
+
+
 

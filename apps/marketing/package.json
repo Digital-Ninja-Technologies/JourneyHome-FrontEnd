@@ -9,6 +9,7 @@
     "build:start": "vite build",
     "start:start": "node .output/server/index.mjs",
     "check:contract": "node scripts/check-contract.ts",
+    "test:interactivity": "node scripts/verify-stage6-interactivity.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
