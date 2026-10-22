@@ -81,6 +81,13 @@
 - Zero imports of `react-router-dom` remain in `apps/dashboard/src`.
 - Verified: `pnpm --filter @journeyhome/dashboard typecheck` and `pnpm --filter @journeyhome/dashboard build` succeed with 0 errors.
 
+## Stage 5: Dependency Cleanup
+- Removed `react-router-dom` dependency from `apps/dashboard/package.json`.
+- Ran `pnpm install` / update lockfile.
+- Verified: `apps/dashboard/src` contains zero references to `react-router-dom`, `useSearchParams`, or `NavLink`.
+- Ran `pnpm --filter @journeyhome/dashboard typecheck` and `build`: PASSED with 0 errors.
+
+
 
 
 
