@@ -27,6 +27,8 @@ export const apiClient = createApiClient({
       localStorage.removeItem(STORAGE_KEY);
       sessionStorage.removeItem(STORAGE_KEY);
       queryClient.setQueryData(["auth", "session"], null);
+      queryClient.cancelQueries();
+      queryClient.removeQueries();
       if (
         typeof window !== "undefined" &&
         !window.location.pathname.startsWith("/login") &&

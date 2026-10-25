@@ -1,9 +1,9 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { PackageCards, PackagesUnavailable } from "../components/PackageCards";
-import { Accent, Container, PageHero } from "../components/Section";
-import { createPageHead } from "../lib/seo";
-import { packagesQueryOptions } from "../modules/packages";
+import { PackageCards, PackagesUnavailable } from "@/components/package-cards";
+import { Accent, Container, PageHero } from "@/components/section";
+import { createPageHead } from "@/lib/seo";
+import { packagesQueryOptions } from "@/modules/packages";
 
 export const Route = createFileRoute("/pricing")({
   headers: () => ({
@@ -54,9 +54,14 @@ function Pricing() {
           <table className="w-full min-w-[640px] border-collapse text-left text-sm">
             <thead>
               <tr>
-                <th className="px-6 py-4.5 font-semibold text-muted">Feature</th>
+                <th className="px-6 py-4.5 font-semibold text-muted">
+                  Feature
+                </th>
                 {COLUMNS.map((c) => (
-                  <th key={c} className="px-6 py-4.5 text-center font-extrabold">
+                  <th
+                    key={c}
+                    className="px-6 py-4.5 text-center font-extrabold"
+                  >
                     {c}
                   </th>
                 ))}

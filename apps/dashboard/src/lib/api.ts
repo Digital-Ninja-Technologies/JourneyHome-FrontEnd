@@ -18,13 +18,12 @@ export async function api<T>(
     if (mocked !== NOT_MOCKED) return mocked as T;
   }
 
-  const res = await apiClient<{ success?: boolean; data?: T; message?: string } | T>(
-    path,
-    {
-      method,
-      body: init.body ? JSON.stringify(init.body) : undefined,
-    },
-  );
+  const res = await apiClient<
+    { success?: boolean; data?: T; message?: string } | T
+  >(path, {
+    method,
+    body: init.body ? JSON.stringify(init.body) : undefined,
+  });
 
   if (
     res &&
