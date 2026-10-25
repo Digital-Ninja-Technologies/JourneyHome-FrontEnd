@@ -1,11 +1,24 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import Signup from "@/pages/signup";
+import { AsyncBoundary } from "@/components/async-boundary";
+import { SignupForm } from "@/modules/auth/components/signup-form";
+import { sessionQueryOptions } from "@/modules/auth";
 
 export const Route = createFileRoute("/signup/")({
-  beforeLoad: ({ context }) => {
-    if (context.auth.user) {
+  beforeLoad: async ({ context }) => {
+    const session = await context.queryClient.ensureQueryData(
+      sessionQueryOptions(),
+    );
+    if (session?.user) {
       throw redirect({ to: "/app" });
     }
   },
-  component: Signup,
+  component: SignupPage,
 });
+
+function SignupPage() {
+  return (
+    <AsyncBoundary>
+      <SignupForm />
+    </AsyncBoundary>
+  );
+}

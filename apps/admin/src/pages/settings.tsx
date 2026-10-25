@@ -4,9 +4,9 @@ import { Label } from "@journeyhome/ui/components/label";
 import { Switch } from "@journeyhome/ui/components/switch";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useAuth } from "@/auth/auth-context";
 import { DemoNotice } from "@/components/demo-notice";
 import { Card, CardTitle, PageHeader, Pill, QueryError } from "@/components/ui";
+import { useAdminUser, useIsSuperAdmin } from "@/modules/auth";
 import { api, isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/api";
 import { useAdminMe, useAdmins, usePackages } from "@/lib/queries";
 import type { AdminMe, Package } from "@/lib/types";
@@ -79,7 +79,7 @@ function PackageCard({ pkg }: { pkg: Package }) {
 }
 
 function AdminTeam() {
-  const { user } = useAuth();
+  const user = useAdminUser();
   const queryClient = useQueryClient();
   const adminsQ = useAdmins(true);
   const [adding, setAdding] = useState(false);
@@ -312,7 +312,7 @@ function Security() {
 }
 
 export default function Settings() {
-  const { isSuperAdmin } = useAuth();
+  const isSuperAdmin = useIsSuperAdmin();
   const packagesQ = usePackages();
   return (
     <main className="flex max-w-[1000px] flex-col gap-6 p-10">

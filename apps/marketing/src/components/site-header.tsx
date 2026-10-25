@@ -27,9 +27,15 @@ export function SiteHeader() {
         <Link to="/" onClick={() => setOpen(false)}>
           <Logo />
         </Link>
-        <nav aria-label="Main" className="hidden items-center gap-1 rounded-full bg-sand p-1.5 md:flex">
+        <nav
+          aria-label="Main"
+          className="hidden items-center gap-1 rounded-full bg-sand p-1.5 md:flex"
+        >
           {NAV.map((item) => {
-            const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+            const active =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
@@ -37,7 +43,9 @@ export function SiteHeader() {
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "whitespace-nowrap rounded-full px-[18px] py-2.5 text-sm",
-                  active ? "bg-foreground font-bold text-canvas" : "font-semibold text-ink-soft",
+                  active
+                    ? "bg-foreground font-bold text-canvas"
+                    : "font-semibold text-ink-soft",
                 )}
               >
                 {item.label}
@@ -73,7 +81,10 @@ export function SiteHeader() {
           className="flex max-h-[calc(100vh-80px)] flex-col gap-1 overflow-y-auto border-t border-border/60 bg-canvas p-4 md:hidden"
         >
           {NAV.map((item) => {
-            const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+            const active =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
@@ -88,7 +99,10 @@ export function SiteHeader() {
               </Link>
             );
           })}
-          <a href={LOGIN_URL} className="rounded-2xl px-4 py-3.5 text-[15px] font-semibold text-ink-soft">
+          <a
+            href={LOGIN_URL}
+            className="rounded-2xl px-4 py-3.5 text-[15px] font-semibold text-ink-soft"
+          >
             Log in
           </a>
           <a

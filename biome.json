@@ -13,7 +13,7 @@
       "**/index.html",
       "**/vite.config.ts",
       "!**/src/routeTree.gen.ts",
-      "!**/src/styles.css",
+      "!**/*.css",
       "!**/src/components/ui/**/*",
       "!**/src/assets/**/*"
     ]
@@ -26,7 +26,17 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "a11y": {
+        "useButtonType": "warn",
+        "noLabelWithoutControl": "warn",
+        "useSemanticElements": "warn",
+        "useAriaPropsSupportedByRole": "warn"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "warn",
+        "useIterableCallbackReturn": "warn"
+      }
     }
   },
   "javascript": {

@@ -1,9 +1,13 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { sessionQueryOptions } from "@/modules/auth";
 import ForgotPassword from "@/pages/forgot-password";
 
 export const Route = createFileRoute("/_auth/forgot-password")({
-  beforeLoad: ({ context }) => {
-    if (context.auth.user) {
+  beforeLoad: async ({ context }) => {
+    const session = await context.queryClient.ensureQueryData(
+      sessionQueryOptions(),
+    );
+    if (session?.user) {
       throw redirect({ to: "/app" });
     }
   },

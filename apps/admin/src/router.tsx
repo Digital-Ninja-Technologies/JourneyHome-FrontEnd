@@ -1,26 +1,22 @@
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRouter, Navigate } from "@tanstack/react-router";
+import { makeQueryClient } from "./lib/query-client";
 import { routeTree } from "./routeTree.gen";
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+export const queryClient = makeQueryClient();
 
 export const router = createRouter({
   routeTree,
   context: {
     queryClient,
-    auth: {
-      user: null,
-      isSuperAdmin: false,
-      logout: () => {},
-    },
   },
+  Wrap: ({ children }) => (
+    <QueryClientProvider client={queryClient}>
+      {children}
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+    </QueryClientProvider>
+  ),
   defaultPreload: "intent",
   scrollRestoration: true,
   defaultNotFoundComponent: () => <Navigate to="/" replace />,

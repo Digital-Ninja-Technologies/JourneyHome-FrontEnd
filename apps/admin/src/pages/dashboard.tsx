@@ -1,7 +1,7 @@
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { useAuth } from "@/auth/auth-context";
 import { Pill, QueryError } from "@/components/ui";
+import { useAdminUser } from "@/modules/auth";
 import {
   formatDay,
   formatMoney,
@@ -71,7 +71,7 @@ function Panel({
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const user = useAdminUser();
   const dir = useDirectory();
   const plansQ = useAllPlans();
   const reqQ = useAllRequests();

@@ -287,3 +287,101 @@ Total 23 files importing `react-router-dom`:
 | 17  | `/app/notifications`        | `Notifications`      | Yes                        | None                                    | Direct load redirects to `/login` if signed out; lists event notifications with unread indicators and links.                    |
 | 18  | `/app/profile`              | `Profile`            | Yes                        | `card_added?: string`                   | Direct load redirects to `/login` if signed out; profile, saved cards (`?card_added=1` banner), notifications, change password. |
 | 19  | `/*` (invalid)              | Not Found / Wildcard | No                         | None                                    | Any unrecognized path redirects to `/app` (which guards to `/login` if unauthenticated).                                        |
+
+## Modularization & Query Architecture
+
+### Stage 1: Shared Packages
+- Created `@journeyhome/api-client`:
+  - `createApiClient({ baseUrl, getAuthToken, onUnauthorized })` factory returning typed `apiClient<T>(endpoint, options)`.
+  - Added JSON headers, `AbortSignal.timeout(60000)` default, safe 204/empty response handling, Bearer token injection, structured JSON / text error parsing, 401 callback dispatch.
+  - Added 7 unit tests covering success, 204, JSON errors, HTML errors, network failure, 401 callback, and timeout signals.
+- Created `@journeyhome/schemas`:
+  - Enforced exact backend domain status enums (`PlanStatus`, `PaymentStatus`, `ServiceRequestStatus`, `DocumentType`, `DocumentVerificationStatus`, `UserRole`, `PaymentPurpose`).
+  - Added Zod schemas for auth, plans, payments, service requests, packages, notifications, users, search/pagination, and `apiResponseSchema` envelope.
+  - Added 15 unit tests covering validation, enums, and open-redirect sanitization.
+- Added `@journeyhome/ui/lib/format` exporting shared currency and date formatters.
+- Consumed `@journeyhome/schemas` in `apps/dashboard/src/lib/search-schemas.ts`.
+
+### Stage 2: Environment Validation with t3-env
+- Installed `@t3-oss/env-core`.
+- Created `src/env/client.ts` with prefix `"VITE_"`, validating:
+  - `VITE_API_BASE_URL`: URL default `http://localhost:4000/api/v1` (replacing `VITE_API_URL`).
+  - `VITE_MARKETING_URL`: URL default `http://localhost:3000`.
+  - `VITE_APP_URL`: URL default `http://localhost:5173`.
+  - `VITE_USE_MOCKS`: string `"true"`/`"false"` -> boolean transformation (defaulting to dev mode in development, false in production).
+- Added `#/` alias to `tsconfig.json` and `vite.config.ts`.
+- Replaced all direct `import.meta.env` access across `src/` with `env` from `#/env/client`.
+- Updated `.env.example`, root `turbo.json` with `globalEnv` and task env passthrough, and `README.md` Vercel deployment documentation.
+
+### Stage 3: Query-Driven Auth & AuthContext Elimination
+- **Eliminated `AuthProvider` and `AuthContext`**:
+  - Removed `src/auth/auth-context.tsx`.
+  - Stored auth session as a first-class TanStack Query entity under query key `["auth", "session"]` (`sessionQueryOptions()`) with `staleTime: Infinity`.
+  - Configured `@journeyhome/api-client` in `src/lib/api-client.ts` to read `jh_session` token and clear cache / invoke 401 callback.
+  - Implemented `loginMutation` with optimistic/synchronous cache population via `queryClient.setQueryData(["auth", "session"], session)`. This eliminates route bounce-back and auth race conditions when `navigate({ to: redirect ?? "/app" })` fires.
+  - Provided clean, hook-based API in `src/modules/auth/`:
+    - `useSessionUser()`: returns the current authenticated `User | null`.
+    - `useLoginMutation()`: typed login with error envelope propagation and instant cache seeding.
+    - `useSignupMutation()`: typed account registration.
+    - `useLogoutMutation()`: clears session cache, removes `jh_session` storage, and routes to `/login`.
+    - `useUpdateUserMutation()`: updates profile data and updates query cache.
+- **Router Route Guarding (`src/routes/app/route.tsx` & `src/routes/_auth/login.tsx`)**:
+  - Route loaders use `context.queryClient.ensureQueryData(sessionQueryOptions())`.
+  - Unauthenticated attempts on protected routes redirect to `/login?redirect=<target>` with safe redirect validation.
+  - Authenticated visits to `/login` redirect directly to `/app`.
+
+### Stage 4: Feature Modularization (Vertical Slices)
+Created vertical slices under `src/modules/`:
+- `modules/auth/`:
+  - `api.ts`: `login()`, `signup()`, `verifyCode()`, `getCurrentUser()`, `logout()`, `updateProfile()`.
+  - `query-options.ts`: `sessionQueryOptions()`.
+  - `mutations.ts`: `useLoginMutation()`, `useSignupMutation()`, `useLogoutMutation()`, `useUpdateUserMutation()`.
+  - `components/login-form.tsx`: `react-hook-form` + `zodResolver` + `@journeyhome/schemas` `customerLoginSchema`.
+  - `components/signup-form.tsx`: `react-hook-form` + `zodResolver` + `@journeyhome/schemas` `signupSchema`.
+- `modules/plans/`:
+  - `api.ts`: `getPlans()`, `getPlan(id)`, `createPlan(data)`.
+  - `query-options.ts`: `plansQueryOptions()`, `planDetailQueryOptions(id)`.
+  - `mutations.ts`: `useCreatePlanMutation()`.
+- `modules/payments/`:
+  - `api.ts`: `getPayments(planId?)`, `initializePayment(planId)`, `verifyPayment(reference)`.
+  - `query-options.ts`: `paymentsQueryOptions(planId?)`.
+  - `mutations.ts`: `useInitializePaymentMutation()`, `useVerifyPaymentMutation()`.
+- `modules/service-requests/`:
+  - `api.ts`: `getServiceRequests()`, `getServiceRequest(id)`, `createServiceRequest(data)`.
+  - `query-options.ts`: `serviceRequestsQueryOptions()`, `serviceRequestDetailQueryOptions(id)`.
+  - `mutations.ts`: `useCreateServiceRequestMutation()`.
+- `modules/packages/`:
+  - `api.ts`: `getPackages()`.
+  - `query-options.ts`: `packagesQueryOptions()`.
+- `modules/notifications/`:
+  - `api.ts`: `getNotifications()`.
+  - `query-options.ts`: `notificationsQueryOptions()`.
+- `modules/profile/`:
+  - `api.ts`: `getSavedCards()`, `deleteSavedCard()`, `getNotificationPreferences()`, `updateNotificationPreferences()`.
+  - `query-options.ts`: `savedCardsQueryOptions()`, `notificationPreferencesQueryOptions()`.
+
+### Stage 5: TanStack Query Infrastructure & Devtools
+- Created `src/lib/query-client.ts`:
+  - Configured `makeQueryClient({ onUnauthorized })`.
+  - Default `staleTime: 1000 * 60 * 5` (5 minutes), `gcTime: 1000 * 60 * 30` (30 minutes).
+  - Smart retry logic: skips retry on `ApiError` 4xx (400, 401, 403, 404, 422), retries up to 2 times on 5xx and network failures.
+  - Automatically dispatches 401 unauthenticated callback.
+- Bound `QueryClientProvider` and `ReactQueryDevtools` into `src/router.tsx` via router `Wrap` property.
+
+### Stage 6: Error Boundaries & Async Boundaries
+- Created class-based `ErrorBoundary` and `AsyncBoundary` in `src/components/async-boundary.tsx`:
+  - Overcomes React 19 / Vite CJS hook dispatcher issues by using a pure React class component with `getDerivedStateFromError` and `componentDidCatch`.
+  - Provides rich `ComponentErrorState` with retry buttons and `UnauthorizedErrorState` with login redirection.
+- Created `CatchBoundary` in `src/components/catch-boundary.tsx` and wired into `__root.tsx` and `app/route.tsx`.
+
+### Stage 7: Local Mock Seam & End-to-End Operation
+- When `VITE_USE_MOCKS=true` (or `import.meta.env.DEV`), `src/mocks/index.ts` intercepts network calls:
+  - Supported Demo Credentials:
+    - Customer Login: `demo@journeyhome.ng` / `Password123!`
+    - Returns full user profile (`id: "usr_mock_customer_01"`, `role: "customer"`, active plans, KYC verified).
+  - Handles auth verification code (`123456`), password reset (`demo-token`), plans, payments, service requests, notifications, and packages.
+- Added `dedupe: ["react", "react-dom"]` in `vite.config.ts`.
+- Validated with 8/8 Playwright smoke tests passing green.
+
+
+

@@ -5,15 +5,7 @@ export const planSearchSchema = z.object({
 });
 export type PlanSearch = z.infer<typeof planSearchSchema>;
 
-export const redirectSearchSchema = z.object({
-  redirect: z
-    .string()
-    .startsWith("/")
-    .refine((value) => !value.startsWith("//"))
-    .optional(),
-});
-
-export type RedirectSearch = z.infer<typeof redirectSearchSchema>;
+export { redirectSearchSchema, type RedirectSearch } from "@journeyhome/schemas";
 
 export const tokenSearchSchema = z.object({
   token: z.coerce.string().optional(),

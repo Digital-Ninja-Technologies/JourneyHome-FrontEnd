@@ -6,6 +6,7 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
     "lint": "turbo run lint"
   },
   "devDependencies": {
@@ -13,7 +14,8 @@
     "@playwright/test": "1.64.1",
     "playwright": "^1.64.1",
     "turbo": "^2.11.10",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
   },
   "dependencies": {
     "zod": "^4.6.7"

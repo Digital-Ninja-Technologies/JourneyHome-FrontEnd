@@ -2,7 +2,7 @@ import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { AlertCircle, Bell, Gift, Plus } from "lucide-react";
 import { PAYMENT_TEXT, StatusPill } from "@/components/status-pill";
-import { useAuth } from "../auth/auth-context";
+import { useSessionUser } from "@/modules/auth";
 import {
   capitalise,
   daysUntil,
@@ -17,10 +17,11 @@ import {
   nextBirthday,
 } from "../lib/format";
 import { canPayNow, isDue, LIVE } from "../lib/plans";
+import { env } from "#/env/client";
 import { usePayments, usePlans } from "../lib/queries";
 import type { Payment, Plan } from "../lib/types";
 
-const MARKETING_URL = import.meta.env.VITE_MARKETING_URL ?? "";
+const MARKETING_URL = env.VITE_MARKETING_URL;
 const HIDDEN = new Set<Plan["status"]>(["Cancelled", "Expired"]);
 
 function dueLabel(p: Plan) {
@@ -188,7 +189,7 @@ function RecentPayments({
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const user = useSessionUser();
   const plansQ = usePlans();
   const paymentsQ = usePayments();
   const now = new Date();

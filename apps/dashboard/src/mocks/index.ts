@@ -1,8 +1,9 @@
-import { ApiError } from "../lib/errors";
+import { ApiError } from "@journeyhome/api-client";
+import type { Plan } from "../lib/types";
 
 /**
- * Simulated server for endpoints the real backend doesn't have yet. State lives in localStorage.
- * Only used in demo mode (see USE_MOCKS in lib/api.ts). The contract these mirror is in docs/BACKEND_CONTRACT.md.
+ * Simulated server for endpoints when running locally with VITE_USE_MOCKS=true.
+ * State lives in localStorage. Mirrors docs/BACKEND_CONTRACT.md.
  */
 export const NOT_MOCKED = Symbol("not-mocked");
 export const DEMO_CODE = "123456";
@@ -56,19 +57,54 @@ function sessionUser(): { id: string; name: string; email: string } {
       /* ignore */
     }
   }
-  throw new ApiError(401, "Please log in again.");
+  throw new ApiError("Please log in again.", 401);
 }
 
-const bad = (message: string) => new ApiError(400, message);
+const bad = (message: string) => new ApiError(message, 400);
 
 export async function mockRequest(
   method: string,
   path: string,
   body: unknown,
 ): Promise<unknown | typeof NOT_MOCKED> {
-  const b = (body ?? {}) as Record<string, string>;
+  const b = (body ?? {}) as Record<string, any>;
   const route = `${method} ${path.split("?")[0]}`;
   const handlers: Record<string, () => unknown> = {
+    "POST /auth/login": () => {
+      const email = String(b.email || "").toLowerCase().trim();
+      const password = String(b.password || "");
+      if (
+        email === "demo@journeyhome.ng" ||
+        email === "demo@journeyhome.test" ||
+        password === "Password123!"
+      ) {
+        return {
+          user: {
+            id: "demo-cust-1",
+            email: email || "demo@journeyhome.ng",
+            name: "Demo Customer",
+            role: "customer",
+            isSuperAdmin: false,
+          },
+          token: "mock-jwt-token-customer",
+        };
+      }
+      throw new ApiError("Invalid email or password.", 401);
+    },
+    "POST /auth/signup": () => {
+      const email = String(b.email || "").trim();
+      const name = String(b.name || "Customer").trim();
+      return {
+        user: {
+          id: `cust_demo_${Date.now()}`,
+          email,
+          name,
+          role: "customer",
+          isSuperAdmin: false,
+        },
+        token: "mock-jwt-token-customer",
+      };
+    },
     "POST /auth/verification/send": () => ({ sent: true }),
     "POST /auth/verification/confirm": () => {
       if (b.code !== DEMO_CODE)
@@ -121,6 +157,87 @@ export async function mockRequest(
       return { ...DEFAULT_PREFS, ...next };
     },
     "DELETE /auth/me": () => ({ closed: true }),
+    "GET /packages": () => [
+      {
+        _id: "pkg_standard",
+        name: "Standard",
+        monthlyContributionMinor: 500000,
+        currency: "NGN",
+        photographyIncluded: true,
+        videographyIncluded: true,
+      },
+      {
+        _id: "pkg_premium",
+        name: "Premium",
+        monthlyContributionMinor: 1000000,
+        currency: "NGN",
+        photographyIncluded: true,
+        videographyIncluded: true,
+      },
+    ],
+    "GET /plans": () => {
+      return read<Plan[]>("jh_mock:plans", [
+        {
+          _id: "plan_demo_1",
+          status: "Active",
+          currency: "NGN",
+          contributionAmountMinor: 500000,
+          targetAmountMinor: 10000000,
+          totalContributedMinor: 1500000,
+          startDate: new Date().toISOString(),
+          coveredPerson: {
+            fullName: "Adebayo Johnson",
+            relationship: "father",
+            address: "12 Marina, Lagos",
+          },
+          packageSnapshot: {
+            name: "Standard",
+          },
+          nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+    },
+    "POST /plans": () => {
+      const newPlan = {
+        _id: `plan_${Date.now()}`,
+        status: "Pending",
+        currency: "NGN",
+        contributionAmountMinor: Number(b.contributionAmountMinor) || 500000,
+        targetAmountMinor: 10000000,
+        totalContributedMinor: 0,
+        startDate: new Date().toISOString(),
+        coveredPerson: {
+          fullName: b.coveredPerson?.fullName || b["coveredPerson.fullName"] || "Beneficiary",
+          relationship: b.coveredPerson?.relationship || b["coveredPerson.relationship"] || "parent",
+          address: b.coveredPerson?.address || b["coveredPerson.address"] || "Lagos, Nigeria",
+        },
+        packageSnapshot: {
+          name: b.packageName || "Standard",
+        },
+        nextPaymentDate: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+      };
+      const current = read<any[]>("jh_mock:plans", []);
+      write("jh_mock:plans", [newPlan, ...current]);
+      return newPlan;
+    },
+    "GET /payments": () => [
+      {
+        _id: "pay_1",
+        plan: "plan_demo_1",
+        amountMinor: 500000,
+        currency: "NGN",
+        purpose: "recurring_contribution",
+        status: "Successful",
+        createdAt: new Date().toISOString(),
+        processedAt: new Date().toISOString(),
+      },
+    ],
+    "POST /payments/initialize": () => ({
+      authorizationUrl: `${window.location.origin}/app/payments/callback?reference=ref_demo_${Date.now()}&trxref=ref_demo_${Date.now()}`,
+      reference: `ref_demo_${Date.now()}`,
+    }),
     "GET /payments/methods": () => {
       const u = sessionUser();
       return read<Card[]>(`jh_mock:cards:${u.id}`, [
@@ -152,9 +269,71 @@ export async function mockRequest(
         authorizationUrl: `${window.location.origin}/app/profile?card_added=1`,
       };
     },
+    "GET /service-requests": () => [],
+    "POST /service-requests": () => ({
+      _id: `req_${Date.now()}`,
+      status: "Submitted",
+      createdAt: new Date().toISOString(),
+    }),
+    "GET /notifications": () => [],
   };
 
   let handler = handlers[route];
+
+  // Match dynamic routes
+  const planMatch = /^GET \/plans\/(.+)$/.exec(route);
+  if (!handler && planMatch) {
+    handler = () => {
+      const planId = planMatch[1];
+      const plans = read<Plan[]>("jh_mock:plans", []);
+      const found = plans.find((p) => p._id === planId);
+      if (found) return found;
+      return {
+        _id: planId || "plan_demo_1",
+        status: planId === "plan_pending_1" ? "Pending" : "Active",
+        currency: "NGN",
+        contributionAmountMinor: 500000,
+        targetAmountMinor: 10000000,
+        totalContributedMinor: 1500000,
+        startDate: new Date().toISOString(),
+        coveredPerson: {
+          fullName: "Adebayo Johnson",
+          relationship: "father",
+          address: "12 Marina, Lagos",
+        },
+        packageSnapshot: {
+          name: "Standard",
+        },
+        nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
+        createdAt: new Date().toISOString(),
+      };
+    };
+  }
+
+  const reqMatch = /^GET \/service-requests\/(.+)$/.exec(route);
+  if (!handler && reqMatch) {
+    handler = () => ({
+      request: {
+        _id: reqMatch[1],
+        plan: "plan_demo_1",
+        status: "Submitted",
+        dateOfDeath: new Date().toISOString(),
+        burialLocation: "Ikoyi Cemetery, Lagos",
+        expectedBurialDate: new Date(Date.now() + 86400000 * 7).toISOString(),
+        contactPerson: "Demo Customer",
+        contactPhone: "+2348012345678",
+        coveredPersonSnapshot: {
+          fullName: "Adebayo Johnson",
+          relationship: "father",
+          address: "12 Marina, Lagos",
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      documents: [],
+    });
+  }
+
   const del = /^DELETE \/payments\/methods\/(.+)$/.exec(route);
   if (!handler && del) {
     handler = () => {
@@ -176,7 +355,8 @@ export async function mockRequest(
       return { removed: true };
     };
   }
+
   if (!handler) return NOT_MOCKED;
-  await sleep(350);
+  await sleep(100);
   return handler();
 }

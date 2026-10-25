@@ -1,7 +1,8 @@
+import { env } from "#/env/client";
 import { capitalise, daysUntil, formatDay, formatMonthYear } from "./format";
 import type { Plan } from "./types";
 
-export const MARKETING_URL = import.meta.env.VITE_MARKETING_URL ?? "";
+export const MARKETING_URL = env.VITE_MARKETING_URL;
 
 export const fullName = (p: Plan) => p.coveredPerson.fullName;
 export const contributionCount = (p: Plan) =>

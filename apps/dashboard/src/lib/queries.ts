@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "../auth/auth-context";
+import { useSessionUser } from "@/modules/auth";
 import { api } from "./api";
 import type {
   AppNotification,
@@ -11,7 +11,7 @@ import type {
 } from "./types";
 
 export function usePlans() {
-  const { user } = useAuth();
+  const user = useSessionUser();
   return useQuery({
     queryKey: ["plans", user?.id],
     queryFn: () => api<Plan[]>("/plans"),
@@ -20,7 +20,7 @@ export function usePlans() {
 }
 
 export function usePayments() {
-  const { user } = useAuth();
+  const user = useSessionUser();
   return useQuery({
     queryKey: ["payments", user?.id],
     queryFn: () => api<Payment[]>("/payments"),
@@ -29,7 +29,7 @@ export function usePayments() {
 }
 
 export function usePlan(id: string | undefined) {
-  const { user } = useAuth();
+  const user = useSessionUser();
   return useQuery({
     queryKey: ["plan", user?.id, id],
     queryFn: () => api<Plan>(`/plans/${id}`),
@@ -49,7 +49,7 @@ export function usePackages() {
 }
 
 export function useServiceRequests() {
-  const { user } = useAuth();
+  const user = useSessionUser();
   return useQuery({
     queryKey: ["service-requests", user?.id],
     queryFn: () => api<ServiceRequest[]>("/service-requests"),
@@ -58,7 +58,7 @@ export function useServiceRequests() {
 }
 
 export function useServiceRequest(id: string) {
-  const { user } = useAuth();
+  const user = useSessionUser();
   return useQuery({
     queryKey: ["service-request", user?.id, id],
     queryFn: () =>
@@ -69,7 +69,7 @@ export function useServiceRequest(id: string) {
 }
 
 export function useNotifications() {
-  const { user } = useAuth();
+  const user = useSessionUser();
   return useQuery({
     queryKey: ["notifications", user?.id],
     queryFn: () => api<AppNotification[]>("/notifications"),
@@ -100,7 +100,7 @@ export interface SavedCard {
 }
 
 export function useMe() {
-  const { user } = useAuth();
+  const user = useSessionUser();
   return useQuery({
     queryKey: ["me", user?.id],
     queryFn: () => api<Me>("/auth/me"),
@@ -110,7 +110,7 @@ export function useMe() {
 }
 
 export function useSavedCards() {
-  const { user } = useAuth();
+  const user = useSessionUser();
   return useQuery({
     queryKey: ["cards", user?.id],
     queryFn: () => api<SavedCard[]>("/payments/methods"),

@@ -1,9 +1,10 @@
+import { env } from "#/env/client";
 import { Logo } from "@journeyhome/ui/components/logo";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 
-const MARKETING_URL = import.meta.env.VITE_MARKETING_URL ?? "/";
+const MARKETING_URL = env.VITE_MARKETING_URL;
 const STEPS = ["Account", "Verify", "First plan", "Payment"];
 
 function Stepper({ current }: { current: number }) {

@@ -38,6 +38,7 @@ export interface Plan {
   startDate: string;
   nextPaymentDate: string;
   totalContributedMinor: number;
+  targetAmountMinor?: number;
   status: PlanStatus;
   lastPaymentAt?: string;
   createdAt: string;
