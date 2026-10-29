@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "@journeyhome/ui/components/logo";
+import { openCookiePreferences } from "@/components/cookie-consent";
 
 const COLUMNS = [
   { title: "Product", links: [["/how-it-works", "How it works"], ["/pricing", "Pricing"], ["/faq", "FAQ"]] },
@@ -25,6 +26,15 @@ export function SiteFooter() {
                 {label}
               </Link>
             ))}
+            {col.title === "Legal" && (
+              <button
+                type="button"
+                onClick={() => openCookiePreferences()}
+                className="text-left font-semibold transition-colors hover:text-link cursor-pointer"
+              >
+                Cookie preferences
+              </button>
+            )}
           </div>
         ))}
       </div>
