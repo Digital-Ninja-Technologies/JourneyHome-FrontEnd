@@ -315,7 +315,7 @@ export default function Settings() {
   const isSuperAdmin = useIsSuperAdmin();
   const packagesQ = usePackages();
   return (
-    <main className="flex max-w-[1000px] flex-col gap-6 p-10">
+    <main className="flex max-w-[1000px] flex-col gap-6 p-4 sm:p-6 md:p-10">
       <PageHeader title="Settings" />
       <Card>
         <CardTitle className="mb-1">Plan packages &amp; pricing</CardTitle>

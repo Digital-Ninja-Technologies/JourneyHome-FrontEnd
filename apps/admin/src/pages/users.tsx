@@ -61,7 +61,7 @@ export default function Users() {
   const loading = customersQ.isPending || plansQ.isPending || reqQ.isPending;
 
   return (
-    <main className="flex flex-col gap-6 p-10">
+    <main className="flex flex-col gap-6 p-4 sm:p-6 md:p-10">
       <PageHeader
         title="Users"
         aside={
@@ -98,7 +98,7 @@ export default function Users() {
           }}
         />
       )}
-      <div className="overflow-x-auto rounded-3xl bg-white p-6">
+      <div className="overflow-x-auto rounded-2xl sm:rounded-3xl bg-white p-4 sm:p-6">
         <table className="w-full min-w-[760px] text-left text-sm">
           <thead>
             <tr className="text-xs font-semibold uppercase tracking-wider text-muted">

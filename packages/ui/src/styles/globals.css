@@ -1,6 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Manrope:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
+@source "../../**/*.{ts,tsx}";
+@source "../../../../apps/**/*.{ts,tsx}";
+
 @theme {
   --color-background: #f3efe7;
   --color-foreground: #0f2420;
@@ -42,5 +45,10 @@
 @layer base {
   body {
     @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
   }
 }

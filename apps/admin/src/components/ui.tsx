@@ -40,7 +40,10 @@ export function Pill({
 }
 
 export const Card = ({ className, ...p }: React.ComponentProps<"section">) => (
-  <section className={cn("rounded-3xl bg-white p-7", className)} {...p} />
+  <section
+    className={cn("rounded-2xl sm:rounded-3xl bg-white p-5 sm:p-7", className)}
+    {...p}
+  />
 );
 
 export const CardTitle = ({ className, ...p }: React.ComponentProps<"h2">) => (
@@ -87,7 +90,7 @@ export function PageHeader({
     <header className="flex flex-wrap items-start justify-between gap-4">
       <div>
         {crumb && <div className="text-sm text-muted">{crumb}</div>}
-        <h1 className="font-serif text-[44px] font-normal leading-[1.1]">
+        <h1 className="font-serif text-[32px] font-normal leading-[1.1] sm:text-[38px] md:text-[44px]">
           {title} {accent && <span className="italic">{accent}</span>}
         </h1>
       </div>

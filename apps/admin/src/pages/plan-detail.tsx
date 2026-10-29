@@ -43,10 +43,10 @@ export default function PlanDetail() {
   });
 
   if (planQ.isPending)
-    return <main className="p-10 text-muted">Loading plan…</main>;
+    return <main className="p-4 sm:p-6 md:p-10 text-muted">Loading plan…</main>;
   if (planQ.isError)
     return (
-      <main className="p-10">
+      <main className="p-4 sm:p-6 md:p-10">
         <QueryError error={planQ.error} retry={() => void planQ.refetch()} />
       </main>
     );
@@ -58,7 +58,7 @@ export default function PlanDetail() {
   const money = (n: number) => formatMoney(n, plan.currency);
 
   return (
-    <main className="flex flex-col gap-6 p-10">
+    <main className="flex flex-col gap-6 p-4 sm:p-6 md:p-10">
       <div className="flex flex-wrap items-center gap-3">
         <PageHeader
           crumb={

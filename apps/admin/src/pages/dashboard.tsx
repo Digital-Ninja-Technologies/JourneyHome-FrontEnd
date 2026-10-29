@@ -90,11 +90,11 @@ export default function Dashboard() {
   const loading = dir.isPending || plansQ.isPending || reqQ.isPending;
 
   return (
-    <main className="flex flex-col gap-6 p-10">
-      <header className="flex items-start justify-between">
+    <main className="flex flex-col gap-6 p-4 sm:p-6 md:p-10">
+      <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="text-sm text-muted">{formatToday()}</div>
-          <h1 className="font-serif text-[44px] font-normal leading-[1.1]">
+          <h1 className="font-serif text-[32px] sm:text-[38px] md:text-[44px] font-normal leading-[1.1]">
             Operations overview
           </h1>
         </div>
@@ -204,7 +204,7 @@ export default function Dashboard() {
             />
           </section>
 
-          <section className="rounded-3xl bg-white p-7">
+          <section className="rounded-2xl sm:rounded-3xl bg-white p-5 sm:p-7">
             <div className="mb-2 flex items-end justify-between">
               <h2 className="font-serif text-[28px] font-normal">
                 Needs your review

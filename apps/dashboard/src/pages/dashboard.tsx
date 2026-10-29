@@ -1,6 +1,6 @@
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { AlertCircle, Bell, Gift, Plus } from "lucide-react";
+import { AlertCircle, Bell, Plus } from "lucide-react";
 import { PAYMENT_TEXT, StatusPill } from "@/components/status-pill";
 import { useSessionUser } from "@/modules/auth";
 import {
@@ -8,13 +8,11 @@ import {
   daysUntil,
   firstName,
   formatDay,
-  formatDayLong,
   formatMoney,
   formatMonthYear,
   formatToday,
   greeting,
   initials,
-  nextBirthday,
 } from "../lib/format";
 import { canPayNow, isDue, LIVE } from "../lib/plans";
 import { env } from "#/env/client";
@@ -205,10 +203,6 @@ export default function Dashboard() {
   const firstSuccess = successful
     .map((p) => p.processedAt ?? p.createdAt)
     .sort()[0];
-  const birthdays = plans
-    .filter((p) => p.coveredPerson.dateOfBirth)
-    .map((p) => ({ plan: p, date: nextBirthday(p.coveredPerson.dateOfBirth!) }))
-    .sort((a, b) => +a.date - +b.date);
   const dueNow = live.find(isDue);
 
   return (
@@ -257,6 +251,7 @@ export default function Dashboard() {
             {(plansQ.error ?? paymentsQ.error)?.message}
           </span>
           <button
+            type="button"
             className="font-bold underline"
             onClick={() => {
               void plansQ.refetch();
@@ -270,7 +265,7 @@ export default function Dashboard() {
 
       <section
         aria-label="Summary"
-        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
       >
         <SummaryCard
           label="Total contributed"
@@ -308,21 +303,6 @@ export default function Dashboard() {
           {nextPlan
             ? formatMoney(nextPlan.contributionAmountMinor, nextPlan.currency)
             : "—"}
-        </SummaryCard>
-        <SummaryCard
-          label="Upcoming"
-          sub={
-            birthdays[0]
-              ? formatDayLong(birthdays[0].date)
-              : "Add a date of birth to see birthdays"
-          }
-        >
-          <span className="flex items-center gap-2 text-xl">
-            <Gift className="size-[18px] text-muted" />
-            {birthdays[0]
-              ? `${firstName(birthdays[0].plan.coveredPerson.fullName)}'s birthday`
-              : "Nothing yet"}
-          </span>
         </SummaryCard>
       </section>
 

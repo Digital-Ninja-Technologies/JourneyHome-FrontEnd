@@ -70,7 +70,7 @@ export default function AuditLog() {
 
   if (q.isError && isUnsupported(q.error)) {
     return (
-      <main className="flex max-w-[720px] flex-col gap-6 p-10">
+      <main className="flex max-w-[720px] flex-col gap-6 p-4 sm:p-6 md:p-10">
         <PageHeader title="Audit log" />
         <section className="rounded-3xl border border-dashed border-foreground/30 p-8">
           <div className="font-serif text-2xl">Not available yet</div>
@@ -85,7 +85,7 @@ export default function AuditLog() {
   }
 
   return (
-    <main className="flex flex-col gap-6 p-10">
+    <main className="flex flex-col gap-6 p-4 sm:p-6 md:p-10">
       <PageHeader
         title="Audit log"
         aside={
@@ -161,7 +161,7 @@ export default function AuditLog() {
           ))}
         </Select>
       </div>
-      <section className="rounded-3xl bg-white px-7 py-2">
+      <section className="rounded-3xl bg-white px-4 py-2 sm:px-7">
         {q.isPending && (
           <p className="py-6 text-sm text-muted">Loading activity…</p>
         )}
@@ -180,7 +180,7 @@ export default function AuditLog() {
             return (
               <li
                 key={e._id}
-                className="flex gap-6 border-b border-border py-4 text-sm last:border-0"
+                className="flex flex-col gap-1 border-b border-border py-4 text-sm last:border-0 sm:flex-row sm:gap-6"
               >
                 <time
                   dateTime={e.createdAt}

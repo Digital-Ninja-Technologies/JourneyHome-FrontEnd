@@ -91,7 +91,7 @@ export default function Payments() {
 
   if (q.isError && isUnsupported(q.error)) {
     return (
-      <main className="flex max-w-[720px] flex-col gap-6 p-10">
+      <main className="flex max-w-[720px] flex-col gap-6 p-4 sm:p-6 md:p-10">
         <PageHeader title="Payments" />
         <section className="rounded-3xl border border-dashed border-foreground/30 p-8">
           <div className="font-serif text-2xl">Not available yet</div>
@@ -105,7 +105,7 @@ export default function Payments() {
   }
 
   return (
-    <main className="flex flex-col gap-6 p-10">
+    <main className="flex flex-col gap-6 p-4 sm:p-6 md:p-10">
       <PageHeader
         title="Payments"
         aside={
@@ -201,7 +201,7 @@ export default function Payments() {
           ))}
         </Select>
       </div>
-      <div className="overflow-x-auto rounded-3xl bg-white p-6">
+      <div className="overflow-x-auto rounded-3xl bg-white p-4 sm:p-6">
         <table className="w-full min-w-[820px] text-left text-sm">
           <thead>
             <tr className="text-xs font-semibold uppercase tracking-wider text-muted">
@@ -281,6 +281,7 @@ export default function Payments() {
         {rows.length > shown && (
           <div className="border-t border-border pt-4 text-center">
             <button
+              type="button"
               onClick={() => setShown((n) => n + PAGE)}
               className="text-sm font-semibold text-link underline"
             >

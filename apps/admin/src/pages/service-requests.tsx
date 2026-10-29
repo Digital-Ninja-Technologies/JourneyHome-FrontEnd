@@ -40,7 +40,7 @@ export default function ServiceRequests() {
   const error = reqQ.error ?? plansQ.error ?? dir.error;
 
   return (
-    <main className="flex flex-col gap-6 p-10">
+    <main className="flex flex-col gap-6 p-4 sm:p-6 md:p-10">
       <PageHeader title="Service requests" />
       <Chips
         value={filter}
@@ -66,7 +66,7 @@ export default function ServiceRequests() {
       )}
       {reqQ.isPending && <p className="text-muted">Loading requests…</p>}
       {reqQ.isSuccess && rows.length === 0 && (
-        <p className="rounded-3xl bg-white p-8 text-sm text-muted">
+        <p className="rounded-2xl sm:rounded-3xl bg-white p-6 sm:p-8 text-sm text-muted">
           No service requests here.
         </p>
       )}
@@ -80,7 +80,7 @@ export default function ServiceRequests() {
               to="/service-requests/$id"
               params={{ id: r._id }}
               className={cn(
-                "flex items-center justify-between gap-4 rounded-2xl border-l-4 bg-white px-6 py-5",
+                "flex flex-col gap-3 rounded-2xl border-l-4 bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6",
                 BORDER[tone],
               )}
             >

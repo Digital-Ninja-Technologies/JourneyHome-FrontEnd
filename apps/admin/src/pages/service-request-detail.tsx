@@ -75,10 +75,10 @@ export default function ServiceRequestDetail() {
   });
 
   if (q.isPending)
-    return <main className="p-10 text-muted">Loading request…</main>;
+    return <main className="p-4 sm:p-6 md:p-10 text-muted">Loading request…</main>;
   if (q.isError)
     return (
-      <main className="p-10">
+      <main className="p-4 sm:p-6 md:p-10">
         <QueryError error={q.error} retry={() => void q.refetch()} />
       </main>
     );
@@ -111,7 +111,7 @@ export default function ServiceRequestDetail() {
   ];
 
   return (
-    <main className="flex flex-col gap-6 p-10">
+    <main className="flex flex-col gap-6 p-4 sm:p-6 md:p-10">
       <div className="flex flex-wrap items-center gap-3">
         <PageHeader
           crumb={

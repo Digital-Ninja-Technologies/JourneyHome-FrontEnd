@@ -18,10 +18,10 @@ export default function UserDetail() {
   const customer = customersQ.data?.find((c) => c._id === id);
 
   if (customersQ.isPending || plansQ.isPending || reqQ.isPending)
-    return <main className="p-10 text-muted">Loading…</main>;
+    return <main className="p-4 sm:p-6 md:p-10 text-muted">Loading…</main>;
   if (error)
     return (
-      <main className="p-10">
+      <main className="p-4 sm:p-6 md:p-10">
         <QueryError
           error={error}
           retry={() => {
@@ -34,7 +34,7 @@ export default function UserDetail() {
     );
   if (!customer) {
     return (
-      <main className="flex flex-col items-start gap-3 p-10">
+      <main className="flex flex-col items-start gap-3 p-4 sm:p-6 md:p-10">
         <h1 className="font-serif text-4xl">User not found</h1>
         <Link to="/users" className="font-bold text-link underline">
           Back to users
@@ -47,7 +47,7 @@ export default function UserDetail() {
   const requests = (reqQ.data ?? []).filter((r) => r.owner === customer._id);
 
   return (
-    <main className="flex max-w-[860px] flex-col gap-6 p-10">
+    <main className="flex max-w-[860px] flex-col gap-6 p-4 sm:p-6 md:p-10">
       <div className="flex flex-col gap-2">
         <PageHeader
           crumb={

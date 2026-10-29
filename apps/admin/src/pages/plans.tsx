@@ -43,7 +43,7 @@ export default function Plans() {
   const error = plansQ.error ?? dir.error;
 
   return (
-    <main className="flex flex-col gap-6 p-10">
+    <main className="flex flex-col gap-6 p-4 sm:p-6 md:p-10">
       <PageHeader
         title="Plans"
         aside={
@@ -82,7 +82,7 @@ export default function Plans() {
           }}
         />
       )}
-      <div className="overflow-x-auto rounded-3xl bg-white p-6">
+      <div className="overflow-x-auto rounded-2xl sm:rounded-3xl bg-white p-4 sm:p-6">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead>
             <tr className="text-xs font-semibold uppercase tracking-wider text-muted">
