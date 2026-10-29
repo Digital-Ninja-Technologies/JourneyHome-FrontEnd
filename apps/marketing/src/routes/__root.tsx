@@ -11,6 +11,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CatchBoundary } from "@/components/catch-boundary";
 import { CookieConsent } from "@/components/cookie-consent";
+
 import globalsCss from "@/styles/globals.css?url";
 
 export const Route = createRootRouteWithContext<{

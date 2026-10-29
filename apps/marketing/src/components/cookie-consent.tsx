@@ -54,14 +54,14 @@ export function CookieConsent() {
         type="button"
         onClick={dismissCookieBanner}
         aria-label="Close and accept essential cookies only"
-        className="absolute right-3.5 top-3.5 rounded-lg p-1.5 text-muted transition-colors hover:bg-foreground/5 hover:text-foreground md:right-4 md:top-4 cursor-pointer"
+        className="absolute right-2.5 top-2.5 rounded-lg p-1.5 text-muted transition-colors hover:bg-foreground/5 hover:text-foreground md:right-4 md:top-4 cursor-pointer"
       >
         <X className="size-4" />
         <span className="sr-only">Close</span>
       </button>
 
       {view === "banner" ? (
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between pr-8 md:pr-10">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex-1 pr-2">
             <h2 className="text-base font-bold tracking-tight text-foreground">
               Cookie Consent
@@ -101,7 +101,7 @@ export function CookieConsent() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-4 pr-8 md:pr-10">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <button
               type="button"
@@ -111,7 +111,7 @@ export function CookieConsent() {
               <ArrowLeft className="size-3.5" />
               <span>Back</span>
             </button>
-            <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+            <span className="text-xs font-bold uppercase tracking-wider text-foreground mr-8">
               Cookie Preferences
             </span>
           </div>
