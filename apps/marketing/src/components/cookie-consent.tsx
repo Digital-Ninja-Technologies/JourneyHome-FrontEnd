@@ -4,25 +4,12 @@ import { X, ArrowLeft, Check } from "lucide-react";
 import { Button } from "@journeyhome/ui/components/button";
 import { Switch } from "@journeyhome/ui/components/switch";
 
-export const COOKIE_CONSENT_STORAGE_KEY = "journey_home_cookie_consent_v1";
-export const OPEN_COOKIE_PREFERENCES_EVENT = "journeyhome:open-cookie-preferences";
-
-export interface CookiePreferences {
-  necessary: true;
-  analytics: boolean;
-  marketing: boolean;
-}
-
-export interface StoredConsent {
-  consentedAt: string;
-  preferences: CookiePreferences;
-}
-
-export function openCookiePreferences() {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent(OPEN_COOKIE_PREFERENCES_EVENT));
-  }
-}
+import {
+  COOKIE_CONSENT_STORAGE_KEY,
+  OPEN_COOKIE_PREFERENCES_EVENT,
+  type CookiePreferences,
+  type StoredConsent,
+} from "@/lib/cookie-consent";
 
 export function CookieConsent() {
   const [hasMounted, setHasMounted] = React.useState(false);
@@ -151,7 +138,7 @@ export function CookieConsent() {
               type="button"
               variant="default"
               size="sm"
-              className="px-4 cursor-pointer"
+              className="rounded-full px-5 text-xs font-bold cursor-pointer"
               onClick={() => setView("preferences")}
             >
               Manage cookies
@@ -160,7 +147,7 @@ export function CookieConsent() {
               type="button"
               variant="outline"
               size="sm"
-              className="px-4 cursor-pointer"
+              className="rounded-full px-5 text-xs font-bold cursor-pointer"
               onClick={handleAcceptAll}
             >
               Accept all
@@ -209,7 +196,7 @@ export function CookieConsent() {
                 aria-hidden="true"
                 className="flex size-5 shrink-0 items-center justify-center rounded-md bg-status-active text-white"
               >
-                <Check className="size-3 stroke-[3]" />
+                <Check className="size-3 stroke-3" />
               </div>
             </div>
 
@@ -220,8 +207,8 @@ export function CookieConsent() {
                   Analytics &amp; Performance
                 </span>
                 <p className="mt-1 text-[11px] leading-relaxed text-muted">
-                  Allows us to aggregate anonymous visitor metrics and improve our
-                  services.
+                  Allows us to aggregate anonymous visitor metrics and improve
+                  our services.
                 </p>
               </div>
               <Switch
@@ -255,7 +242,7 @@ export function CookieConsent() {
               type="button"
               size="sm"
               variant="default"
-              className="cursor-pointer"
+              className="rounded-full px-5 text-xs font-bold cursor-pointer"
               onClick={handleSaveCustom}
             >
               Save My Choices
@@ -264,7 +251,7 @@ export function CookieConsent() {
               type="button"
               size="sm"
               variant="outline"
-              className="cursor-pointer"
+              className="rounded-full px-5 text-xs font-bold cursor-pointer"
               onClick={handleAcceptAll}
             >
               Accept all

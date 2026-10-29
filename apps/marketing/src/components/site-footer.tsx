@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "@journeyhome/ui/components/logo";
-import { openCookiePreferences } from "@/components/cookie-consent";
+import { openCookiePreferences } from "@/lib/cookie-consent";
 
 const COLUMNS = [
   { title: "Product", links: [["/how-it-works", "How it works"], ["/pricing", "Pricing"], ["/faq", "FAQ"]] },
@@ -38,8 +38,19 @@ export function SiteFooter() {
           </div>
         ))}
       </div>
-      <div className="flex flex-wrap justify-between gap-2 border-t border-border pt-6 text-[13px] text-muted">
+      <div className="flex flex-col gap-3 border-t border-border pt-6 text-[13px] text-muted sm:flex-row sm:items-center sm:justify-between">
         <span>© {new Date().getFullYear()} Journey Home. All rights reserved.</span>
+        <span>
+          Designed &amp; developed by{" "}
+          <a
+            href="https://www.thedigitalninjatech.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-link"
+          >
+            The Digital Ninja Technologies Agency
+          </a>
+        </span>
         <span>Lagos, Nigeria</span>
       </div>
     </footer>
