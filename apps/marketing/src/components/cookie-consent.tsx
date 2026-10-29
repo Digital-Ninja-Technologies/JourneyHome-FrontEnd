@@ -5,96 +5,42 @@ import { Button } from "@journeyhome/ui/components/button";
 import { Switch } from "@journeyhome/ui/components/switch";
 
 import {
-  COOKIE_CONSENT_STORAGE_KEY,
-  OPEN_COOKIE_PREFERENCES_EVENT,
-  type CookiePreferences,
-  type StoredConsent,
-} from "@/lib/cookie-consent";
+  useCookieConsentState,
+  initCookieConsent,
+  acceptAllCookies,
+  saveCookiePreferences,
+  dismissCookieBanner,
+  setCookieConsentView,
+} from "@/store/cookie-consent";
 
 export function CookieConsent() {
-  const [hasMounted, setHasMounted] = React.useState(false);
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [view, setView] = React.useState<"banner" | "preferences">("banner");
+  const { isOpen, view, preferences, isInitialized } = useCookieConsentState();
 
-  const [analyticsEnabled, setAnalyticsEnabled] = React.useState(false);
-  const [marketingEnabled, setMarketingEnabled] = React.useState(false);
+  const [analyticsEnabled, setAnalyticsEnabled] = React.useState(
+    preferences.analytics,
+  );
+  const [marketingEnabled, setMarketingEnabled] = React.useState(
+    preferences.marketing,
+  );
 
   React.useEffect(() => {
-    try {
-      const raw = localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
-      if (raw) {
-        const parsed: StoredConsent = JSON.parse(raw);
-        if (parsed?.preferences) {
-          setAnalyticsEnabled(Boolean(parsed.preferences.analytics));
-          setMarketingEnabled(Boolean(parsed.preferences.marketing));
-          setIsOpen(false);
-        } else {
-          setIsOpen(true);
-        }
-      } else {
-        setIsOpen(true);
-      }
-    } catch {
-      setIsOpen(true);
-    }
-    setHasMounted(true);
-
-    const handleOpen = () => {
-      // Reload current preferences from storage if present
-      try {
-        const raw = localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
-        if (raw) {
-          const parsed: StoredConsent = JSON.parse(raw);
-          if (parsed?.preferences) {
-            setAnalyticsEnabled(Boolean(parsed.preferences.analytics));
-            setMarketingEnabled(Boolean(parsed.preferences.marketing));
-          }
-        }
-      } catch {
-        // ignore
-      }
-      setView("preferences");
-      setIsOpen(true);
-    };
-
-    window.addEventListener(OPEN_COOKIE_PREFERENCES_EVENT, handleOpen);
-    return () => {
-      window.removeEventListener(OPEN_COOKIE_PREFERENCES_EVENT, handleOpen);
-    };
+    return initCookieConsent();
   }, []);
 
-  const saveConsent = (prefs: CookiePreferences) => {
-    const payload: StoredConsent = {
-      consentedAt: new Date().toISOString(),
-      preferences: prefs,
-    };
-    try {
-      localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, JSON.stringify(payload));
-    } catch {
-      // ignore
-    }
-    setAnalyticsEnabled(prefs.analytics);
-    setMarketingEnabled(prefs.marketing);
-    setIsOpen(false);
-  };
-
-  const handleAcceptAll = () => {
-    saveConsent({ necessary: true, analytics: true, marketing: true });
-  };
-
-  const handleDismissEssential = () => {
-    saveConsent({ necessary: true, analytics: false, marketing: false });
-  };
+  React.useEffect(() => {
+    setAnalyticsEnabled(preferences.analytics);
+    setMarketingEnabled(preferences.marketing);
+  }, [preferences.analytics, preferences.marketing]);
 
   const handleSaveCustom = () => {
-    saveConsent({
+    saveCookiePreferences({
       necessary: true,
       analytics: analyticsEnabled,
       marketing: marketingEnabled,
     });
   };
 
-  if (!hasMounted || !isOpen) {
+  if (!isInitialized || !isOpen) {
     return null;
   }
 
@@ -106,7 +52,7 @@ export function CookieConsent() {
       {/* Top right close (x) button */}
       <button
         type="button"
-        onClick={handleDismissEssential}
+        onClick={dismissCookieBanner}
         aria-label="Close and accept essential cookies only"
         className="absolute right-3.5 top-3.5 rounded-lg p-1.5 text-muted transition-colors hover:bg-foreground/5 hover:text-foreground md:right-4 md:top-4 cursor-pointer"
       >
@@ -139,7 +85,7 @@ export function CookieConsent() {
               variant="default"
               size="sm"
               className="rounded-full px-5 text-xs font-bold cursor-pointer"
-              onClick={() => setView("preferences")}
+              onClick={() => setCookieConsentView("preferences")}
             >
               Manage cookies
             </Button>
@@ -148,7 +94,7 @@ export function CookieConsent() {
               variant="outline"
               size="sm"
               className="rounded-full px-5 text-xs font-bold cursor-pointer"
-              onClick={handleAcceptAll}
+              onClick={acceptAllCookies}
             >
               Accept all
             </Button>
@@ -159,7 +105,7 @@ export function CookieConsent() {
           <div className="flex items-center justify-between border-b border-border pb-3">
             <button
               type="button"
-              onClick={() => setView("banner")}
+              onClick={() => setCookieConsentView("banner")}
               className="flex items-center gap-1.5 text-xs font-semibold text-link transition-colors hover:text-link-hover cursor-pointer"
             >
               <ArrowLeft className="size-3.5" />
@@ -252,7 +198,7 @@ export function CookieConsent() {
               size="sm"
               variant="outline"
               className="rounded-full px-5 text-xs font-bold cursor-pointer"
-              onClick={handleAcceptAll}
+              onClick={acceptAllCookies}
             >
               Accept all
             </Button>

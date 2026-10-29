@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "@journeyhome/ui/components/logo";
-import { openCookiePreferences } from "@/lib/cookie-consent";
+import { openCookiePreferences } from "@/store/cookie-consent";
 
 const COLUMNS = [
   { title: "Product", links: [["/how-it-works", "How it works"], ["/pricing", "Pricing"], ["/faq", "FAQ"]] },
