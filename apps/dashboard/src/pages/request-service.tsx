@@ -17,7 +17,30 @@ import {
   uploadServiceDocument,
   validateFile,
 } from "@/lib/service-requests";
-import type { DocumentType, ServiceRequest } from "@/lib/types";
+import type { DocumentType, Plan, ServiceRequest } from "@/lib/types";
+
+// TEMP TOGGLE: Set to false to revert back to requiring an active plan.
+export const BYPASS_PLAN_REQUIREMENT = true;
+
+const PREVIEW_FALLBACK_PLAN: Plan = {
+  _id: "preview-plan-id",
+  status: "Active",
+  currency: "NGN",
+  contributionAmountMinor: 500000,
+  targetAmountMinor: 10000000,
+  totalContributedMinor: 1500000,
+  startDate: new Date().toISOString(),
+  nextPaymentDate: new Date().toISOString(),
+  createdAt: new Date().toISOString(),
+  coveredPerson: {
+    fullName: "Preview Beneficiary",
+    relationship: "father",
+    address: "12 Marina, Lagos",
+  },
+  packageSnapshot: {
+    name: "Standard",
+  },
+};
 
 const STATES = [
   "Abia",
@@ -156,7 +179,10 @@ export default function RequestService() {
     ELIGIBLE_PLAN.has(p.status),
   );
   const [planId, setPlanId] = useState(paramPlan ?? "");
-  const plan = eligible.find((p) => p._id === planId) ?? eligible[0];
+  const plan =
+    eligible.find((p) => p._id === planId) ??
+    eligible[0] ??
+    (BYPASS_PLAN_REQUIREMENT ? PREVIEW_FALLBACK_PLAN : undefined);
 
   const submit = useMutation({
     mutationFn: async (body: Record<string, unknown>) => {
@@ -224,15 +250,24 @@ export default function RequestService() {
       </header>
 
       {plansQ.isPending && <p className="text-muted">Loading your plans…</p>}
-      {plansQ.isSuccess && eligible.length === 0 && (
-        <div className="rounded-2xl bg-white p-6 text-sm leading-relaxed text-ink-soft">
-          <div className="mb-1 font-serif text-2xl text-foreground">
-            No plan is ready for a service
+      {plansQ.isSuccess &&
+        eligible.length === 0 &&
+        !BYPASS_PLAN_REQUIREMENT && (
+          <div className="rounded-2xl bg-white p-6 text-sm leading-relaxed text-ink-soft">
+            <div className="mb-1 font-serif text-2xl text-foreground">
+              No plan is ready for a service
+            </div>
+            A service can be requested for a plan once it&rsquo;s active.{" "}
+            <Link to="/app/plans" className="font-bold text-link underline">
+              Go to my plans
+            </Link>
           </div>
-          A service can be requested for a plan once it&rsquo;s active.{" "}
-          <Link to="/app/plans" className="font-bold text-link underline">
-            Go to my plans
-          </Link>
+        )}
+
+      {BYPASS_PLAN_REQUIREMENT && eligible.length === 0 && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-900">
+          <strong>Preview mode:</strong> Showing request service flow with a
+          mock plan.
         </div>
       )}
 
@@ -244,14 +279,22 @@ export default function RequestService() {
                 id="plan"
                 value={plan._id}
                 onChange={(e) => setPlanId(e.target.value)}
-                disabled={partial}
+                disabled={
+                  partial || (BYPASS_PLAN_REQUIREMENT && eligible.length === 0)
+                }
               >
-                {eligible.map((p) => (
-                  <option key={p._id} value={p._id}>
-                    {p.coveredPerson.fullName} — {p.packageSnapshot.name} ·{" "}
-                    {formatMoney(p.totalContributedMinor, p.currency)} saved
+                {eligible.length > 0 ? (
+                  eligible.map((p) => (
+                    <option key={p._id} value={p._id}>
+                      {p.coveredPerson.fullName} — {p.packageSnapshot.name} ·{" "}
+                      {formatMoney(p.totalContributedMinor, p.currency)} saved
+                    </option>
+                  ))
+                ) : (
+                  <option value={PREVIEW_FALLBACK_PLAN._id}>
+                    Preview Plan (Bypassed plan requirement)
                   </option>
-                ))}
+                )}
               </Select>
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">

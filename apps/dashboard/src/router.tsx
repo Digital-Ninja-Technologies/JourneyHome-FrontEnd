@@ -1,5 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { TanStackDevtools } from "@tanstack/react-devtools";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { createRouter, Navigate } from "@tanstack/react-router";
 import { makeQueryClient } from "./lib/query-client";
 import { routeTree } from "./routeTree.gen";
@@ -14,7 +16,24 @@ export const router = createRouter({
   Wrap: ({ children }) => (
     <QueryClientProvider client={queryClient}>
       {children}
-      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+
+      {import.meta.env.DEV && (
+        <TanStackDevtools
+          config={{
+            position: "bottom-right",
+          }}
+          plugins={[
+            {
+              name: "Tanstack Router",
+              render: <TanStackRouterDevtoolsPanel router={router} />,
+            },
+            {
+              name: "Tanstack Query",
+              render: <ReactQueryDevtoolsPanel />,
+            },
+          ]}
+        />
+      )}
     </QueryClientProvider>
   ),
   defaultPreload: "intent",

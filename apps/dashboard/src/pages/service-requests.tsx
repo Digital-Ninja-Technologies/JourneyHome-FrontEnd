@@ -11,6 +11,7 @@ import {
   STEPS,
 } from "@/lib/service-requests";
 import type { Plan, ServiceRequest } from "@/lib/types";
+import { BYPASS_PLAN_REQUIREMENT } from "./request-service";
 
 const HOW = [
   [
@@ -166,7 +167,7 @@ export default function ServiceRequests() {
             Service <span className="italic">requests</span>
           </h1>
         </div>
-        {active.length === 0 && canRequest && (
+        {active.length === 0 && (canRequest || BYPASS_PLAN_REQUIREMENT) && (
           <Link
             to="/app/service-requests/new"
             className="inline-flex h-[52px] items-center rounded-2xl bg-foreground px-6 text-sm font-semibold text-canvas"
@@ -197,7 +198,7 @@ export default function ServiceRequests() {
         <div className="rounded-3xl border border-dashed border-foreground/30 p-8">
           <div className="font-serif text-2xl">No service requests yet</div>
           <p className="mt-1 max-w-lg text-sm text-muted">
-            {canRequest
+            {canRequest || BYPASS_PLAN_REQUIREMENT
               ? "When the time comes, submit a request and we'll take care of the rest."
               : "A service can be requested once you have an active plan."}
           </p>
