@@ -6,7 +6,7 @@ import Welcome from "@/pages/welcome";
 export const Route = createFileRoute("/welcome")({
   validateSearch: (search) => planSearchSchema.parse(search),
   beforeLoad: async ({ context, location }) => {
-    const session = await context.queryClient.ensureQueryData(
+    const session = await context.queryClient.query(
       sessionQueryOptions(),
     );
     if (!session?.user) {

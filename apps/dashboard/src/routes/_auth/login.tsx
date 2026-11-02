@@ -7,7 +7,7 @@ import { sessionQueryOptions } from "@/modules/auth";
 export const Route = createFileRoute("/_auth/login")({
   validateSearch: (search) => redirectSearchSchema.parse(search),
   beforeLoad: async ({ context, search }) => {
-    const session = await context.queryClient.ensureQueryData(
+    const session = await context.queryClient.query(
       sessionQueryOptions(),
     );
     if (session?.user) {

@@ -4,7 +4,7 @@ import OnboardingPlan from "@/pages/onboarding-plan";
 
 export const Route = createFileRoute("/signup/plan")({
   beforeLoad: async ({ context, location }) => {
-    const session = await context.queryClient.ensureQueryData(
+    const session = await context.queryClient.query(
       sessionQueryOptions(),
     );
     if (!session?.user) {

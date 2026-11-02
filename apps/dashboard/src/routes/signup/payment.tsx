@@ -6,7 +6,7 @@ import OnboardingPayment from "@/pages/onboarding-payment";
 export const Route = createFileRoute("/signup/payment")({
   validateSearch: (search) => planSearchSchema.parse(search),
   beforeLoad: async ({ context, location }) => {
-    const session = await context.queryClient.ensureQueryData(
+    const session = await context.queryClient.query(
       sessionQueryOptions(),
     );
     if (!session?.user) {

@@ -4,7 +4,7 @@ import VerifyCode from "@/pages/verify-code";
 
 export const Route = createFileRoute("/signup/verify")({
   beforeLoad: async ({ context, location }) => {
-    const session = await context.queryClient.ensureQueryData(
+    const session = await context.queryClient.query(
       sessionQueryOptions(),
     );
     if (!session?.user) {

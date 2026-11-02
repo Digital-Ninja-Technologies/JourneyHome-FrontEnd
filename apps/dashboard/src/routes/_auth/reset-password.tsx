@@ -6,7 +6,7 @@ import ResetPassword from "@/pages/reset-password";
 export const Route = createFileRoute("/_auth/reset-password")({
   validateSearch: (search) => tokenSearchSchema.parse(search),
   beforeLoad: async ({ context }) => {
-    const session = await context.queryClient.ensureQueryData(
+    const session = await context.queryClient.query(
       sessionQueryOptions(),
     );
     if (session?.user) {
