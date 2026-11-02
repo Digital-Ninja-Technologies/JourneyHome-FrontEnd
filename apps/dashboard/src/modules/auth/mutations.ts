@@ -1,13 +1,7 @@
+import type { LoginInput, SignupInput } from "@journeyhome/schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import type { LoginInput, SignupInput } from "@journeyhome/schemas";
-import {
-  login,
-  logout,
-  signup,
-  updateUserLocally,
-  type User,
-} from "./api";
+import { login, logout, signup, type User, updateUserLocally } from "./api";
 import { sessionQueryOptions } from "./query-options";
 
 export function useLoginMutation() {
@@ -15,8 +9,9 @@ export function useLoginMutation() {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (input: LoginInput & { remember?: boolean; redirect?: string }) =>
-      login(input),
+    mutationFn: (
+      input: LoginInput & { remember?: boolean; redirect?: string },
+    ) => login(input),
     onSuccess: (session, variables) => {
       queryClient.setQueryData(sessionQueryOptions().queryKey, session);
       const to = variables.redirect || "/app";
@@ -46,10 +41,20 @@ export function useSignupMutation() {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (input: SignupInput & { phone?: string }) => signup(input),
-    onSuccess: (session) => {
+    mutationFn: ({
+      selectedPackage: _selectedPackage,
+      ...input
+    }: SignupInput & { phone?: string; selectedPackage?: string }) =>
+      signup(input),
+    onSuccess: (session, variables) => {
       queryClient.setQueryData(sessionQueryOptions().queryKey, session);
-      navigate({ to: "/signup/verify", replace: true });
+      navigate({
+        to: "/signup/verify",
+        search: variables.selectedPackage
+          ? { package: variables.selectedPackage }
+          : {},
+        replace: true,
+      });
     },
   });
 }

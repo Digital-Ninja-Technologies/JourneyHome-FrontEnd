@@ -7,12 +7,25 @@ export const redirectSearchSchema = z.object({
     .refine(
       (val) => {
         if (!val) return true;
-        return val.startsWith("/") && !val.startsWith("//") && !val.includes("://");
+        return (
+          val.startsWith("/") && !val.startsWith("//") && !val.includes("://")
+        );
       },
       { message: "Redirect URL must be a valid internal path" },
     ),
 });
 export type RedirectSearch = z.infer<typeof redirectSearchSchema>;
+
+/** Search params for the signup flow; `package` (or legacy `packageId`) carries the package picked on marketing. */
+export const signupSearchSchema = z.object({
+  package: z.coerce.string().optional(),
+  packageId: z.coerce.string().optional(),
+});
+export type SignupSearch = z.infer<typeof signupSearchSchema>;
+
+export const resolveSelectedPackage = (
+  search: Partial<SignupSearch> | undefined,
+): string | undefined => search?.package || search?.packageId || undefined;
 
 export const sanitizeRedirect = (
   rawRedirect: string | undefined | null,

@@ -41,9 +41,7 @@ export function usePackages() {
   return useQuery({
     queryKey: ["packages"],
     queryFn: async () =>
-      (await api<Package[]>("/packages")).sort(
-        (a, b) => a.monthlyContributionMinor - b.monthlyContributionMinor,
-      ),
+      (await api<Package[]>("/packages")).sort((a, b) => a.amount - b.amount),
     staleTime: 5 * 60_000,
   });
 }

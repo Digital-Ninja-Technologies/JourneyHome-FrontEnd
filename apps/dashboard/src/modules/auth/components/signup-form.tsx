@@ -1,11 +1,17 @@
-import { env } from "#/env/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
-import { Link } from "@tanstack/react-router";
+import { Link, useSearch } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { env } from "#/env/client";
+import {
+  getStoredSelectedPackage,
+  setStoredSelectedPackage,
+} from "@/lib/onboarding-storage";
+import { resolveSelectedPackage } from "@/lib/search-schemas";
 import { useSignupMutation } from "../mutations";
 
 const formSchema = z.object({
@@ -22,6 +28,15 @@ type SignupFormValues = z.infer<typeof formSchema>;
 
 export function SignupForm() {
   const signupMutation = useSignupMutation();
+  const search = useSearch({ from: "/signup/" });
+  const selectedPackage =
+    resolveSelectedPackage(search) ?? getStoredSelectedPackage() ?? undefined;
+
+  // Remember the package picked on the marketing site in case the URL param is lost mid-flow.
+  useEffect(() => {
+    const fromUrl = resolveSelectedPackage(search);
+    if (fromUrl) setStoredSelectedPackage(fromUrl);
+  }, [search]);
 
   const {
     register,
@@ -45,6 +60,7 @@ export function SignupForm() {
       password: data.password,
       role: "customer",
       phone: data.phone?.trim() || undefined,
+      selectedPackage,
     });
   };
 

@@ -138,7 +138,7 @@ export function PackagePicker({
               />
             </div>
             <div className="text-xl font-bold tracking-tight">
-              {formatMoney(p.monthlyContributionMinor, p.currency)}
+              {formatMoney(p.amount, p.currency)}
               <span className="text-xs font-normal text-muted">/mo</span>
             </div>
           </label>

@@ -1,11 +1,13 @@
 import { Button } from "@journeyhome/ui/components/button";
 import { useMutation } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { DemoNotice } from "@/components/demo-notice";
 import { OtpInput } from "@/components/otp-input";
+import { resolveSelectedPackage } from "@/lib/search-schemas";
 import { useSessionUser } from "@/modules/auth";
 import { api, isUnsupported, UNSUPPORTED_MESSAGE } from "../lib/api";
+import { getStoredSelectedPackage } from "../lib/onboarding-storage";
 import { DEMO_CODE } from "../mocks";
 
 const COOLDOWN = 30;
@@ -13,6 +15,7 @@ const COOLDOWN = 30;
 export default function VerifyCode() {
   const user = useSessionUser();
   const navigate = useNavigate();
+  const search = useSearch({ from: "/signup/verify" });
   const [code, setCode] = useState("");
   const [wait, setWait] = useState(COOLDOWN);
   const [resent, setResent] = useState(false);
@@ -23,7 +26,15 @@ export default function VerifyCode() {
   });
   const confirm = useMutation({
     mutationFn: () => api("/auth/verification/confirm", { body: { code } }),
-    onSuccess: () => navigate({ to: "/signup/plan", replace: true }),
+    onSuccess: () => {
+      const selected =
+        resolveSelectedPackage(search) ?? getStoredSelectedPackage();
+      navigate({
+        to: "/signup/plan",
+        search: selected ? { package: selected } : {},
+        replace: true,
+      });
+    },
   });
 
   // Ask for a code once when the page opens.

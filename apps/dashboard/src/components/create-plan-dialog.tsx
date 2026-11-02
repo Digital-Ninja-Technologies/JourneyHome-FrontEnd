@@ -89,7 +89,7 @@ export function CreatePlanDialog({
               {create.isPending
                 ? "Creating…"
                 : selected
-                  ? `Create plan — ${formatMoney(selected.monthlyContributionMinor, selected.currency)}/mo`
+                  ? `Create plan — ${formatMoney(selected.amount, selected.currency)}/mo`
                   : "Create plan"}
             </Button>
           </div>

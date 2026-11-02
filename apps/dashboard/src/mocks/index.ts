@@ -71,7 +71,9 @@ export async function mockRequest(
   const route = `${method} ${path.split("?")[0]}`;
   const handlers: Record<string, () => unknown> = {
     "POST /auth/login": () => {
-      const email = String(b.email || "").toLowerCase().trim();
+      const email = String(b.email || "")
+        .toLowerCase()
+        .trim();
       const password = String(b.password || "");
       if (
         email === "demo@journeyhome.ng" ||
@@ -161,18 +163,22 @@ export async function mockRequest(
       {
         _id: "pkg_standard",
         name: "Standard",
-        monthlyContributionMinor: 500000,
+        description: "Photography + videography",
+        features: ["Full-day photography & video", "Digital gallery"],
+        amount: 500000,
         currency: "NGN",
-        photographyIncluded: true,
-        videographyIncluded: true,
+        billingInterval: "monthly",
+        isActive: true,
       },
       {
         _id: "pkg_premium",
         name: "Premium",
-        monthlyContributionMinor: 1000000,
+        description: "Full production",
+        features: ["Everything in Standard", "Second videographer"],
+        amount: 1000000,
         currency: "NGN",
-        photographyIncluded: true,
-        videographyIncluded: true,
+        billingInterval: "monthly",
+        isActive: true,
       },
     ],
     "GET /plans": () => {
@@ -208,9 +214,18 @@ export async function mockRequest(
         totalContributedMinor: 0,
         startDate: new Date().toISOString(),
         coveredPerson: {
-          fullName: b.coveredPerson?.fullName || b["coveredPerson.fullName"] || "Beneficiary",
-          relationship: b.coveredPerson?.relationship || b["coveredPerson.relationship"] || "parent",
-          address: b.coveredPerson?.address || b["coveredPerson.address"] || "Lagos, Nigeria",
+          fullName:
+            b.coveredPerson?.fullName ||
+            b["coveredPerson.fullName"] ||
+            "Beneficiary",
+          relationship:
+            b.coveredPerson?.relationship ||
+            b["coveredPerson.relationship"] ||
+            "parent",
+          address:
+            b.coveredPerson?.address ||
+            b["coveredPerson.address"] ||
+            "Lagos, Nigeria",
         },
         packageSnapshot: {
           name: b.packageName || "Standard",

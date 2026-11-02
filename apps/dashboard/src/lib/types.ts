@@ -61,10 +61,13 @@ export interface Payment {
 export interface Package {
   _id: string;
   name: string;
-  photographyIncluded: boolean;
-  videographyIncluded: boolean;
-  monthlyContributionMinor: number;
+  description?: string;
+  features?: string[];
+  /** Stored minor-unit amount (e.g. 1000000 = ₦10,000). */
+  amount: number;
   currency: string;
+  billingInterval?: string;
+  isActive?: boolean;
 }
 
 export type ServiceRequestStatus =

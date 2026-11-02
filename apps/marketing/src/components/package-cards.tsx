@@ -105,8 +105,8 @@ export function PackageCardsSkeleton({
               <>
                 <hr className="border-border" />
                 <ul className="flex flex-col gap-3">
-                  {["w-4/5", "w-3/5", "w-2/3", "w-1/2"].map((width, idx) => (
-                    <li key={idx} className="flex items-center gap-2.5">
+                  {["w-4/5", "w-3/5", "w-2/3", "w-1/2"].map((width) => (
+                    <li key={width} className="flex items-center gap-2.5">
                       <Skeleton className="size-4 shrink-0 rounded-full" />
                       <Skeleton className={cn("h-4 rounded-md", width)} />
                     </li>
@@ -191,7 +191,7 @@ export function PackageCards({
               </span>
             </div>
             <a
-              href={SIGNUP_URL}
+              href={`${SIGNUP_URL}?package=${encodeURIComponent(p._id)}`}
               className={cn(
                 "inline-flex h-[52px] items-center justify-center rounded-full text-sm font-bold",
                 featured

@@ -19,6 +19,8 @@ import {
   packageSchema,
   createPackageSchema,
   updatePackageSchema,
+  signupSearchSchema,
+  resolveSelectedPackage,
 } from "../src";
 
 describe("@journeyhome/schemas", () => {
@@ -315,6 +317,18 @@ describe("@journeyhome/schemas", () => {
         isActive: false,
       });
       expect(updateRes.success).toBe(true);
+    });
+  });
+
+  describe("signup search", () => {
+    it("resolves the selected package from package or packageId", () => {
+      expect(
+        resolveSelectedPackage(signupSearchSchema.parse({ package: "abc" })),
+      ).toBe("abc");
+      expect(
+        resolveSelectedPackage(signupSearchSchema.parse({ packageId: "xyz" })),
+      ).toBe("xyz");
+      expect(resolveSelectedPackage(signupSearchSchema.parse({}))).toBeUndefined();
     });
   });
 });
