@@ -12,12 +12,14 @@ import { useState } from "react";
 import { CONTACT_EMAIL } from "../lib/config";
 import { useSubmitContact } from "../modules/contact/mutations";
 
+// TODO: Consume Submit Contact API when ready.
+
 export function ContactForm() {
   const [topic, setTopic] = useState<ContactTopic>(contactTopics[0]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const submitMutation = useSubmitContact();
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setFieldErrors({});
 
