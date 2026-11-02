@@ -47,13 +47,15 @@ const SKELETON_KEYS = [
 
 export function PackageCardsSkeleton({
   count = 3,
-  showFeatures,
+  showFeatures = true,
   className,
 }: {
   count?: number;
   showFeatures?: boolean;
   className?: string;
 }) {
+  const featuredIndex = count === 3 ? 1 : -1;
+
   return (
     <div
       role="status"
@@ -62,60 +64,54 @@ export function PackageCardsSkeleton({
       aria-label="Loading packages..."
     >
       {Array.from({ length: count }).map((_, i) => {
-        const isMiddle = count === 3 && i === 1;
+        const isFeatured = i === featuredIndex;
         const key = SKELETON_KEYS[i] ?? `pkg-sk-${i}`;
+
         return (
           <div
             key={key}
             className={cn(
               "relative flex flex-col rounded-[28px] border-[1.5px] border-border bg-white",
               showFeatures ? "gap-[22px] p-9" : "gap-[18px] p-8",
-              isMiddle && "ring-1 ring-border/50",
             )}
           >
-            {isMiddle && showFeatures && (
-              <Skeleton className="absolute right-6 top-6 h-5 w-24 rounded-md" />
+            {isFeatured && (
+              <Skeleton className="absolute right-6 top-6 h-6 w-24 rounded-md" />
             )}
-            <div className="flex flex-col gap-2">
+
+            <div>
               <Skeleton
                 className={cn(
                   "rounded-md",
-                  showFeatures ? "h-7 w-36" : "h-6 w-32",
+                  showFeatures ? "h-7 w-32" : "h-6 w-28",
                 )}
               />
-              <Skeleton className="h-4 w-44 rounded-md" />
+              <Skeleton className="mt-1.5 h-4 w-44 rounded-md" />
             </div>
+
             <div className="flex items-baseline gap-2">
               <Skeleton
                 className={cn(
                   "rounded-md",
-                  showFeatures ? "h-9 w-36" : "h-8 w-32",
+                  showFeatures ? "h-9 w-28" : "h-8 w-24",
                 )}
               />
-              <Skeleton className="h-4 w-14 rounded-md" />
+              <Skeleton className="h-4 w-16 rounded-md" />
             </div>
+
             <Skeleton className="h-[52px] w-full rounded-full" />
+
             {showFeatures && (
               <>
                 <hr className="border-border" />
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <Skeleton className="size-4 shrink-0 rounded-full" />
-                    <Skeleton className="h-4 w-4/5 rounded-md" />
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <Skeleton className="size-4 shrink-0 rounded-full" />
-                    <Skeleton className="h-4 w-3/5 rounded-md" />
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <Skeleton className="size-4 shrink-0 rounded-full" />
-                    <Skeleton className="h-4 w-2/3 rounded-md" />
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <Skeleton className="size-4 shrink-0 rounded-full" />
-                    <Skeleton className="h-4 w-1/2 rounded-md" />
-                  </div>
-                </div>
+                <ul className="flex flex-col gap-3">
+                  {["w-4/5", "w-3/5", "w-2/3", "w-1/2"].map((width, idx) => (
+                    <li key={idx} className="flex items-center gap-2.5">
+                      <Skeleton className="size-4 shrink-0 rounded-full" />
+                      <Skeleton className={cn("h-4 rounded-md", width)} />
+                    </li>
+                  ))}
+                </ul>
               </>
             )}
           </div>

@@ -83,7 +83,7 @@ function HomePricingPackages() {
     return <PackagesUnavailable />;
   }
 
-  return <PackageCards packages={packages} />;
+  return <PackageCards packages={packages} showFeatures />;
 }
 
 function Home() {
