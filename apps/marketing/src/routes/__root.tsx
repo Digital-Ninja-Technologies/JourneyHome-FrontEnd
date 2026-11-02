@@ -1,16 +1,20 @@
 /// <reference types="vite/client" />
+import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import {
-  Outlet,
   createRootRouteWithContext,
   HeadContent,
+  Outlet,
   Scripts,
 } from "@tanstack/react-router";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 import { CatchBoundary } from "@/components/catch-boundary";
 import { CookieConsent } from "@/components/cookie-consent";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import TanStackQueryDevtools from "@/lib/query/devtools";
+import TanstackQueryProvider from "@/lib/query/root-provider";
 
 import globalsCss from "@/styles/globals.css?url";
 
@@ -80,7 +84,19 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <HeadContent />
       </head>
       <body className="bg-canvas">
-        {children}
+        <TanstackQueryProvider>{children}</TanstackQueryProvider>
+        <TanStackDevtools
+          config={{
+            position: "bottom-right",
+          }}
+          plugins={[
+            {
+              name: "Tanstack Router",
+              render: <TanStackRouterDevtoolsPanel />,
+            },
+            TanStackQueryDevtools,
+          ]}
+        />
         <Scripts />
       </body>
     </html>
