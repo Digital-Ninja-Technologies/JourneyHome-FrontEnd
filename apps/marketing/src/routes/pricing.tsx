@@ -1,6 +1,11 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { PackageCards, PackagesUnavailable } from "@/components/package-cards";
+import { AsyncBoundary } from "@/components/async-boundary";
+import {
+  PackageCards,
+  PackageCardsSkeleton,
+  PackagesUnavailable,
+} from "@/components/package-cards";
 import { Accent, Container, PageHero } from "@/components/section";
 import { createPageHead } from "@/lib/seo";
 import { packagesQueryOptions } from "@/modules/packages/query-options";
@@ -10,7 +15,7 @@ export const Route = createFileRoute("/pricing")({
     "Cache-Control": "public, s-maxage=300, stale-while-revalidate=31535700",
   }),
   loader: async ({ context }) => {
-    await context.queryClient.query(packagesQueryOptions());
+    await context.queryClient.prefetchQuery(packagesQueryOptions());
   },
   head: () =>
     createPageHead({
@@ -31,9 +36,17 @@ const ROWS: [string, string, string, string][] = [
   ["Drone coverage", "—", "—", "Where permitted"],
 ];
 
-function Pricing() {
+function PricingPackages() {
   const { data: packages } = useSuspenseQuery(packagesQueryOptions());
 
+  if (!packages?.length) {
+    return <PackagesUnavailable />;
+  }
+
+  return <PackageCards packages={packages} showFeatures />;
+}
+
+function Pricing() {
   return (
     <main>
       <PageHero
@@ -43,11 +56,14 @@ function Pricing() {
         Save at whatever pace suits your <Accent>family.</Accent>
       </PageHero>
       <Container className="pb-12">
-        {packages?.length ? (
-          <PackageCards packages={packages} showFeatures />
-        ) : (
-          <PackagesUnavailable />
-        )}
+        <AsyncBoundary
+          loadingFallback={<PackageCardsSkeleton showFeatures />}
+          errorFallback={({ resetErrorBoundary }) => (
+            <PackagesUnavailable onRetry={resetErrorBoundary} />
+          )}
+        >
+          <PricingPackages />
+        </AsyncBoundary>
       </Container>
       <Container className="pb-24">
         <div className="overflow-x-auto rounded-3xl bg-background p-2">

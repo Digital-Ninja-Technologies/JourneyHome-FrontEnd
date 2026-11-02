@@ -1,4 +1,6 @@
 import { Button } from "@journeyhome/ui/components/button";
+import { Skeleton } from "@journeyhome/ui/components/skeleton";
+import { useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Component, type ReactNode, Suspense } from "react";
 
@@ -93,10 +95,25 @@ export function ComponentErrorState({
 export function DefaultLoadingFallback() {
   return (
     <div
+      role="status"
       className="flex min-h-[140px] items-center justify-center p-8"
       aria-label="Loading..."
     >
       <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
+    </div>
+  );
+}
+
+export function DefaultSkeletonFallback() {
+  return (
+    <div
+      role="status"
+      className="flex flex-col gap-4 rounded-2xl border border-border bg-white p-6"
+      aria-label="Loading content..."
+    >
+      <Skeleton className="h-6 w-1/3" />
+      <Skeleton className="h-4 w-2/3" />
+      <Skeleton className="h-24 w-full rounded-xl" />
     </div>
   );
 }
@@ -114,9 +131,16 @@ export function AsyncBoundary({
   errorFallback,
   onReset,
 }: AsyncBoundaryProps) {
+  const { reset } = useQueryErrorResetBoundary();
+
+  const handleReset = () => {
+    reset();
+    onReset?.();
+  };
+
   return (
     <ErrorBoundary
-      onReset={onReset}
+      onReset={handleReset}
       fallbackRender={(props) => {
         if (typeof errorFallback === "function") {
           return errorFallback(props);

@@ -1,6 +1,7 @@
-import { AlertCircle, RefreshCw } from "lucide-react";
-import React, { Component, Suspense, type ReactNode } from "react";
 import { Button } from "@journeyhome/ui/components/button";
+import { useQueryErrorResetBoundary } from "@tanstack/react-query";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { Component, type ReactNode, Suspense } from "react";
 
 export interface FallbackProps {
   error: unknown;
@@ -118,6 +119,7 @@ export function UnauthorizedErrorState() {
 export function DefaultLoadingFallback() {
   return (
     <div
+      role="status"
       className="flex min-h-[140px] items-center justify-center p-8"
       aria-label="Loading..."
     >
@@ -139,9 +141,16 @@ export function AsyncBoundary({
   errorFallback,
   onReset,
 }: AsyncBoundaryProps) {
+  const { reset } = useQueryErrorResetBoundary();
+
+  const handleReset = () => {
+    reset();
+    onReset?.();
+  };
+
   return (
     <ErrorBoundary
-      onReset={onReset}
+      onReset={handleReset}
       fallbackRender={(props) => {
         if (typeof errorFallback === "function") {
           return errorFallback(props);

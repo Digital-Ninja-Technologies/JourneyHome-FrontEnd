@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { AsyncBoundary } from "@/components/async-boundary";
 import { ContactForm } from "@/components/contact-form";
 import { Accent, Container, PageHero } from "@/components/section";
 import { CONTACT_EMAIL } from "@/lib/config";
@@ -54,7 +55,9 @@ function Contact() {
         We&rsquo;re here to <Accent>help.</Accent>
       </PageHero>
       <Container className="grid gap-10 pb-12 md:grid-cols-[1.4fr_1fr]">
-        <ContactForm />
+        <AsyncBoundary>
+          <ContactForm />
+        </AsyncBoundary>
         <div className="flex flex-col gap-4">
           {INFO.map(({ icon: Icon, title, body, tint, dark }) => (
             <div

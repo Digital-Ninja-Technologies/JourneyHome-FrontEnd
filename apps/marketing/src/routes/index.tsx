@@ -9,7 +9,12 @@ import {
   ImageIcon,
   MapPin,
 } from "lucide-react";
-import { PackageCards, PackagesUnavailable } from "@/components/package-cards";
+import { AsyncBoundary } from "@/components/async-boundary";
+import {
+  PackageCards,
+  PackageCardsSkeleton,
+  PackagesUnavailable,
+} from "@/components/package-cards";
 import { Photo } from "@/components/photo";
 import { Accent, Container, Eyebrow } from "@/components/section";
 import { SIGNUP_URL } from "@/lib/config";
@@ -18,9 +23,6 @@ import { createPageHead } from "@/lib/seo";
 import { packagesQueryOptions } from "@/modules/packages/query-options";
 
 export const Route = createFileRoute("/")({
-  headers: () => ({
-    "Cache-Control": "public, s-maxage=300, stale-while-revalidate=31535700",
-  }),
   loader: async ({ context }) => {
     await context.queryClient.query(packagesQueryOptions());
   },
@@ -74,9 +76,17 @@ const STEPS = [
   ["04", "We capture the day", "Delivered as a keepsake you'll treasure."],
 ];
 
-function Home() {
+function HomePricingPackages() {
   const { data: packages } = useSuspenseQuery(packagesQueryOptions());
 
+  if (!packages?.length) {
+    return <PackagesUnavailable />;
+  }
+
+  return <PackageCards packages={packages} />;
+}
+
+function Home() {
   return (
     <main>
       {/* HERO */}
@@ -307,11 +317,14 @@ function Home() {
             Compare all packages →
           </Link>
         </div>
-        {packages?.length ? (
-          <PackageCards packages={packages} />
-        ) : (
-          <PackagesUnavailable />
-        )}
+        <AsyncBoundary
+          loadingFallback={<PackageCardsSkeleton />}
+          errorFallback={({ resetErrorBoundary }) => (
+            <PackagesUnavailable onRetry={resetErrorBoundary} />
+          )}
+        >
+          <HomePricingPackages />
+        </AsyncBoundary>
       </Container>
 
       {/* TESTIMONIAL */}
