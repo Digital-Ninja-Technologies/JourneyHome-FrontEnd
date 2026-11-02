@@ -64,7 +64,7 @@ function readStoredConsent(): StoredConsent | null {
   try {
     if (document.cookie) {
       const match = document.cookie.match(
-        new RegExp(`(?:^|; )${COOKIE_NAME}=([^;]*)`)
+        new RegExp(`(?:^|; )${COOKIE_NAME}=([^;]*)`),
       );
       if (match?.[1]) {
         const decoded = decodeURIComponent(match[1]);
@@ -167,7 +167,7 @@ export function declineNonEssentialCookies(): void {
 }
 
 export function saveCookiePreferences(
-  custom: Partial<CookiePreferences>
+  custom: Partial<CookiePreferences>,
 ): void {
   const finalPrefs: CookiePreferences = {
     necessary: true,

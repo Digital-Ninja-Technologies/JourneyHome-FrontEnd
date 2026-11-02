@@ -1,16 +1,16 @@
-import * as React from "react";
-import { Link } from "@tanstack/react-router";
-import { X, ArrowLeft, Check } from "lucide-react";
 import { Button } from "@journeyhome/ui/components/button";
 import { Switch } from "@journeyhome/ui/components/switch";
+import { Link } from "@tanstack/react-router";
+import { ArrowLeft, Check, X } from "lucide-react";
+import * as React from "react";
 
 import {
-  useCookieConsentState,
-  initCookieConsent,
   acceptAllCookies,
-  saveCookiePreferences,
   dismissCookieBanner,
+  initCookieConsent,
+  saveCookiePreferences,
   setCookieConsentView,
+  useCookieConsentState,
 } from "@/store/cookie-consent";
 
 export function CookieConsent() {

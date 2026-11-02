@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
 import { Logo } from "@journeyhome/ui/components/logo";
+import { Link } from "@tanstack/react-router";
 import { openCookiePreferences } from "@/store/cookie-consent";
 
 const COLUMNS = [

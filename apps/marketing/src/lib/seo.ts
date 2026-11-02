@@ -36,10 +36,11 @@ export function createPageHead({
       { name: "twitter:title", content: fullTitle },
       { name: "twitter:description", content: description },
       { name: "twitter:image", content: image },
-      { name: "robots", content: noindex ? "noindex, nofollow" : "index, follow" },
+      {
+        name: "robots",
+        content: noindex ? "noindex, nofollow" : "index, follow",
+      },
     ],
-    links: [
-      { rel: "canonical", href: canonicalUrl },
-    ],
+    links: [{ rel: "canonical", href: canonicalUrl }],
   };
 }

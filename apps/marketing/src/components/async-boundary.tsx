@@ -1,6 +1,6 @@
-import { AlertCircle, RefreshCw } from "lucide-react";
-import React, { Component, Suspense, type ReactNode } from "react";
 import { Button } from "@journeyhome/ui/components/button";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { Component, type ReactNode, Suspense } from "react";
 
 export interface FallbackProps {
   error: unknown;

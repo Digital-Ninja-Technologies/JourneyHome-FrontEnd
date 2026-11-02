@@ -1,5 +1,5 @@
-import { serverEnv } from "#/env/server";
 import { createFileRoute } from "@tanstack/react-router";
+import { serverEnv } from "#/env/server";
 
 const SITE_ORIGIN = serverEnv.SITE_URL;
 
@@ -28,7 +28,7 @@ ${routes
     <lastmod>${lastmod}</lastmod>
     <changefreq>${r.changefreq}</changefreq>
     <priority>${r.priority}</priority>
-  </url>`
+  </url>`,
   )
   .join("\n")}
 </urlset>`;

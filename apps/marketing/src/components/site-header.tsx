@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
 import { Logo } from "@journeyhome/ui/components/logo";
 import { cn } from "@journeyhome/ui/lib/utils";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { LOGIN_URL, SIGNUP_URL } from "../lib/config";
 
 const NAV = [
@@ -19,7 +19,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   // Close the mobile menu whenever navigation happens.
-  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => setOpen(false), []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-canvas/95 backdrop-blur-sm">

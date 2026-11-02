@@ -1,6 +1,6 @@
+import { Button } from "@journeyhome/ui/components/button";
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { AlertTriangle, RefreshCw } from "lucide-react";
-import { Button } from "@journeyhome/ui/components/button";
 
 export function CatchBoundary({ error, reset }: ErrorComponentProps) {
   const message =
@@ -17,11 +17,7 @@ export function CatchBoundary({ error, reset }: ErrorComponentProps) {
       <p className="mt-2 max-w-md text-sm text-foreground/70">{message}</p>
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         {reset && (
-          <Button
-            type="button"
-            onClick={() => reset()}
-            className="gap-2"
-          >
+          <Button type="button" onClick={() => reset()} className="gap-2">
             <RefreshCw className="h-4 w-4" />
             Try again
           </Button>
