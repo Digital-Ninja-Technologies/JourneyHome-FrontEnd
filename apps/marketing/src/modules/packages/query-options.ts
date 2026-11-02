@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getPackages } from "../../lib/packages";
+import { getPackages } from "./api";
 
 export const packagesQueryOptions = () =>
   queryOptions({

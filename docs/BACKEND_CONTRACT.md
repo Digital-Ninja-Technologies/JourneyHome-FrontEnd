@@ -10,26 +10,62 @@ implementing them as written makes the screens work without frontend changes. Un
 
 All responses use the backend's existing envelope: `{ "success": true, "message": "...", "data": ... }`;
 errors are `{ "success": false, "message": "..." }` with a useful HTTP status (the message is shown to users).
-All endpoints below except the first two groups require the usual `Authorization: Bearer <jwt>`.
+All endpoints below except public auth and marketing inquiries require the usual `Authorization: Bearer <jwt>`.
+
+## Marketing website (`apps/marketing`)
+
+### Package pricing (public, no auth)
+
+- `GET /packages` — List active packages available for selection.
+  Returns `200` with:
+  ```json
+  {
+    "success": true,
+    "message": "Packages retrieved successfully",
+    "data": [
+      {
+        "_id": "66f...",
+        "name": "Classic Memorial",
+        "description": "Sample test fixture package",
+        "features": ["Half-day photography", "Digital gallery"],
+        "amount": 1000000,
+        "currency": "NGN",
+        "billingInterval": "monthly",
+        "isActive": true
+      }
+    ]
+  }
+  ```
+  Package amounts in responses expose stored minor-unit amount (`1000000` for ₦10,000). Create/update requests use major currency units (`10000` for ₦10,000). Only packages with a successfully created Paystack monthly plan are listed as available. Provider plan identifiers are internal.
+
+### Contact & inquiries (public, no auth)
+
+- `POST /contact` — body `{ name, email, phone?, topic, message }`.
+  `topic` is one of `Starting a plan`, `An existing plan`, `Photographer network`, `Something else`.
+  Returns `200` with `{ "received": true, "id": "..." }`.
 
 ## Customer app (`apps/dashboard`)
 
 ### Signup extras
+
 - `POST /auth/signup` — body may now include an optional `phone` string (store it on the user).
 
 ### Verification code (onboarding step 2)
+
 - `POST /auth/verification/send` — sends a 6-digit code to the signed-in user's email. Rate-limit it (the UI waits 30s
   before offering "Resend"). `200`.
 - `POST /auth/verification/confirm` — body `{ "code": "123456" }`. `200` when valid; `400` with a message such as
   `"That code is incorrect or has expired."` otherwise.
 
 ### Password reset (public, no auth)
+
 - `POST /auth/forgot-password` — body `{ "email": "..." }`. Always `200` (don't reveal whether the account exists).
   Email a link to `<dashboard origin>/reset-password?token=<token>`.
 - `POST /auth/reset-password` — body `{ "token": "...", "password": "..." }` (min 6 chars). `200`; `400`
   `"This reset link is invalid or has expired."` for a bad/expired token.
 
 ### Profile & settings
+
 - `GET /auth/me` → `{ id, name, email, phone?, createdAt, preferences: { paymentReminders, deficitAlerts, serviceUpdates, productNews } }` (booleans).
 - `PATCH /auth/me` — body any of `{ name, phone, email }` → updated user. (Changing `email` should re-verify.)
 - `PATCH /auth/me/password` — body `{ currentPassword, newPassword }`; `400` `"Your current password is incorrect."` on mismatch.

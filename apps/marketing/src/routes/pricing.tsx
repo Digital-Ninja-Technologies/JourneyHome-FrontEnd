@@ -3,14 +3,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PackageCards, PackagesUnavailable } from "@/components/package-cards";
 import { Accent, Container, PageHero } from "@/components/section";
 import { createPageHead } from "@/lib/seo";
-import { packagesQueryOptions } from "@/modules/packages";
+import { packagesQueryOptions } from "@/modules/packages/query-options";
 
 export const Route = createFileRoute("/pricing")({
   headers: () => ({
     "Cache-Control": "public, s-maxage=300, stale-while-revalidate=31535700",
   }),
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(packagesQueryOptions());
+    await context.queryClient.query(packagesQueryOptions());
   },
   head: () =>
     createPageHead({

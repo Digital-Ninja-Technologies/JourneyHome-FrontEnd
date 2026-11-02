@@ -13,6 +13,7 @@ export type CoveredPerson = z.infer<typeof coveredPersonSchema>;
 
 export const planPackageSnapshotSchema = z.object({
   name: z.string(),
+  amount: z.number().optional(),
   monthlyContributionMinor: z.number().optional(),
 });
 export type PlanPackageSnapshot = z.infer<typeof planPackageSnapshotSchema>;

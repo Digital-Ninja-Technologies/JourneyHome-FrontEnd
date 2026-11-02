@@ -14,6 +14,11 @@ import {
   planSchema,
   paymentSchema,
   serviceRequestSchema,
+  contactSubmissionSchema,
+  contactResponseSchema,
+  packageSchema,
+  createPackageSchema,
+  updatePackageSchema,
 } from "../src";
 
 describe("@journeyhome/schemas", () => {
@@ -200,6 +205,116 @@ describe("@journeyhome/schemas", () => {
         createdAt: "2026-03-02T00:00:00.000Z",
       };
       expect(serviceRequestSchema.safeParse(sampleRequest).success).toBe(true);
+    });
+  });
+  describe("contact schemas", () => {
+    it("validates valid contact submission input", () => {
+      const valid = {
+        name: "Adaeze Nwosu",
+        email: "adaeze@example.com",
+        phone: "08012345678",
+        topic: "Starting a plan" as const,
+        message: "I would like to inquire about coverage for our family.",
+      };
+      const res = contactSubmissionSchema.safeParse(valid);
+      expect(res.success).toBe(true);
+    });
+
+    it("rejects invalid contact submission input", () => {
+      const invalid = {
+        name: "",
+        email: "not-an-email",
+        topic: "Invalid Topic",
+        message: "hi",
+      };
+      const res = contactSubmissionSchema.safeParse(invalid);
+      expect(res.success).toBe(false);
+    });
+
+    it("validates contact response envelope shape", () => {
+      const res = contactResponseSchema.safeParse({
+        received: true,
+        id: "msg_123",
+      });
+      expect(res.success).toBe(true);
+    });
+  });
+
+  describe("package schemas", () => {
+    it("validates backend package response data shape", () => {
+      const fixture = {
+        _id: "66f...",
+        name: "Classic Memorial",
+        description: "Sample test fixture package",
+        features: ["Half-day photography", "Digital gallery"],
+        amount: 1000000,
+        currency: "NGN",
+        billingInterval: "monthly",
+        isActive: true,
+      };
+
+      const res = packageSchema.safeParse(fixture);
+      expect(res.success).toBe(true);
+      if (res.success) {
+        expect(res.data.name).toBe("Classic Memorial");
+        expect(res.data.amount).toBe(1000000);
+        expect(res.data.billingInterval).toBe("monthly");
+        expect(res.data.features).toEqual([
+          "Half-day photography",
+          "Digital gallery",
+        ]);
+      }
+    });
+
+    it("applies defaults for optional package fields", () => {
+      const minimal = {
+        _id: "pkg_minimal",
+        name: "Essential",
+        amount: 500000,
+      };
+
+      const res = packageSchema.safeParse(minimal);
+      expect(res.success).toBe(true);
+      if (res.success) {
+        expect(res.data.currency).toBe("NGN");
+        expect(res.data.billingInterval).toBe("monthly");
+        expect(res.data.isActive).toBe(true);
+        expect(res.data.features).toEqual([]);
+        expect(res.data.description).toBe("");
+      }
+    });
+
+    it("rejects invalid package amounts", () => {
+      expect(
+        packageSchema.safeParse({
+          _id: "pkg_1",
+          name: "Invalid",
+          amount: -100,
+        }).success,
+      ).toBe(false);
+
+      expect(
+        packageSchema.safeParse({
+          _id: "pkg_1",
+          name: "Invalid",
+          amount: 0,
+        }).success,
+      ).toBe(false);
+    });
+
+    it("validates create and update package schemas", () => {
+      const createRes = createPackageSchema.safeParse({
+        name: "New Tier",
+        amount: 10000, // major currency unit
+        features: ["Drone shot"],
+      });
+      expect(createRes.success).toBe(true);
+
+      const updateRes = updatePackageSchema.safeParse({
+        amount: 15000,
+        isActive: false,
+      });
+      expect(updateRes.success).toBe(true);
     });
   });
 });

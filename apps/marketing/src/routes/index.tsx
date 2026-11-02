@@ -9,13 +9,13 @@ import {
   ImageIcon,
   MapPin,
 } from "lucide-react";
-import { Photo } from "@/components/photo";
 import { PackageCards, PackagesUnavailable } from "@/components/package-cards";
+import { Photo } from "@/components/photo";
 import { Accent, Container, Eyebrow } from "@/components/section";
 import { SIGNUP_URL } from "@/lib/config";
 import { images } from "@/lib/images";
 import { createPageHead } from "@/lib/seo";
-import { packagesQueryOptions } from "@/modules/packages";
+import { packagesQueryOptions } from "@/modules/packages/query-options";
 
 export const Route = createFileRoute("/")({
   headers: () => ({
