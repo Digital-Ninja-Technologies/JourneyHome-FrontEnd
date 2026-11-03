@@ -1,10 +1,10 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { signupSearchSchema } from "@/lib/search-schemas";
+import { redirectSearchSchema } from "@/lib/search-schemas";
 import { sessionQueryOptions } from "@/modules/auth/query-options";
 import { OnboardingPlanView } from "@/modules/onboarding/components/onboarding-plan-view";
 
 export const Route = createFileRoute("/signup/plan")({
-  validateSearch: signupSearchSchema,
+  validateSearch: redirectSearchSchema,
   beforeLoad: async ({ context, location }) => {
     const session = await context.queryClient.query(sessionQueryOptions());
     if (!session?.user) {

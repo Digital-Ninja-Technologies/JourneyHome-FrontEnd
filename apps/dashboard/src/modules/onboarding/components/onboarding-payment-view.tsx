@@ -3,7 +3,10 @@ import { Button } from "@journeyhome/ui/components/button";
 import { Link, Navigate, useSearch } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 import { firstName, formatMoney } from "@/lib/format";
-import { useStartCheckout } from "@/modules/payments/checkout";
+import {
+  setOnboardingPlan,
+  useStartCheckout,
+} from "@/modules/payments/checkout";
 import { relationshipLabel } from "@/modules/plans/plans.utils";
 import { usePlan } from "@/modules/plans/query-options";
 
@@ -58,6 +61,7 @@ function Checkout({ plan }: { plan: Plan }) {
       </Button>
       <Link
         to="/app"
+        onClick={() => setOnboardingPlan(null)}
         className="text-center text-xs font-semibold text-muted underline"
       >
         Skip for now — I&rsquo;ll make my first payment later
@@ -98,7 +102,7 @@ export function OnboardingPaymentView() {
           </p>
         )}
         {planId && planQ.isPending && (
-          <p className="text-center text-sm text-muted">Loading your plan…</p>
+          <p className="text-center text-sm text-muted">Loading your plan...</p>
         )}
         {planQ.isError && (
           <p

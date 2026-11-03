@@ -8,9 +8,9 @@ export type PlanSearch = z.infer<typeof planSearchSchema>;
 export {
   type RedirectSearch,
   redirectSearchSchema,
-  resolveSelectedPackage,
-  type SignupSearch,
-  signupSearchSchema,
+  sanitizeRedirect,
+  type VerifyEmailSearch,
+  verifyEmailSearchSchema,
 } from "@journeyhome/schemas";
 
 export const tokenSearchSchema = z.object({

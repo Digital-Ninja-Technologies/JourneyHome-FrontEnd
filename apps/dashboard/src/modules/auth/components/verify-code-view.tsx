@@ -1,14 +1,18 @@
 import { Button } from "@journeyhome/ui/components/button";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@journeyhome/ui/components/input-otp";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { DemoNotice } from "@/components/demo-notice";
-import { OtpInput } from "@/components/otp-input";
-import { api, isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/api";
-import { DEMO_CODE } from "@/lib/api/mocks";
-import { resolveSelectedPackage } from "@/lib/search-schemas";
+import {
+  getPendingVerificationEmail,
+  resendVerification,
+  verifyEmail,
+} from "@/modules/auth/api";
 import { useSessionUser } from "@/modules/auth/query-options";
-import { getStoredSelectedPackage } from "@/modules/onboarding/storage";
 
 const COOLDOWN = 30;
 
@@ -16,34 +20,51 @@ export function VerifyCodeView() {
   const user = useSessionUser();
   const navigate = useNavigate();
   const search = useSearch({ from: "/signup/verify" });
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(search.token ?? "");
   const [wait, setWait] = useState(COOLDOWN);
   const [resent, setResent] = useState(false);
+  const [email, setEmail] = useState<string>("");
+
+  useEffect(() => {
+    const stored = getPendingVerificationEmail();
+    if (stored) {
+      setEmail(stored);
+    } else if (user?.email) {
+      setEmail(user.email);
+    }
+  }, [user]);
 
   const send = useMutation({
-    mutationFn: () => api("/auth/verification/send", { method: "POST" }),
+    mutationFn: () => resendVerification(email),
     onSuccess: () => setWait(COOLDOWN),
   });
+
   const confirm = useMutation({
-    mutationFn: () => api("/auth/verification/confirm", { body: { code } }),
+    mutationFn: (tokenToVerify: string) => verifyEmail(tokenToVerify),
     onSuccess: () => {
-      const selected =
-        resolveSelectedPackage(search) ?? getStoredSelectedPackage();
-      navigate({
-        to: "/signup/plan",
-        search: selected ? { package: selected } : {},
-        replace: true,
-      });
+      if (user) {
+        navigate({
+          to: "/signup/plan",
+          replace: true,
+        });
+      } else {
+        navigate({
+          to: "/login",
+          search: search.redirect ? { redirect: search.redirect } : undefined,
+          replace: true,
+        });
+      }
     },
   });
 
-  // Ask for a code once when the page opens.
-  const asked = useRef(false);
+  // Auto-verify if token is present in URL search params
+  const autoTriggered = useRef(false);
   useEffect(() => {
-    if (asked.current) return;
-    asked.current = true;
-    send.mutate();
-  }, [send]);
+    if (search.token && !autoTriggered.current) {
+      autoTriggered.current = true;
+      confirm.mutate(search.token);
+    }
+  }, [search.token, confirm]);
 
   useEffect(() => {
     if (wait <= 0) return;
@@ -51,38 +72,56 @@ export function VerifyCodeView() {
     return () => clearTimeout(t);
   }, [wait]);
 
-  const unsupported = isUnsupported(send.error) || isUnsupported(confirm.error);
-  const complete = code.length === 6;
+  const complete = code.trim().length >= 6;
 
   return (
     <div className="flex w-full max-w-[480px] flex-col items-center gap-8">
       <div className="flex flex-col gap-2 text-center">
         <h1 className="font-sans text-4xl font-extrabold leading-[1.1] tracking-tight">
-          Verify it's{" "}
-          <span className="font-serif font-normal italic text-link">you.</span>
+          Verify your{" "}
+          <span className="font-serif font-normal italic text-link">
+            email.
+          </span>
         </h1>
         <p className="text-sm leading-relaxed text-muted">
-          We sent a 6-digit code to {user?.email ?? "your email"}.
+          We sent a verification code to{" "}
+          <strong className="text-foreground">
+            {email || "your email address"}
+          </strong>
+          .
         </p>
       </div>
       <div className="flex w-full flex-col gap-6">
-        <DemoNotice>
-          Use code <strong>{DEMO_CODE}</strong>.
-        </DemoNotice>
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (complete) confirm.mutate();
+            if (complete) confirm.mutate(code.trim());
           }}
           className="flex flex-col gap-6"
         >
           <section className="flex flex-col items-center gap-4 rounded-[28px] bg-white p-7 text-center shadow-sm">
-            <OtpInput value={code} onChange={setCode} />
-            {confirm.isError && !unsupported && (
+            <InputOTP
+              maxLength={6}
+              value={code}
+              onChange={setCode}
+              className="gap-2"
+            >
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
+
+            {confirm.isError && (
               <p role="alert" className="text-xs text-status-cancelled">
                 {confirm.error.message}
               </p>
             )}
+
             <div className="text-[13px] text-muted">
               Didn&rsquo;t get it?{" "}
               {wait > 0 ? (
@@ -92,55 +131,40 @@ export function VerifyCodeView() {
                   type="button"
                   variant="link"
                   size="sm"
-                  disabled={send.isPending}
+                  disabled={send.isPending || !email}
                   onClick={() => {
                     setResent(true);
                     send.mutate();
                   }}
                   className="h-auto p-0 font-bold text-link underline"
                 >
-                  Resend code
+                  {send.isPending ? "Sending..." : "Resend code"}
                 </Button>
               )}
             </div>
+
             {resent && send.isSuccess && wait > 0 && (
               <p className="text-xs text-status-active">
-                A new code is on its way.
+                A new verification email has been sent.
               </p>
             )}
           </section>
 
-          {unsupported ? (
-            <div
-              role="alert"
-              className="flex flex-col gap-3 rounded-2xl bg-cream px-5 py-4 text-sm text-status-due"
-            >
-              <span>
-                {UNSUPPORTED_MESSAGE} Verification codes aren&rsquo;t enabled
-                yet, so you can carry on without one.
-              </span>
-              <Link to="/signup/plan" className="font-bold underline">
-                Continue →
-              </Link>
-            </div>
-          ) : (
-            <Button
-              type="submit"
-              size="lg"
-              disabled={!complete || confirm.isPending}
-              className="h-[54px] rounded-2xl"
-            >
-              {confirm.isPending ? "Checking…" : "Verify & continue →"}
-            </Button>
-          )}
-          {send.isError && !unsupported && (
-            <p
-              role="alert"
-              className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-center text-[13px] text-status-cancelled"
-            >
-              {send.error.message}
-            </p>
-          )}
+          <Button
+            type="submit"
+            size="lg"
+            disabled={!complete || confirm.isPending}
+            className="h-[54px] rounded-2xl"
+          >
+            {confirm.isPending ? "Checking…" : "Verify & continue →"}
+          </Button>
+
+          <div className="text-center text-[13px] text-status-paused">
+            Wrong email address or already verified?{" "}
+            <Link to="/login" className="font-bold text-link underline">
+              Sign in
+            </Link>
+          </div>
         </form>
       </div>
     </div>
