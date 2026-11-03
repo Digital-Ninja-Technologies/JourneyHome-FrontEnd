@@ -1,3 +1,4 @@
+import type { SavedCard } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import {
   Dialog,
@@ -15,19 +16,13 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { DemoNotice } from "@/components/demo-notice";
-import {
-  api,
-  ApiError,
-  isUnsupported,
-  UNSUPPORTED_MESSAGE,
-} from "@/lib/api";
+import { ApiError, api, isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/api";
 import { formatMonthYearLong, initials } from "@/lib/format";
 import { useLogoutMutation } from "@/modules/auth/mutations";
 import { useSessionUser } from "@/modules/auth/query-options";
 import { useSavedCards } from "@/modules/payments/query-options";
 import { useMe } from "@/modules/profile/query-options";
 import type { Me } from "@/modules/profile/types";
-import type { SavedCard } from "@journeyhome/schemas";
 
 const card = "flex flex-col gap-6 rounded-[28px] bg-white p-7";
 const h2 = "font-serif text-[28px] font-normal";

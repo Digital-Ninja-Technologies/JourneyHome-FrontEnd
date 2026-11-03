@@ -1,12 +1,9 @@
+import type { Plan } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
+import { firstName, formatDay, formatMoney } from "@/lib/format";
 import { useStartCheckout } from "@/modules/payments/checkout";
-import {
-  firstName,
-  formatDay,
-  formatMoney,
-} from "@/lib/format";
 import {
   canPayNow,
   fullName,
@@ -14,7 +11,6 @@ import {
   relationshipLabel,
 } from "@/modules/plans/plans.utils";
 import { usePlans } from "@/modules/plans/query-options";
-import type { Plan } from "@journeyhome/schemas";
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (

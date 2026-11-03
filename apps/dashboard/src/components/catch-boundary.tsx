@@ -18,19 +18,12 @@ export function CatchBoundary({ error, reset }: ErrorComponentProps) {
       <p className="mt-2 max-w-md text-sm text-muted-foreground">{message}</p>
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         {reset && (
-          <Button
-            type="button"
-            onClick={() => reset()}
-            className="gap-2"
-          >
+          <Button type="button" onClick={() => reset()} className="gap-2">
             <RefreshCw className="h-4 w-4" />
             Try again
           </Button>
         )}
-        <a
-          href="/app"
-          className={cn(buttonVariants({ variant: "outline" }))}
-        >
+        <a href="/app" className={cn(buttonVariants({ variant: "outline" }))}>
           Return to dashboard
         </a>
       </div>

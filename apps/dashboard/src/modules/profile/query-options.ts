@@ -1,5 +1,5 @@
-import { useSessionUser } from "@/modules/auth/query-options";
 import { queryOptions, useQuery } from "@tanstack/react-query";
+import { useSessionUser } from "@/modules/auth/query-options";
 import { fetchMe } from "./api";
 
 export const meQueryOptions = (userId?: string) =>

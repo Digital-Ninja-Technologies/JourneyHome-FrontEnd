@@ -1,4 +1,3 @@
-import { env } from "#/env/client";
 import { Logo } from "@journeyhome/ui/components/logo";
 import { cn } from "@journeyhome/ui/lib/utils";
 import {
@@ -8,6 +7,7 @@ import {
   useLocation,
 } from "@tanstack/react-router";
 import { Check } from "lucide-react";
+import { env } from "#/env/client";
 
 const MARKETING_URL = env.VITE_MARKETING_URL;
 const STEPS = ["Account", "Verify", "First plan", "Payment"];
@@ -83,10 +83,7 @@ function SignupLayout() {
           <Logo />
         </a>
         {exitTo ? (
-          <Link
-            to={exitTo as any}
-            className="text-[13px] font-semibold text-muted"
-          >
+          <Link to={exitTo} className="text-[13px] font-semibold text-muted">
             Exit setup
           </Link>
         ) : (

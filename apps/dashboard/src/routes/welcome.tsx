@@ -6,9 +6,7 @@ import { WelcomeView } from "@/modules/onboarding/components/welcome-view";
 export const Route = createFileRoute("/welcome")({
   validateSearch: (search) => planSearchSchema.parse(search),
   beforeLoad: async ({ context, location }) => {
-    const session = await context.queryClient.query(
-      sessionQueryOptions(),
-    );
+    const session = await context.queryClient.query(sessionQueryOptions());
     if (!session?.user) {
       throw redirect({
         to: "/login",

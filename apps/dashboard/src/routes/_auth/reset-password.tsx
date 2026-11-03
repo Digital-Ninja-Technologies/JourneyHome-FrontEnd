@@ -6,9 +6,7 @@ import { sessionQueryOptions } from "@/modules/auth/query-options";
 export const Route = createFileRoute("/_auth/reset-password")({
   validateSearch: (search) => tokenSearchSchema.parse(search),
   beforeLoad: async ({ context }) => {
-    const session = await context.queryClient.query(
-      sessionQueryOptions(),
-    );
+    const session = await context.queryClient.query(sessionQueryOptions());
     if (session?.user) {
       throw redirect({ to: "/app" });
     }

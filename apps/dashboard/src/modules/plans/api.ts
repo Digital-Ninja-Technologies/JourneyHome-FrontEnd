@@ -1,5 +1,5 @@
-import { api } from "@/lib/api";
 import type { Plan } from "@journeyhome/schemas";
+import { api } from "@/lib/api";
 
 export async function fetchPlans(): Promise<Plan[]> {
   return api<Plan[]>("/plans");

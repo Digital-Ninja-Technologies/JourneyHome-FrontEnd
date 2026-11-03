@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
-import { loginSchema } from "@journeyhome/schemas";
 import { Link, useSearch } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -43,9 +43,7 @@ export function LoginForm() {
       <div className="flex flex-col gap-2 text-center">
         <h1 className="font-sans text-4xl font-extrabold leading-[1.1] tracking-tight">
           Welcome{" "}
-          <span className="font-serif font-normal italic text-link">
-            back.
-          </span>
+          <span className="font-serif font-normal italic text-link">back.</span>
         </h1>
         <p className="text-sm leading-relaxed text-status-paused">
           Log in to see your plans, payments, and upcoming services.

@@ -1,9 +1,10 @@
+import type { Payment, Plan } from "@journeyhome/schemas";
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { AlertCircle, Bell, Plus } from "lucide-react";
+import { env } from "#/env/client";
 import { PAYMENT_TEXT, StatusPill } from "@/components/status-pill";
-import { useSessionUser } from "@/modules/auth/query-options";
 import {
   capitalise,
   daysUntil,
@@ -15,11 +16,10 @@ import {
   greeting,
   initials,
 } from "@/lib/format";
-import { canPayNow, isDue, LIVE } from "@/modules/plans/plans.utils";
-import { env } from "#/env/client";
+import { useSessionUser } from "@/modules/auth/query-options";
 import { usePayments } from "@/modules/payments/query-options";
+import { canPayNow, isDue, LIVE } from "@/modules/plans/plans.utils";
 import { usePlans } from "@/modules/plans/query-options";
-import type { Payment, Plan } from "@journeyhome/schemas";
 
 const MARKETING_URL = env.VITE_MARKETING_URL;
 const HIDDEN = new Set<Plan["status"]>(["Cancelled", "Expired"]);

@@ -1,5 +1,5 @@
-import { useSessionUser } from "@/modules/auth/query-options";
 import { queryOptions, useQuery } from "@tanstack/react-query";
+import { useSessionUser } from "@/modules/auth/query-options";
 import { fetchPlan, fetchPlans } from "./api";
 
 export const plansQueryOptions = (userId?: string) =>
@@ -12,7 +12,8 @@ export const plansQueryOptions = (userId?: string) =>
 export const planQueryOptions = (id?: string, userId?: string) =>
   queryOptions({
     queryKey: ["plan", userId, id] as const,
-    queryFn: () => (id ? fetchPlan(id) : Promise.reject(new Error("No plan ID"))),
+    queryFn: () =>
+      id ? fetchPlan(id) : Promise.reject(new Error("No plan ID")),
     enabled: Boolean(id),
   });
 

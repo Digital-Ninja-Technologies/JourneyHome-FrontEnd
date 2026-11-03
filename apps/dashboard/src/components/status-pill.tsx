@@ -1,5 +1,5 @@
-import { cn } from "@journeyhome/ui/lib/utils";
 import type { PaymentStatus, PlanStatus } from "@journeyhome/schemas";
+import { cn } from "@journeyhome/ui/lib/utils";
 
 const PLAN: Record<PlanStatus, [label: string, tone: string]> = {
   Pending: ["Pending", "paused"],

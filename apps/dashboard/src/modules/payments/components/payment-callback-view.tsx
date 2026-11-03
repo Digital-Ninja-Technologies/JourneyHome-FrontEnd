@@ -1,3 +1,4 @@
+import type { Payment } from "@journeyhome/schemas";
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -5,9 +6,8 @@ import { Link, Navigate, useSearch } from "@tanstack/react-router";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { useEffect } from "react";
 import { api } from "@/lib/api";
-import { getOnboardingPlan } from "@/modules/payments/checkout";
 import { formatMoney } from "@/lib/format";
-import type { Payment } from "@journeyhome/schemas";
+import { getOnboardingPlan } from "@/modules/payments/checkout";
 
 export function PaymentCallbackView() {
   const search = useSearch({ from: "/app/payments/callback" });

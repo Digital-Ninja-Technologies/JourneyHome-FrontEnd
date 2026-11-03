@@ -1,11 +1,11 @@
+import type { Plan } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import { Link, Navigate, useSearch } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
-import { useStartCheckout } from "@/modules/payments/checkout";
 import { firstName, formatMoney } from "@/lib/format";
+import { useStartCheckout } from "@/modules/payments/checkout";
 import { relationshipLabel } from "@/modules/plans/plans.utils";
 import { usePlan } from "@/modules/plans/query-options";
-import type { Plan } from "@journeyhome/schemas";
 
 function Checkout({ plan }: { plan: Plan }) {
   const start = useStartCheckout(plan._id, { onboarding: true });

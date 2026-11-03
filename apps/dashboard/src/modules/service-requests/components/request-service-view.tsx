@@ -1,3 +1,4 @@
+import type { DocumentType, Plan, ServiceRequest } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
@@ -17,7 +18,6 @@ import {
   uploadServiceDocument,
   validateFile,
 } from "@/modules/service-requests/service-requests.utils";
-import type { DocumentType, Plan, ServiceRequest } from "@journeyhome/schemas";
 
 // TEMP TOGGLE: Set to false to revert back to requiring an active plan.
 export const BYPASS_PLAN_REQUIREMENT = true;

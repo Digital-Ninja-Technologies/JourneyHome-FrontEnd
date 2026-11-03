@@ -4,8 +4,8 @@ import {
   resolveSelectedPackage,
   signupSearchSchema,
 } from "@/lib/search-schemas";
-import { sessionQueryOptions } from "@/modules/auth/query-options";
 import { SignupForm } from "@/modules/auth/components/signup-form";
+import { sessionQueryOptions } from "@/modules/auth/query-options";
 
 export const Route = createFileRoute("/signup/")({
   validateSearch: signupSearchSchema,

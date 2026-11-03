@@ -1,9 +1,11 @@
+import type { Plan } from "@journeyhome/schemas";
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { NoticeBanner } from "@/components/notice-banner";
 import { StatusPill } from "@/components/status-pill";
+import { formatMoney } from "@/lib/format";
 import {
   contributionCount,
   fullName,
@@ -13,9 +15,7 @@ import {
   relationshipLabel,
   startedLabel,
 } from "@/modules/plans/plans.utils";
-import { formatMoney } from "@/lib/format";
 import { usePlans } from "@/modules/plans/query-options";
-import type { Plan } from "@journeyhome/schemas";
 import { CreatePlanDialog } from "./create-plan-dialog";
 
 const FINISHED = new Set<Plan["status"]>(["Completed", "Cancelled", "Expired"]);
@@ -61,14 +61,24 @@ function PlanSection({ plan }: { plan: Plan }) {
   const finished = FINISHED.has(plan.status);
   const review = plan.status === "Under_Review";
 
-  let primary: { to: string; search?: Record<string, string>; label: string } | null = null;
-  let secondary: { to: string; params: { id: string }; label: string } | null = null;
+  let primary: {
+    to: string;
+    search?: Record<string, string>;
+    label: string;
+  } | null = null;
+  let secondary: { to: string; params: { id: string }; label: string } | null =
+    null;
 
-  if (plan.status === "Pending" || plan.status === "Payment_Due" || plan.status === "Overdue") {
+  if (
+    plan.status === "Pending" ||
+    plan.status === "Payment_Due" ||
+    plan.status === "Overdue"
+  ) {
     primary = {
       to: "/app/payments/new",
       search: { plan: plan._id },
-      label: plan.status === "Pending" ? "Make first payment" : "Complete payment",
+      label:
+        plan.status === "Pending" ? "Make first payment" : "Complete payment",
     };
     secondary = {
       to: "/app/plans/$id",

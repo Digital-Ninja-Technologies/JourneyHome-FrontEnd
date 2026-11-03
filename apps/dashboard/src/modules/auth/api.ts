@@ -1,5 +1,5 @@
-import { api, ApiError, USE_MOCKS } from "@/lib/api";
 import type { LoginInput, SignupInput } from "@journeyhome/schemas";
+import { ApiError, api, USE_MOCKS } from "@/lib/api";
 
 export interface User {
   id: string;

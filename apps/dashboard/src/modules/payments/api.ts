@@ -1,5 +1,5 @@
-import { api } from "@/lib/api";
 import type { Payment } from "@journeyhome/schemas";
+import { api } from "@/lib/api";
 import type { Card } from "@/lib/api/mocks";
 
 export async function fetchPayments(): Promise<Payment[]> {
@@ -10,10 +10,15 @@ export async function fetchSavedCards(): Promise<Card[]> {
   return api<Card[]>("/payments/methods");
 }
 
-export async function initializePayment(data: unknown): Promise<{ authorizationUrl: string; reference: string }> {
-  return api<{ authorizationUrl: string; reference: string }>("/payments/initialize", {
-    body: data,
-  });
+export async function initializePayment(
+  data: unknown,
+): Promise<{ authorizationUrl: string; reference: string }> {
+  return api<{ authorizationUrl: string; reference: string }>(
+    "/payments/initialize",
+    {
+      body: data,
+    },
+  );
 }
 
 export async function initializeCard(): Promise<{ authorizationUrl: string }> {

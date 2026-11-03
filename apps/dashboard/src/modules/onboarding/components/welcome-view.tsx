@@ -5,9 +5,9 @@ import { Link, useSearch } from "@tanstack/react-router";
 import { Bell, Check, Plus } from "lucide-react";
 import { useEffect } from "react";
 import { StatusPill } from "@/components/status-pill";
+import { firstName, formatDate, formatMoney } from "@/lib/format";
 import { useSessionUser } from "@/modules/auth/query-options";
 import { setOnboardingPlan } from "@/modules/payments/checkout";
-import { firstName, formatDate, formatMoney } from "@/lib/format";
 import { relationshipLabel } from "@/modules/plans/plans.utils";
 import { usePlan } from "@/modules/plans/query-options";
 

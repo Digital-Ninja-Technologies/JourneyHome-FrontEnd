@@ -1,6 +1,6 @@
-import { env } from "#/env/client";
 import { Logo } from "@journeyhome/ui/components/logo";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { env } from "#/env/client";
 
 export const Route = createFileRoute("/_auth")({
   component: AuthLayout,

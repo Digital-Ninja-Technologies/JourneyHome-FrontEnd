@@ -3,6 +3,7 @@ import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { AlertCircle, Bell, Camera, Check, CreditCard } from "lucide-react";
 import { useState } from "react";
+import { useSessionUser } from "@/modules/auth/query-options";
 import {
   describeNotification,
   formatNotificationTime,
@@ -10,10 +11,9 @@ import {
   readSeen,
   writeSeen,
 } from "@/modules/notifications/notifications.utils";
-import { MARKETING_URL } from "@/modules/plans/plans.utils";
 import { useNotifications } from "@/modules/notifications/query-options";
+import { MARKETING_URL } from "@/modules/plans/plans.utils";
 import { usePlans } from "@/modules/plans/query-options";
-import { useSessionUser } from "@/modules/auth/query-options";
 
 const TONE: Record<NoteTone, { icon: typeof Bell; box: string }> = {
   success: { icon: Check, box: "bg-status-active-bg text-status-active" },

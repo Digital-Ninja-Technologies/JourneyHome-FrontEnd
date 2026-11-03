@@ -1,7 +1,7 @@
+import type { Plan, ServiceRequest } from "@journeyhome/schemas";
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { RequestDocuments } from "./request-documents";
 import { Pill } from "@/components/status-pill";
 import { formatDay } from "@/lib/format";
 import { usePlans } from "@/modules/plans/query-options";
@@ -12,7 +12,7 @@ import {
   requestState,
   STEPS,
 } from "@/modules/service-requests/service-requests.utils";
-import type { Plan, ServiceRequest } from "@journeyhome/schemas";
+import { RequestDocuments } from "./request-documents";
 import { BYPASS_PLAN_REQUIREMENT } from "./request-service-view";
 
 const HOW = [

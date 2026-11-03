@@ -1,3 +1,4 @@
+import type { DocumentType, ServiceDocument } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
@@ -11,7 +12,6 @@ import {
   uploadServiceDocument,
   validateFile,
 } from "@/modules/service-requests/service-requests.utils";
-import type { DocumentType, ServiceDocument } from "@journeyhome/schemas";
 
 const TONE = {
   Pending: "review",

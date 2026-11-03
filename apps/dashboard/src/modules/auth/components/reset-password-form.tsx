@@ -27,7 +27,8 @@ export function ResetPasswordForm() {
             </span>
           </h1>
           <p className="text-sm leading-relaxed text-status-paused">
-            The reset link is missing or incomplete. Request a new one and try again.
+            The reset link is missing or incomplete. Request a new one and try
+            again.
           </p>
         </div>
         <Link

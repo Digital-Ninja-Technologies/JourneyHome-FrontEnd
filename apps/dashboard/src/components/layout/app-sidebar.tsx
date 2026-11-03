@@ -1,4 +1,3 @@
-import { env } from "#/env/client";
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
@@ -15,6 +14,7 @@ import {
   User,
   X,
 } from "lucide-react";
+import { env } from "#/env/client";
 import { useLogoutMutation } from "@/modules/auth/mutations";
 
 export const NAV = [

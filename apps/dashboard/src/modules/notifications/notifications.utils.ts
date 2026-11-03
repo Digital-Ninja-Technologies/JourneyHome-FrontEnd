@@ -1,5 +1,5 @@
-import { firstName, formatMoney } from "@/lib/format";
 import type { AppNotification, Plan } from "@journeyhome/schemas";
+import { firstName, formatMoney } from "@/lib/format";
 
 export type NoteTone = "success" | "due" | "alert" | "service" | "info";
 export interface NoteView {

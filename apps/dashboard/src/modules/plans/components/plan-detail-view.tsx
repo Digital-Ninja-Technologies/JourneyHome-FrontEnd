@@ -11,6 +11,7 @@ import {
   formatMoney,
   formatMonthYear,
 } from "@/lib/format";
+import { usePayments } from "@/modules/payments/query-options";
 import {
   canPayNow,
   contributionCount,
@@ -19,7 +20,6 @@ import {
   planNotice,
   startedLabel,
 } from "@/modules/plans/plans.utils";
-import { usePayments } from "@/modules/payments/query-options";
 import { usePlan } from "@/modules/plans/query-options";
 
 function Detail({

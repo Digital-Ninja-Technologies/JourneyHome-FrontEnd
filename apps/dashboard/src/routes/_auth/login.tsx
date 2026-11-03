@@ -5,11 +5,9 @@ import { LoginForm } from "@/modules/auth/components/login-form";
 import { sessionQueryOptions } from "@/modules/auth/query-options";
 
 export const Route = createFileRoute("/_auth/login")({
-  validateSearch: (search) => redirectSearchSchema.parse(search),
+  validateSearch: redirectSearchSchema,
   beforeLoad: async ({ context, search }) => {
-    const session = await context.queryClient.query(
-      sessionQueryOptions(),
-    );
+    const session = await context.queryClient.query(sessionQueryOptions());
     if (session?.user) {
       throw redirect({
         to: (search.redirect as any) || "/app",

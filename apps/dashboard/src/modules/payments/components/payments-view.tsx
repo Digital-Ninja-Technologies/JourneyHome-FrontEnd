@@ -1,3 +1,4 @@
+import type { Payment, Plan } from "@journeyhome/schemas";
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
@@ -11,10 +12,14 @@ import {
   formatMoney,
   formatMonthYear,
 } from "@/lib/format";
-import { canPayNow, isDue, LIVE, MARKETING_URL } from "@/modules/plans/plans.utils";
 import { usePayments } from "@/modules/payments/query-options";
+import {
+  canPayNow,
+  isDue,
+  LIVE,
+  MARKETING_URL,
+} from "@/modules/plans/plans.utils";
 import { usePlans } from "@/modules/plans/query-options";
-import type { Payment, Plan } from "@journeyhome/schemas";
 
 const PAGE = 10;
 

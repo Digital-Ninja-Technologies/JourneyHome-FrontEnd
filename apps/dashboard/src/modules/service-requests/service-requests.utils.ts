@@ -1,11 +1,11 @@
-import type { Tone } from "@/components/status-pill";
-import { api } from "@/lib/api";
 import type {
   DocumentType,
   Plan,
   ServiceDocument,
   ServiceRequest,
 } from "@journeyhome/schemas";
+import type { Tone } from "@/components/status-pill";
+import { api } from "@/lib/api";
 
 export const DOC_LABEL: Record<DocumentType, string> = {
   Death_Certificate: "Death certificate",

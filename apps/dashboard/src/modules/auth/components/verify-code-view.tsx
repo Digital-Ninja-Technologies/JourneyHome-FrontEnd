@@ -4,11 +4,11 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { DemoNotice } from "@/components/demo-notice";
 import { OtpInput } from "@/components/otp-input";
+import { api, isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/api";
+import { DEMO_CODE } from "@/lib/api/mocks";
 import { resolveSelectedPackage } from "@/lib/search-schemas";
 import { useSessionUser } from "@/modules/auth/query-options";
-import { api, isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/api";
 import { getStoredSelectedPackage } from "@/modules/onboarding/storage";
-import { DEMO_CODE } from "@/lib/api/mocks";
 
 const COOLDOWN = 30;
 

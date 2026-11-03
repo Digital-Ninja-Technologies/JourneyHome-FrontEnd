@@ -7,11 +7,11 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { env } from "#/env/client";
+import { resolveSelectedPackage } from "@/lib/search-schemas";
 import {
   getStoredSelectedPackage,
   setStoredSelectedPackage,
 } from "@/modules/onboarding/storage";
-import { resolveSelectedPackage } from "@/lib/search-schemas";
 import { useSignupMutation } from "../mutations";
 
 const formSchema = z.object({
