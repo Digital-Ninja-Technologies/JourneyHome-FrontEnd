@@ -1,5 +1,6 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.6.2/schema.json",
+  "root": true,
+  "$schema": "https://biomejs.dev/schemas/2.6.3/schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
@@ -15,7 +16,8 @@
       "!**/src/routeTree.gen.ts",
       "!**/*.css",
       "!**/src/components/ui/**/*",
-      "!**/src/assets/**/*"
+      "!**/src/assets/**/*",
+      "!**/dist/**/*"
     ]
   },
   "formatter": {
