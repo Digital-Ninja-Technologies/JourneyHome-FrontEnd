@@ -1,6 +1,6 @@
 import { serverEnv as env } from "@/env/server";
-import { mockRequest, NOT_MOCKED } from "../mocks";
-import { apiClient } from "./api-client";
+import { apiClient } from "./client";
+import { mockRequest, NOT_MOCKED } from "./mocks";
 
 export { ApiError } from "@journeyhome/api-client";
 

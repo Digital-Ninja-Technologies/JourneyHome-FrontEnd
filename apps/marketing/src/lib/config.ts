@@ -1,4 +1,4 @@
-import { env } from "#/env/client";
+import { env } from "@/env/client";
 
 export const APP_URL = env.VITE_APP_URL;
 export const SITE_ORIGIN = env.VITE_SITE_URL;
