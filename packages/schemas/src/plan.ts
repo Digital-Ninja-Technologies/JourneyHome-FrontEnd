@@ -39,10 +39,20 @@ export type Plan = z.infer<typeof planSchema>;
 export const createPlanSchema = z.object({
   packageId: z.string().min(1, "Please select a package"),
   coveredPerson: coveredPersonSchema,
-  contributionAmountMinor: z.number().positive("Contribution amount must be greater than zero"),
-  currency: z.string().default("NGN"),
+  contributionAmountMinor: z.number().positive().optional(),
+  currency: z.string().default("NGN").optional(),
 });
 export type CreatePlanInput = z.infer<typeof createPlanSchema>;
+
+export const dashboardSummarySchema = z.object({
+  totalPlans: z.number().default(0),
+  activePlans: z.number().default(0),
+  pendingPlans: z.number().default(0),
+  totalContributedMinor: z.number().default(0),
+  currency: z.string().default("NGN"),
+  recentPlans: z.array(planSchema).default([]),
+});
+export type DashboardSummary = z.infer<typeof dashboardSummarySchema>;
 
 export const updatePlanStatusSchema = z.object({
   status: PlanStatusEnum,

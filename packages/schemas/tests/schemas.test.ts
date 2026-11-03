@@ -19,8 +19,17 @@ import {
   packageSchema,
   createPackageSchema,
   updatePackageSchema,
-  signupSearchSchema,
-  resolveSelectedPackage,
+  verifyEmailSchema,
+  resendVerificationSchema,
+  deleteAccountSchema,
+  resetPasswordSchema,
+  sessionUserSchema,
+  verifyEmailSearchSchema,
+  customerPreferencesSchema,
+  appNotificationSchema,
+  paginatedNotificationsSchema,
+  dashboardSummarySchema,
+  subscriptionSchema,
 } from "../src";
 
 describe("@journeyhome/schemas", () => {
@@ -375,15 +384,225 @@ describe("@journeyhome/schemas", () => {
     });
   });
 
-  describe("signup search", () => {
-    it("resolves the selected package from package or packageId", () => {
-      expect(
-        resolveSelectedPackage(signupSearchSchema.parse({ package: "abc" })),
-      ).toBe("abc");
-      expect(
-        resolveSelectedPackage(signupSearchSchema.parse({ packageId: "xyz" })),
-      ).toBe("xyz");
-      expect(resolveSelectedPackage(signupSearchSchema.parse({}))).toBeUndefined();
+  describe("auth schemas - extended & live backend alignment", () => {
+    it("validates session user without phone", () => {
+      const res = sessionUserSchema.safeParse({
+        id: "usr_123",
+        email: "user@example.com",
+        name: "Adaeze Okafor",
+        role: "customer",
+        isSuperAdmin: false,
+      });
+      expect(res.success).toBe(true);
+      if (res.success) {
+        expect("phone" in res.data).toBe(false);
+      }
+    });
+
+    it("validates signup input without phone and defaults role to customer", () => {
+      const res = signupSchema.safeParse({
+        name: "Adaeze Okafor",
+        email: "adaeze@example.com",
+        password: "Secret123Password",
+      });
+      expect(res.success).toBe(true);
+      if (res.success) {
+        expect(res.data.role).toBe("customer");
+        expect("phone" in res.data).toBe(false);
+      }
+    });
+
+    it("accepts role covered_person in signup", () => {
+      const res = signupSchema.safeParse({
+        name: "Emeka Okafor",
+        email: "emeka@example.com",
+        password: "Secret123Password",
+        role: "covered_person",
+      });
+      expect(res.success).toBe(true);
+      if (res.success) {
+        expect(res.data.role).toBe("covered_person");
+      }
+    });
+
+    it("rejects invalid role in signup", () => {
+      const res = signupSchema.safeParse({
+        name: "Bad Role",
+        email: "bad@example.com",
+        password: "Secret123Password",
+        role: "admin",
+      });
+      expect(res.success).toBe(false);
+    });
+
+    it("validates verifyEmailSchema", () => {
+      expect(verifyEmailSchema.safeParse({ token: "tok_abc123" }).success).toBe(true);
+      expect(verifyEmailSchema.safeParse({ token: "" }).success).toBe(false);
+      expect(verifyEmailSchema.safeParse({}).success).toBe(false);
+    });
+
+    it("validates resendVerificationSchema", () => {
+      expect(resendVerificationSchema.safeParse({ email: "user@example.com" }).success).toBe(true);
+      expect(resendVerificationSchema.safeParse({ email: "not-an-email" }).success).toBe(false);
+      expect(resendVerificationSchema.safeParse({}).success).toBe(false);
+    });
+
+    it("validates deleteAccountSchema", () => {
+      expect(deleteAccountSchema.safeParse({ password: "MyPassword123" }).success).toBe(true);
+      expect(deleteAccountSchema.safeParse({ password: "" }).success).toBe(false);
+      expect(deleteAccountSchema.safeParse({}).success).toBe(false);
+    });
+
+    it("validates resetPasswordSchema with newPassword", () => {
+      const valid = resetPasswordSchema.safeParse({
+        token: "tok_reset_123",
+        newPassword: "NewSecretPassword123",
+      });
+      expect(valid.success).toBe(true);
+
+      const legacy = resetPasswordSchema.safeParse({
+        token: "tok_reset_123",
+        password: "NewSecretPassword123",
+      });
+      expect(legacy.success).toBe(false);
+    });
+  });
+
+  describe("verify email search schema", () => {
+    it("parses verification token and safe redirect", () => {
+      const res = verifyEmailSearchSchema.safeParse({
+        token: "tok_verify_789",
+        redirect: "/app/plans",
+      });
+      expect(res.success).toBe(true);
+      if (res.success) {
+        expect(res.data.token).toBe("tok_verify_789");
+        expect(res.data.redirect).toBe("/app/plans");
+      }
+    });
+
+    it("allows optional token and redirect", () => {
+      const res = verifyEmailSearchSchema.safeParse({});
+      expect(res.success).toBe(true);
+      if (res.success) {
+        expect(res.data.token).toBeUndefined();
+        expect(res.data.redirect).toBeUndefined();
+      }
+    });
+
+    it("rejects open redirect in verify email search", () => {
+      const res = verifyEmailSearchSchema.safeParse({
+        token: "tok_verify_789",
+        redirect: "https://evil.com",
+      });
+      expect(res.success).toBe(false);
+    });
+  });
+
+  describe("notification schemas - live backend alignment", () => {
+    it("validates customer preferences with serviceRequestUpdates and productNewsOffers", () => {
+      const valid = {
+        paymentReminders: true,
+        deficitAlerts: false,
+        serviceRequestUpdates: true,
+        productNewsOffers: false,
+      };
+      expect(customerPreferencesSchema.safeParse(valid).success).toBe(true);
+
+      const legacy = {
+        paymentReminders: true,
+        deficitAlerts: false,
+        serviceUpdates: true,
+        productNews: false,
+      };
+      expect(customerPreferencesSchema.safeParse(legacy).success).toBe(false);
+    });
+
+    it("validates appNotificationSchema with title, message and isRead", () => {
+      const sample = {
+        _id: "notif_001",
+        title: "Plan Created",
+        message: "Your plan has been initialized",
+        event: "InitialPaymentSuccess",
+        isRead: false,
+        createdAt: "2026-11-03T12:00:00.000Z",
+      };
+      const res = appNotificationSchema.safeParse(sample);
+      expect(res.success).toBe(true);
+      if (res.success) {
+        expect(res.data.isRead).toBe(false);
+        expect(res.data.title).toBe("Plan Created");
+      }
+    });
+
+    it("validates paginatedNotificationsSchema envelope", () => {
+      const envelope = {
+        items: [
+          {
+            _id: "notif_001",
+            title: "Plan Created",
+            message: "Your plan has been initialized",
+            event: "InitialPaymentSuccess",
+            isRead: true,
+            createdAt: "2026-11-03T12:00:00.000Z",
+          },
+        ],
+        pagination: {
+          total: 1,
+          page: 1,
+          limit: 20,
+          totalPages: 1,
+        },
+        counts: {
+          totalNotifications: 1,
+          totalUnreadNotifications: 0,
+        },
+      };
+      expect(paginatedNotificationsSchema.safeParse(envelope).success).toBe(true);
+    });
+  });
+
+  describe("dashboard summary and subscriptions schemas", () => {
+    it("validates dashboard summary KPIs and applies defaults", () => {
+      const emptyRes = dashboardSummarySchema.safeParse({});
+      expect(emptyRes.success).toBe(true);
+      if (emptyRes.success) {
+        expect(emptyRes.data.totalPlans).toBe(0);
+        expect(emptyRes.data.currency).toBe("NGN");
+        expect(emptyRes.data.recentPlans).toEqual([]);
+      }
+
+      const fullRes = dashboardSummarySchema.safeParse({
+        totalPlans: 4,
+        activePlans: 3,
+        pendingPlans: 1,
+        totalContributedMinor: 20000000,
+        currency: "NGN",
+        recentPlans: [],
+      });
+      expect(fullRes.success).toBe(true);
+      if (fullRes.success) {
+        expect(fullRes.data.activePlans).toBe(3);
+        expect(fullRes.data.totalContributedMinor).toBe(20000000);
+      }
+    });
+
+    it("validates subscription data shape", () => {
+      const sub = {
+        _id: "sub_demo_1",
+        plan: "plan_demo_1",
+        status: "active",
+        amountMinor: 500000,
+        currency: "NGN",
+        nextBillingDate: "2026-12-01T00:00:00.000Z",
+        createdAt: "2026-11-01T00:00:00.000Z",
+      };
+      const res = subscriptionSchema.safeParse(sub);
+      expect(res.success).toBe(true);
+      if (res.success) {
+        expect(res.data.status).toBe("active");
+        expect(res.data.amountMinor).toBe(500000);
+      }
     });
   });
 });

@@ -8,7 +8,10 @@ export const redirectSearchSchema = z.object({
       (val) => {
         if (!val) return true;
         return (
-          val.startsWith("/") && !val.startsWith("//") && !val.includes("://")
+          val.startsWith("/") &&
+          !val.startsWith("//") &&
+          !val.includes("://") &&
+          !val.includes("\\")
         );
       },
       { message: "Redirect URL must be a valid path" },
@@ -16,16 +19,10 @@ export const redirectSearchSchema = z.object({
 });
 export type RedirectSearch = z.infer<typeof redirectSearchSchema>;
 
-/** Search params for the signup flow; `package` (or legacy `packageId`) carries the package picked on marketing. */
-export const signupSearchSchema = z.object({
-  package: z.coerce.string().optional(),
-  packageId: z.coerce.string().optional(),
+export const verifyEmailSearchSchema = redirectSearchSchema.extend({
+  token: z.string().optional(),
 });
-export type SignupSearch = z.infer<typeof signupSearchSchema>;
-
-export const resolveSelectedPackage = (
-  search: Partial<SignupSearch> | undefined,
-): string | undefined => search?.package || search?.packageId || undefined;
+export type VerifyEmailSearch = z.infer<typeof verifyEmailSearchSchema>;
 
 export const sanitizeRedirect = (
   rawRedirect: string | undefined | null,
@@ -35,7 +32,8 @@ export const sanitizeRedirect = (
   if (
     rawRedirect.startsWith("/") &&
     !rawRedirect.startsWith("//") &&
-    !rawRedirect.includes("://")
+    !rawRedirect.includes("://") &&
+    !rawRedirect.includes("\\")
   ) {
     return rawRedirect;
   }

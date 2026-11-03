@@ -33,7 +33,21 @@ export const savedCardSchema = z.object({
 export type SavedCard = z.infer<typeof savedCardSchema>;
 
 export const checkoutInitializeSchema = z.object({
-  authorizationUrl: z.string(),
+  paymentId: z.string().optional(),
   reference: z.string().optional(),
+  authorizationUrl: z.string(),
+  accessCode: z.string().optional(),
 });
 export type CheckoutInitializeResult = z.infer<typeof checkoutInitializeSchema>;
+
+export const subscriptionSchema = z.object({
+  _id: z.string(),
+  plan: z.string(),
+  status: z.string(),
+  amountMinor: z.number(),
+  currency: z.string().default("NGN").optional(),
+  nextBillingDate: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string().optional(),
+});
+export type Subscription = z.infer<typeof subscriptionSchema>;
