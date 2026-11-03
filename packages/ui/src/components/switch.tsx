@@ -1,23 +1,32 @@
-import { cn } from "../lib/utils";
+import { Switch as SwitchPrimitive } from "@base-ui/react/switch"
+import { cn } from "../lib/utils"
 
-export function Switch({
-  checked, onCheckedChange, label, disabled, className,
-}: { checked: boolean; onCheckedChange: (checked: boolean) => void; label: string; disabled?: boolean; className?: string }) {
+function Switch({
+  className,
+  size = "default",
+  label,
+  ...props
+}: SwitchPrimitive.Root.Props & {
+  size?: "sm" | "default"
+  label?: string
+}) {
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      disabled={disabled}
-      onClick={() => onCheckedChange(!checked)}
+    <SwitchPrimitive.Root
+      data-slot="switch"
+      data-size={size}
+      aria-label={props["aria-label"] || label}
       className={cn(
-        "relative h-[26px] w-11 shrink-0 rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50",
-        checked ? "bg-accent" : "bg-status-paused-bg",
-        className,
+        "peer group/switch relative inline-flex shrink-0 items-center rounded-full border-2 transition-all outline-none group-has-[:focus-visible]/field-label:ring-0 after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=default]:h-5 data-[size=default]:w-11 data-[size=sm]:h-4 data-[size=sm]:w-7 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:border-primary data-checked:bg-primary group-has-[:focus-visible]/field-label:data-checked:border-primary data-unchecked:border-transparent data-unchecked:bg-input/90 group-has-[:focus-visible]/field-label:data-unchecked:border-transparent data-disabled:cursor-not-allowed data-disabled:opacity-50",
+        className
       )}
+      {...props}
     >
-      <span className={cn("absolute top-[3px] size-5 rounded-full bg-white shadow transition-all", checked ? "left-[21px]" : "left-[3px]")} />
-    </button>
-  );
+      <SwitchPrimitive.Thumb
+        data-slot="switch-thumb"
+        className="pointer-events-none block rounded-full bg-background shadow-sm ring-0 transition-transform not-dark:bg-clip-padding group-data-[size=default]/switch:h-4 group-data-[size=default]/switch:w-6 group-data-[size=sm]/switch:h-3 group-data-[size=sm]/switch:w-4 data-checked:translate-x-[calc(100%-8px)] dark:data-checked:bg-primary-foreground data-unchecked:translate-x-0 dark:data-unchecked:bg-foreground"
+      />
+    </SwitchPrimitive.Root>
+  )
 }
+
+export { Switch }
