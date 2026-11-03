@@ -11,6 +11,7 @@ export async function api<T>(
   init: { method?: string; body?: unknown } = {},
 ): Promise<T> {
   const method = init.method ?? (init.body ? "POST" : "GET");
+
   if (USE_MOCKS) {
     const mocked = await mockRequest(method, path, init.body);
     if (mocked !== NOT_MOCKED) return mocked as T;

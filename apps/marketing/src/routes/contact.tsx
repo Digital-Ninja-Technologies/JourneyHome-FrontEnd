@@ -6,6 +6,7 @@ import { CONTACT_EMAIL } from "@/lib/config";
 import { createPageHead } from "@/lib/seo";
 import { ContactForm } from "@/modules/contact";
 import { Accent, Container, PageHero } from "@/modules/marketing";
+import { AsyncBoundary } from "@/components/async-boundary";
 
 export const Route = createFileRoute("/contact")({
   head: () =>
@@ -56,7 +57,9 @@ function Contact() {
         We&rsquo;re here to <Accent>help.</Accent>
       </PageHero>
       <Container className="grid gap-10 pb-12 md:grid-cols-[1.4fr_1fr]">
-        <ContactForm />
+        <AsyncBoundary>
+          <ContactForm />
+        </AsyncBoundary>
         <div className="flex flex-col gap-4">
           {INFO.map(({ icon: Icon, title, body, tint, dark }) => (
             <div

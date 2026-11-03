@@ -8,7 +8,6 @@ export const serverEnv = createEnv({
     USE_MOCKS: z
       .string()
       .optional()
-      .default(process.env.NODE_ENV === "development" ? "true" : "false")
       .transform((v) => v === "true" || v === "1"),
   },
   runtimeEnv: process.env,
