@@ -1,5 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import { RouteProgress } from "@journeyhome/ui/components/route-progress";
 import { CatchBoundary } from "@/components/catch-boundary";
 
 export interface RouterContext {
@@ -12,5 +13,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 });
 
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <>
+      <RouteProgress />
+      <Outlet />
+    </>
+  );
 }

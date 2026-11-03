@@ -1,4 +1,6 @@
 /// <reference types="vite/client" />
+
+import { RouteProgress } from "@journeyhome/ui/components/route-progress";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import {
@@ -48,6 +50,7 @@ export const Route = createRootRouteWithContext<{
 function RootComponent() {
   return (
     <RootDocument>
+      <RouteProgress />
       <SiteHeader />
       <Outlet />
       <SiteFooter />
