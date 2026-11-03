@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../lib/utils";
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-full font-semibold whitespace-nowrap transition-all duration-200 ease-out outline-none select-none cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 disabled:hover:translate-y-0 disabled:active:scale-100 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-full font-semibold whitespace-nowrap transition-all duration-200 ease-out outline-none select-none cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:-translate-y-[0.5px] active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 disabled:hover:translate-y-0 disabled:active:scale-100 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -12,11 +12,11 @@ const buttonVariants = cva(
         accent:
           "bg-accent text-accent-foreground hover:bg-accent/90 shadow-xs hover:shadow-md",
         outline:
-          "border border-border bg-background hover:bg-muted/40 hover:text-foreground shadow-xs hover:shadow-sm aria-expanded:bg-muted",
+          "border border-border bg-background hover:bg-muted/20 hover:text-foreground shadow-xs hover:shadow-xs aria-expanded:bg-muted",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
-          "hover:bg-muted/40 hover:text-foreground hover:-translate-y-0.5 active:translate-y-0",
+          "hover:bg-muted/20 hover:text-foreground hover:-translate-y-0.5 active:translate-y-0",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xs",
         link: "text-link underline-offset-4 hover:text-link-hover hover:underline hover:translate-y-0 active:scale-100 shadow-none",
@@ -39,7 +39,8 @@ const buttonVariants = cva(
   },
 );
 
-export type ButtonProps = ButtonPrimitive.Props & VariantProps<typeof buttonVariants>;
+export type ButtonProps = ButtonPrimitive.Props &
+  VariantProps<typeof buttonVariants>;
 
 function Button({
   className,

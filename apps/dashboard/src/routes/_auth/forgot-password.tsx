@@ -1,6 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { sessionQueryOptions } from "@/modules/auth";
-import ForgotPassword from "@/pages/forgot-password";
+import { ForgotPasswordForm, sessionQueryOptions } from "@/modules/auth";
 
 export const Route = createFileRoute("/_auth/forgot-password")({
   beforeLoad: async ({ context }) => {
@@ -11,5 +10,5 @@ export const Route = createFileRoute("/_auth/forgot-password")({
       throw redirect({ to: "/app" });
     }
   },
-  component: ForgotPassword,
+  component: ForgotPasswordForm,
 });

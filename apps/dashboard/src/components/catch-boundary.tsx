@@ -1,6 +1,7 @@
+import { Button, buttonVariants } from "@journeyhome/ui/components/button";
+import { cn } from "@journeyhome/ui/lib/utils";
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { AlertTriangle, RefreshCw } from "lucide-react";
-import { Button } from "@journeyhome/ui/components/button";
 
 export function CatchBoundary({ error, reset }: ErrorComponentProps) {
   const message =
@@ -28,7 +29,7 @@ export function CatchBoundary({ error, reset }: ErrorComponentProps) {
         )}
         <a
           href="/app"
-          className="inline-flex h-10 items-center justify-center rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
+          className={cn(buttonVariants({ variant: "outline" }))}
         >
           Return to dashboard
         </a>

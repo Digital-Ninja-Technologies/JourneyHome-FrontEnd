@@ -1,7 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { tokenSearchSchema } from "@/lib/search-schemas";
-import { sessionQueryOptions } from "@/modules/auth";
-import ResetPassword from "@/pages/reset-password";
+import { ResetPasswordForm, sessionQueryOptions } from "@/modules/auth";
 
 export const Route = createFileRoute("/_auth/reset-password")({
   validateSearch: (search) => tokenSearchSchema.parse(search),
@@ -13,5 +12,5 @@ export const Route = createFileRoute("/_auth/reset-password")({
       throw redirect({ to: "/app" });
     }
   },
-  component: ResetPassword,
+  component: ResetPasswordForm,
 });

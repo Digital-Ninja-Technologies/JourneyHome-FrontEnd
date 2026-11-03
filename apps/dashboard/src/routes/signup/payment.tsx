@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { planSearchSchema } from "@/lib/search-schemas";
 import { sessionQueryOptions } from "@/modules/auth";
-import OnboardingPayment from "@/pages/onboarding-payment";
+import { OnboardingPaymentView } from "@/modules/onboarding";
 
 export const Route = createFileRoute("/signup/payment")({
   validateSearch: (search) => planSearchSchema.parse(search),
@@ -17,5 +17,5 @@ export const Route = createFileRoute("/signup/payment")({
     }
     return { session, user: session.user };
   },
-  component: OnboardingPayment,
+  component: OnboardingPaymentView,
 });

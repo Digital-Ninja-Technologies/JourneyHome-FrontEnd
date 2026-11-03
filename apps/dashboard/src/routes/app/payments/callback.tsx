@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { paymentCallbackSearchSchema } from "@/lib/search-schemas";
-import PaymentCallback from "@/pages/payment-callback";
+import { PaymentCallbackView } from "@/modules/payments";
 
 export const Route = createFileRoute("/app/payments/callback")({
   validateSearch: (search) => paymentCallbackSearchSchema.parse(search),
-  component: PaymentCallback,
+  component: PaymentCallbackView,
 });

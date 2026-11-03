@@ -55,12 +55,21 @@ export function SiteHeader() {
           })}
         </nav>
         <div className="flex items-center gap-3.5">
-          <a href={LOGIN_URL} className="hidden text-sm font-bold md:inline">
+          <a
+            href={LOGIN_URL}
+            className={cn(
+              buttonVariants({ size: "lg", variant: "ghost" }),
+              "hidden md:inline-flex",
+            )}
+          >
             Log in
           </a>
           <a
             href={SIGNUP_URL}
-            className={cn("hidden md:inline-flex", buttonVariants({ variant: "accent", size: "lg" }))}
+            className={cn(
+              "hidden md:inline-flex",
+              buttonVariants({ variant: "accent", size: "lg" }),
+            )}
           >
             Get started &rarr;
           </a>
@@ -102,13 +111,16 @@ export function SiteHeader() {
           })}
           <a
             href={LOGIN_URL}
-            className="rounded-2xl px-4 py-3.5 text-[15px] font-semibold text-ink-soft"
+            className={cn(buttonVariants({ size: "lg", variant: "ghost" }))}
           >
             Log in
           </a>
           <a
             href={SIGNUP_URL}
-            className={cn("mt-2 w-full justify-center", buttonVariants({ variant: "accent", size: "lg" }))}
+            className={cn(
+              "mt-2 w-full justify-center",
+              buttonVariants({ variant: "accent", size: "lg" }),
+            )}
           >
             Get started &rarr;
           </a>

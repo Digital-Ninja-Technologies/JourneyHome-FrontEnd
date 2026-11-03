@@ -1,7 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { signupSearchSchema } from "@/lib/search-schemas";
-import { sessionQueryOptions } from "@/modules/auth";
-import VerifyCode from "@/pages/verify-code";
+import { sessionQueryOptions, VerifyCodeView } from "@/modules/auth";
 
 export const Route = createFileRoute("/signup/verify")({
   validateSearch: (search) => signupSearchSchema.parse(search),
@@ -15,5 +14,5 @@ export const Route = createFileRoute("/signup/verify")({
     }
     return { session, user: session.user };
   },
-  component: VerifyCode,
+  component: VerifyCodeView,
 });

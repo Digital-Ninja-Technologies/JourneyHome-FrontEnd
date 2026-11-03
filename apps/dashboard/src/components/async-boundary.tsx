@@ -1,4 +1,5 @@
-import { Button } from "@journeyhome/ui/components/button";
+import { Button, buttonVariants } from "@journeyhome/ui/components/button";
+import { cn } from "@journeyhome/ui/lib/utils";
 import { useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Component, type ReactNode, Suspense } from "react";
@@ -108,7 +109,7 @@ export function UnauthorizedErrorState() {
       </p>
       <a
         href="/login"
-        className="mt-4 inline-flex items-center justify-center rounded-lg bg-link px-4 py-2 text-sm font-semibold text-canvas transition-colors hover:bg-link/90"
+        className={cn(buttonVariants({ variant: "default" }), "mt-4")}
       >
         Sign in
       </a>
