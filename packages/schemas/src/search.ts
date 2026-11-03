@@ -11,7 +11,7 @@ export const redirectSearchSchema = z.object({
           val.startsWith("/") && !val.startsWith("//") && !val.includes("://")
         );
       },
-      { message: "Redirect URL must be a valid internal path" },
+      { message: "Redirect URL must be a valid path" },
     ),
 });
 export type RedirectSearch = z.infer<typeof redirectSearchSchema>;
