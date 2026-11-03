@@ -45,7 +45,7 @@ export const PasswordInput = React.forwardRef<
         <div className="relative">
           <Input
             type={show ? "text" : "password"}
-            className={cn("pr-10 bg-muted/30", className)}
+            className={cn("pr-11", className)}
             ref={ref}
             value={value}
             onChange={onChange}
@@ -55,7 +55,8 @@ export const PasswordInput = React.forwardRef<
             type="button"
             variant="ghost"
             size="icon"
-            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+            tabIndex={-1}
+            className="absolute right-1 top-1/2 size-9 -translate-y-1/2 rounded-lg text-muted-foreground hover:bg-transparent hover:text-foreground"
             onClick={() => setShow((prev) => !prev)}
           >
             {show ? (

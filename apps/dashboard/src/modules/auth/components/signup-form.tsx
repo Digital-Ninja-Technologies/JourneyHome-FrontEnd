@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@journeyhome/ui/components/button";
 import {
-  FormCheckbox,
   FormInput,
   FormPasswordInput,
 } from "@journeyhome/ui/components/form-fields";
@@ -12,13 +11,13 @@ import { z } from "zod";
 import { env } from "#/env/client";
 import { useSignupMutation } from "../mutations";
 
+// Matches the backend/schema rule (min 6 characters).
+const PASSWORD_CRITERIA = [{ label: "At least 6 characters", regex: /^.{6,}$/ }];
+
 const formSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters"),
   email: z.string().trim().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  terms: z.boolean().refine((val) => val === true, {
-    message: "You must agree to the terms and privacy policy",
-  }),
 });
 
 type SignupFormValues = z.infer<typeof formSchema>;
@@ -32,7 +31,6 @@ export function SignupForm() {
       name: "",
       email: "",
       password: "",
-      terms: false,
     },
   });
 
@@ -83,33 +81,7 @@ export function SignupForm() {
               autoComplete="new-password"
               placeholder="At least 6 characters"
               showCriteria
-            />
-            <FormCheckbox
-              control={control}
-              name="terms"
-              label={
-                <span>
-                  I agree to the{" "}
-                  <a
-                    href={`${env.VITE_MARKETING_URL}/terms`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-bold text-link underline"
-                  >
-                    terms &amp; conditions
-                  </a>{" "}
-                  and{" "}
-                  <a
-                    href={`${env.VITE_MARKETING_URL}/privacy`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-bold text-link underline"
-                  >
-                    privacy policy
-                  </a>
-                  .
-                </span>
-              }
+              criteria={PASSWORD_CRITERIA}
             />
             {signupMutation.error && (
               <p
@@ -143,6 +115,27 @@ export function SignupForm() {
             </Link>
           </div>
         </form>
+        <p className="px-6 text-center text-xs leading-relaxed text-muted">
+          By clicking continue, you agree to our{" "}
+          <a
+            href={`${env.VITE_MARKETING_URL}/terms`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-foreground underline-offset-2 hover:underline"
+          >
+            Terms &amp; Conditions
+          </a>{" "}
+          and{" "}
+          <a
+            href={`${env.VITE_MARKETING_URL}/privacy`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-foreground underline-offset-2 hover:underline"
+          >
+            Privacy Policy
+          </a>
+          .
+        </p>
       </div>
     </div>
   );
