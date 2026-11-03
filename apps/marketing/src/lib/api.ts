@@ -1,10 +1,10 @@
-import { env } from "#/env/client";
+import { serverEnv as env } from "@/env/server";
 import { mockRequest, NOT_MOCKED } from "../mocks";
 import { apiClient } from "./api-client";
 
 export { ApiError } from "@journeyhome/api-client";
 
-export const USE_MOCKS: boolean = env.VITE_USE_MOCKS;
+export const USE_MOCKS: boolean = env.USE_MOCKS;
 
 export async function api<T>(
   path: string,

@@ -1,6 +1,6 @@
 import { createApiClient } from "@journeyhome/api-client";
-import { env } from "#/env/client";
+import { serverEnv as env } from "#/env/server";
 
 export const apiClient = createApiClient({
-  baseUrl: env.VITE_API_BASE_URL,
+  baseUrl: env.API_BASE_URL,
 });

@@ -1,7 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { serverEnv } from "#/env/server";
-
-const SITE_ORIGIN = serverEnv.SITE_URL;
+import { SITE_ORIGIN } from "@/lib/config";
 
 const routes = [
   { path: "", changefreq: "weekly", priority: "1.0" },
