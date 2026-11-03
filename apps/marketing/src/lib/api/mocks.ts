@@ -67,9 +67,15 @@ export async function mockRequest(
     await sleep(250);
     const b = (body ?? {}) as Record<string, unknown>;
     return {
-      received: true,
+      _id: `msg_mock_${Date.now()}`,
       id: `msg_mock_${Date.now()}`,
+      name: b.name,
+      phone: b.phone,
+      email: b.email,
       topic: b.topic,
+      message: b.message,
+      createdAt: new Date().toISOString(),
+      received: true,
     };
   }
 

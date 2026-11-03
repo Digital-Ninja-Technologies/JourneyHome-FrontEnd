@@ -222,10 +222,54 @@ describe("@journeyhome/schemas", () => {
       expect(res.success).toBe(true);
     });
 
+    it("validates exact user prompt sample payload", () => {
+      const promptSample = {
+        name: "Adebayo Okafor",
+        phone: "+2348012345678",
+        email: "adebayo@example.com",
+        topic: "An existing plan" as const,
+        message: "I have a question about my monthly contribution.",
+      };
+      const res = contactSubmissionSchema.safeParse(promptSample);
+      expect(res.success).toBe(true);
+    });
+
+    it("rejects when required phone number is missing", () => {
+      const withoutPhone = {
+        name: "Adebayo Okafor",
+        email: "adebayo@example.com",
+        topic: "An existing plan" as const,
+        message: "I have a question about my monthly contribution.",
+      };
+      const res = contactSubmissionSchema.safeParse(withoutPhone);
+      expect(res.success).toBe(false);
+    });
+
+    it("accepts all four defined topics", () => {
+      const topics = [
+        "Starting a plan",
+        "An existing plan",
+        "Photographer network",
+        "Something else",
+      ] as const;
+
+      for (const topic of topics) {
+        const res = contactSubmissionSchema.safeParse({
+          name: "Adebayo Okafor",
+          phone: "+2348012345678",
+          email: "adebayo@example.com",
+          topic,
+          message: "A valid message for testing topics.",
+        });
+        expect(res.success).toBe(true);
+      }
+    });
+
     it("rejects invalid contact submission input", () => {
       const invalid = {
         name: "",
         email: "not-an-email",
+        phone: "12",
         topic: "Invalid Topic",
         message: "hi",
       };
@@ -233,12 +277,23 @@ describe("@journeyhome/schemas", () => {
       expect(res.success).toBe(false);
     });
 
-    it("validates contact response envelope shape", () => {
-      const res = contactResponseSchema.safeParse({
+    it("validates contact response envelope and 201 created entity shape", () => {
+      const legacyEnvelope = contactResponseSchema.safeParse({
         received: true,
         id: "msg_123",
       });
-      expect(res.success).toBe(true);
+      expect(legacyEnvelope.success).toBe(true);
+
+      const created201Entity = contactResponseSchema.safeParse({
+        _id: "672750e3b97e9d0012ab4567",
+        name: "Adebayo Okafor",
+        phone: "+2348012345678",
+        email: "adebayo@example.com",
+        topic: "An existing plan",
+        message: "I have a question about my monthly contribution.",
+        createdAt: "2026-11-03T12:00:00.000Z",
+      });
+      expect(created201Entity.success).toBe(true);
     });
   });
 

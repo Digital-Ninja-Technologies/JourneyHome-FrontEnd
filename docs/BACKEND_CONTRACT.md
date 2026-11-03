@@ -1,3 +1,5 @@
+# OUTDATED.
+
 # Backend contract for the screens that had no backend
 
 These endpoints don't exist on the backend yet. The frontend is already built against the shapes below, so
@@ -40,9 +42,9 @@ All endpoints below except public auth and marketing inquiries require the usual
 
 ### Contact & inquiries (public, no auth)
 
-- `POST /contact` — body `{ name, email, phone?, topic, message }`.
+- `POST /contact` — body `{ name, phone, email, topic, message }`. All fields are required.
   `topic` is one of `Starting a plan`, `An existing plan`, `Photographer network`, `Something else`.
-  Returns `200` with `{ "received": true, "id": "..." }`.
+  Returns `201` with created contact submission entity.
 
 ## Customer app (`apps/dashboard`)
 
