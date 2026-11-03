@@ -1,3 +1,4 @@
+import { buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 
 export function Container({
@@ -103,7 +104,7 @@ export function CtaBand({
         )}
         <a
           href={href}
-          className="relative inline-flex h-14 items-center rounded-full bg-accent px-8 text-[15px] font-extrabold text-foreground"
+          className={buttonVariants({ variant: "accent", size: "lg" })}
         >
           {label}
         </a>

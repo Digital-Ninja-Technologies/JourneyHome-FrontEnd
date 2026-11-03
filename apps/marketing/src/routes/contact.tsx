@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { buttonVariants } from "@journeyhome/ui/components/button";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { AsyncBoundary } from "@/components/async-boundary";
 import { CONTACT_EMAIL } from "@/lib/config";
@@ -97,7 +98,7 @@ function Contact() {
           </div>
           <Link
             to="/faq"
-            className="inline-flex h-[52px] shrink-0 items-center rounded-full bg-accent px-7 text-sm font-extrabold text-foreground"
+            className={buttonVariants({ variant: "accent", size: "lg" })}
           >
             Visit FAQ
           </Link>

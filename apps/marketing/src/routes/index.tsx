@@ -9,6 +9,7 @@ import {
   ImageIcon,
   MapPin,
 } from "lucide-react";
+import { buttonVariants } from "@journeyhome/ui/components/button";
 import { AsyncBoundary } from "@/components/async-boundary";
 import { Photo } from "@/components/photo";
 import { SIGNUP_URL } from "@/lib/config";
@@ -106,13 +107,13 @@ function Home() {
           <div className="flex flex-wrap gap-3">
             <a
               href={SIGNUP_URL}
-              className="inline-flex h-14 items-center rounded-full bg-foreground px-7 text-[15px] font-bold text-canvas"
+              className={buttonVariants({ variant: "default", size: "lg" })}
             >
               Start saving today
             </a>
             <Link
               to="/how-it-works"
-              className="inline-flex h-14 items-center rounded-full border border-border px-7 text-[15px] font-semibold"
+              className={buttonVariants({ variant: "outline", size: "lg" })}
             >
               Watch how it works
             </Link>
@@ -367,7 +368,7 @@ function Home() {
           </p>
           <a
             href={SIGNUP_URL}
-            className="relative inline-flex h-14 items-center rounded-full bg-accent px-8 text-[15px] font-extrabold text-foreground"
+            className={buttonVariants({ variant: "accent", size: "lg" })}
           >
             Start a plan
           </a>

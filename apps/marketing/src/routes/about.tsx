@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Eye, Heart, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { buttonVariants } from "@journeyhome/ui/components/button";
 import { Photo } from "@/components/photo";
 import { CONTACT_EMAIL, SIGNUP_URL } from "@/lib/config";
 import { images } from "@/lib/images";
@@ -201,7 +202,7 @@ function About() {
           </div>
           <a
             href={`mailto:${CONTACT_EMAIL}`}
-            className="inline-flex h-12 shrink-0 items-center rounded-full bg-foreground px-6 text-sm font-bold text-canvas"
+            className={buttonVariants({ variant: "default", size: "lg" })}
           >
             Get in touch
           </a>

@@ -1,3 +1,4 @@
+import { buttonVariants } from "@journeyhome/ui/components/button";
 import { Logo } from "@journeyhome/ui/components/logo";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
@@ -59,16 +60,16 @@ export function SiteHeader() {
           </a>
           <a
             href={SIGNUP_URL}
-            className="hidden h-12 items-center rounded-full bg-accent px-6 text-sm font-extrabold text-foreground md:inline-flex"
+            className={cn("hidden md:inline-flex", buttonVariants({ variant: "accent", size: "lg" }))}
           >
-            Get started →
+            Get started &rarr;
           </a>
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
-            className="grid size-11 shrink-0 place-items-center rounded-full border border-border text-foreground md:hidden"
+            className="grid size-11 shrink-0 place-items-center rounded-full border border-border text-foreground transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer md:hidden"
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
@@ -107,9 +108,9 @@ export function SiteHeader() {
           </a>
           <a
             href={SIGNUP_URL}
-            className="mt-2 inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-sm font-extrabold text-foreground"
+            className={cn("mt-2 w-full justify-center", buttonVariants({ variant: "accent", size: "lg" }))}
           >
-            Get started →
+            Get started &rarr;
           </a>
         </nav>
       )}

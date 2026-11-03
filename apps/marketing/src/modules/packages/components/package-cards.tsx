@@ -1,3 +1,4 @@
+import { buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Check } from "lucide-react";
 import { SIGNUP_URL } from "@/lib/config";
@@ -75,12 +76,14 @@ export function PackageCards({
             </div>
             <a
               href={`${SIGNUP_URL}?package=${encodeURIComponent(p._id)}`}
-              className={cn(
-                "inline-flex h-[52px] items-center justify-center rounded-full text-sm font-bold",
-                featured
-                  ? "bg-accent text-foreground"
-                  : "border border-foreground",
-              )}
+              className={buttonVariants({
+                variant: featured ? "accent" : "outline",
+                size: "lg",
+                className: cn(
+                  "w-full font-bold",
+                  !featured && "border-foreground text-foreground hover:bg-foreground/5",
+                ),
+              })}
             >
               Choose {p.name}
             </a>

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { buttonVariants } from "@journeyhome/ui/components/button";
 import { createPageHead } from "@/lib/seo";
 import { Accent, Container, PageHero } from "@/modules/marketing";
 
@@ -80,7 +81,7 @@ function FAQ() {
           </div>
           <Link
             to="/contact"
-            className="inline-flex h-[52px] shrink-0 items-center rounded-full bg-accent px-7 text-sm font-extrabold text-foreground"
+            className={buttonVariants({ variant: "accent", size: "lg" })}
           >
             Contact us
           </Link>
