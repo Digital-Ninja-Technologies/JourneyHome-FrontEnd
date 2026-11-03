@@ -189,8 +189,24 @@ export function formatNotificationTime(iso: string, now = new Date()) {
     : `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}, ${time}`;
 }
 
-// "Read" state is kept on this device only; the backend has no read/unread tracking.
 const seenKey = (userId: string) => `jh_notifications_seen_${userId}`;
+
+export function clearSeenStorage(userId?: string) {
+  try {
+    if (userId) {
+      localStorage.removeItem(seenKey(userId));
+    } else {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key?.startsWith("jh_notifications_seen_")) {
+          localStorage.removeItem(key);
+        }
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+}
 
 export function readSeen(userId: string): string | null {
   try {

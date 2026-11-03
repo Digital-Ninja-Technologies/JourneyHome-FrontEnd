@@ -1,15 +1,28 @@
+import type { AppNotification } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { AlertCircle, Bell, Camera, Check, CreditCard } from "lucide-react";
-import { useState } from "react";
+import {
+  AlertCircle,
+  Bell,
+  Camera,
+  Check,
+  CreditCard,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { useSessionUser } from "@/modules/auth/query-options";
 import {
+  deleteNotification,
+  markNotificationRead,
+} from "@/modules/notifications/api";
+import {
+  clearSeenStorage,
   describeNotification,
   formatNotificationTime,
   type NoteTone,
   readSeen,
-  writeSeen,
 } from "@/modules/notifications/notifications.utils";
 import { useNotifications } from "@/modules/notifications/query-options";
 import { MARKETING_URL } from "@/modules/plans/plans.utils";
@@ -28,22 +41,48 @@ const TONE: Record<NoteTone, { icon: typeof Bell; box: string }> = {
 
 export function NotificationsView() {
   const user = useSessionUser();
+  const queryClient = useQueryClient();
   const notesQ = useNotifications();
   const plansQ = usePlans();
   const [seen, setSeen] = useState(() => (user ? readSeen(user.id) : null));
+
+  // Purge legacy local storage tracking keys
+  useEffect(() => {
+    clearSeenStorage(user?.id);
+  }, [user?.id]);
+
+  const markReadMutation = useMutation({
+    mutationFn: (id: string) => markNotificationRead(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteNotification(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
 
   const plans = new Map((plansQ.data ?? []).map((p) => [p._id, p]));
   const notes = [...(notesQ.data ?? [])].sort(
     (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt),
   );
-  const isUnread = (iso: string) => !seen || new Date(iso) > new Date(seen);
-  const unread = notes.filter((n) => isUnread(n.createdAt)).length;
 
-  function markAllRead() {
-    if (!user) return;
-    const now = new Date().toISOString();
-    writeSeen(user.id, now);
-    setSeen(now);
+  const isUnread = (n: AppNotification) =>
+    n.isRead === false ||
+    (n.isRead === undefined &&
+      (!seen || new Date(n.createdAt) > new Date(seen)));
+
+  const unread = notes.filter((n) => isUnread(n)).length;
+
+  async function markAllRead() {
+    const unreadNotes = notes.filter((n) => isUnread(n));
+    setSeen(new Date().toISOString());
+    for (const note of unreadNotes) {
+      void markReadMutation.mutateAsync(note._id);
+    }
   }
 
   return (
@@ -66,6 +105,7 @@ export function NotificationsView() {
             variant="link"
             size="sm"
             onClick={markAllRead}
+            disabled={markReadMutation.isPending}
             className="h-auto p-0 pt-3 text-sm font-semibold text-link hover:text-link-hover"
           >
             Mark all as read ({unread})
@@ -112,61 +152,91 @@ export function NotificationsView() {
               n.plan ? plans.get(n.plan) : undefined,
             );
             const { icon: Icon, box } = TONE[view.tone];
-            const unreadNow = isUnread(n.createdAt);
+            const unreadNow = isUnread(n);
             return (
               <li
                 key={n._id}
-                className="flex items-start gap-4 border-b border-border py-5 last:border-0"
+                className="flex items-start justify-between gap-4 border-b border-border py-5 last:border-0"
               >
-                <span
-                  className={cn(
-                    "mt-5 size-2 shrink-0 rounded-full",
-                    unreadNow ? "bg-accent" : "bg-transparent",
-                  )}
-                  aria-label={unreadNow ? "Unread" : undefined}
-                />
-                <span
-                  className={cn(
-                    "grid size-10 shrink-0 place-items-center rounded-xl",
-                    box,
-                  )}
-                >
-                  <Icon className="size-[18px]" />
-                </span>
-                <div className="min-w-0">
-                  <div
+                <div className="flex items-start gap-4 min-w-0">
+                  <span
                     className={cn(
-                      "text-[15px]",
-                      unreadNow ? "font-bold" : "font-semibold",
+                      "mt-5 size-2 shrink-0 rounded-full",
+                      unreadNow ? "bg-accent" : "bg-transparent",
+                    )}
+                    aria-label={unreadNow ? "Unread" : undefined}
+                  />
+                  <span
+                    className={cn(
+                      "grid size-10 shrink-0 place-items-center rounded-xl",
+                      box,
                     )}
                   >
-                    {view.title}
-                  </div>
-                  <div className="text-sm leading-relaxed text-ink-soft">
-                    {view.body}{" "}
-                    {view.link && (
-                      <Link
-                        to={view.link.to as any}
-                        className="font-semibold text-link underline"
-                      >
-                        {view.link.label}
-                      </Link>
-                    )}
-                    {view.policy && (
-                      <>
-                        {" "}
-                        <a
-                          href={`${MARKETING_URL}/terms`}
+                    <Icon className="size-[18px]" />
+                  </span>
+                  <div className="min-w-0">
+                    <div
+                      className={cn(
+                        "text-[15px]",
+                        unreadNow ? "font-bold" : "font-semibold",
+                      )}
+                    >
+                      {view.title}
+                    </div>
+                    <div className="text-sm leading-relaxed text-ink-soft">
+                      {view.body}{" "}
+                      {view.link && (
+                        <Link
+                          to={view.link.to as any}
+                          onClick={() => {
+                            if (unreadNow) markReadMutation.mutate(n._id);
+                          }}
                           className="font-semibold text-link underline"
                         >
-                          Read the policy
-                        </a>
-                      </>
-                    )}
+                          {view.link.label}
+                        </Link>
+                      )}
+                      {view.policy && (
+                        <>
+                          {" "}
+                          <a
+                            href={`${MARKETING_URL}/terms`}
+                            className="font-semibold text-link underline"
+                          >
+                            Read the policy
+                          </a>
+                        </>
+                      )}
+                    </div>
+                    <div className="mt-1 text-xs text-muted">
+                      {formatNotificationTime(n.createdAt)}
+                    </div>
                   </div>
-                  <div className="mt-1 text-xs text-muted">
-                    {formatNotificationTime(n.createdAt)}
-                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {unreadNow && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="xs"
+                      onClick={() => markReadMutation.mutate(n._id)}
+                      disabled={markReadMutation.isPending}
+                      className="text-xs text-muted hover:text-foreground"
+                    >
+                      Mark read
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Delete notification"
+                    onClick={() => deleteMutation.mutate(n._id)}
+                    disabled={deleteMutation.isPending}
+                    className="size-8 text-muted hover:text-destructive"
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
                 </div>
               </li>
             );

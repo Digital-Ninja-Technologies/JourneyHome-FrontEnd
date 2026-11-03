@@ -16,6 +16,7 @@ export interface Session {
 }
 
 const STORAGE_KEY = "jh_session";
+export const PENDING_EMAIL_KEY = "jh_pending_verification_email";
 
 export function readSession(): Session | null {
   try {
@@ -39,6 +40,23 @@ export function writeSession(session: Session | null) {
     }
   } catch {
     /* storage unavailable */
+  }
+}
+
+export function getPendingVerificationEmail(): string | null {
+  try {
+    return sessionStorage.getItem(PENDING_EMAIL_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setPendingVerificationEmail(email: string | null) {
+  try {
+    if (email) sessionStorage.setItem(PENDING_EMAIL_KEY, email);
+    else sessionStorage.removeItem(PENDING_EMAIL_KEY);
+  } catch {
+    /* ignore */
   }
 }
 
@@ -84,79 +102,117 @@ export async function fetchSession(): Promise<Session | null> {
 export async function login(
   input: LoginInput & { remember?: boolean },
 ): Promise<Session> {
-  const res = await api<{ user: User; token: string }>("/auth/login", {
-    body: {
-      email: input.email.trim(),
-      password: input.password,
-    },
-  });
+  try {
+    const res = await api<{ user: User; token: string }>("/auth/login", {
+      body: {
+        email: input.email.trim(),
+        password: input.password,
+      },
+    });
 
-  assertCustomer(res.user);
+    assertCustomer(res.user);
 
-  const session: Session = {
-    user: res.user,
-    token: res.token,
-    remember: Boolean(input.remember),
-  };
+    const session: Session = {
+      user: res.user,
+      token: res.token,
+      remember: Boolean(input.remember),
+    };
 
-  writeSession(session);
-  return session;
+    writeSession(session);
+    setPendingVerificationEmail(null);
+    return session;
+  } catch (err) {
+    if (
+      err instanceof ApiError &&
+      (err.status === 401 || err.status === 403) &&
+      /verify|unverified/i.test(err.message)
+    ) {
+      setPendingVerificationEmail(input.email.trim());
+    }
+    throw err;
+  }
 }
 
 export async function signup(
-  input: SignupInput & { phone?: string },
-): Promise<Session> {
-  const res = await api<{ user: User; token: string }>("/auth/signup", {
+  input: SignupInput,
+): Promise<{ success: boolean; message: string; email: string }> {
+  const res = await api<{ message?: string; email?: string }>("/auth/signup", {
     body: {
       name: input.name.trim(),
       email: input.email.trim(),
       password: input.password,
-      role: "customer",
-      ...(input.phone && { phone: input.phone }),
+      role: input.role ?? "customer",
     },
   });
 
-  assertCustomer(res.user);
+  const email = res?.email ?? input.email.trim();
+  setPendingVerificationEmail(email);
 
-  const session: Session = {
-    user: res.user,
-    token: res.token,
-    remember: true,
+  return {
+    success: true,
+    message:
+      res?.message ??
+      "Signup completed. Check your email to verify the account before logging in.",
+    email,
   };
-
-  writeSession(session);
-  return session;
 }
 
 export async function logout(): Promise<void> {
   writeSession(null);
 }
 
-export async function sendVerificationCode(): Promise<{ sent: boolean }> {
-  return api<{ sent: boolean }>("/auth/verification/send", { method: "POST" });
+export async function verifyEmail(
+  token: string,
+): Promise<{ success: boolean; message?: string }> {
+  const res = await api<{ message?: string }>("/auth/verify-email", {
+    method: "POST",
+    body: { token: token.trim() },
+  });
+  setPendingVerificationEmail(null);
+  return { success: true, message: res?.message };
 }
 
-export async function verifyCode(code: string): Promise<{ verified: boolean }> {
-  return api<{ verified: boolean }>("/auth/verification/confirm", {
-    body: { code },
+export async function resendVerification(
+  email: string,
+): Promise<{ success: boolean; message?: string }> {
+  const res = await api<{ message?: string }>("/auth/resend-verification", {
+    method: "POST",
+    body: { email: email.trim() },
   });
+  return { success: true, message: res?.message };
 }
 
 export async function forgotPassword(
   email: string,
-): Promise<{ sent: boolean }> {
-  return api<{ sent: boolean }>("/auth/forgot-password", {
-    body: { email },
+): Promise<{ sent: boolean; message?: string }> {
+  const res = await api<{ message?: string }>("/auth/forgot-password", {
+    body: { email: email.trim() },
   });
+  return {
+    sent: true,
+    message: res?.message ?? "Password reset instructions sent to your email",
+  };
 }
 
 export async function resetPassword(
   token: string,
-  password: string,
-): Promise<{ reset: boolean }> {
-  return api<{ reset: boolean }>("/auth/reset-password", {
-    body: { token, password },
+  newPassword: string,
+): Promise<{ reset: boolean; message?: string }> {
+  const res = await api<{ message?: string }>("/auth/reset-password", {
+    body: { token: token.trim(), newPassword },
   });
+  return {
+    reset: true,
+    message: res?.message ?? "Password reset successful",
+  };
+}
+
+export async function deleteAccount(password: string): Promise<void> {
+  await api("/auth/me", {
+    method: "DELETE",
+    body: { password },
+  });
+  writeSession(null);
 }
 
 export function updateUserLocally(

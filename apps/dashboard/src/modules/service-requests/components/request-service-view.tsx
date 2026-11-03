@@ -1,8 +1,15 @@
 import type { DocumentType, Plan, ServiceRequest } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
+import { DatePicker } from "@journeyhome/ui/components/date-picker";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
-import { Select } from "@journeyhome/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@journeyhome/ui/components/select";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
@@ -181,6 +188,9 @@ export function RequestServiceView() {
     ELIGIBLE_PLAN.has(p.status),
   );
   const [planId, setPlanId] = useState(paramPlan ?? "");
+  const [dod, setDod] = useState<Date | null>(null);
+  const [serviceDate, setServiceDate] = useState<Date | null>(null);
+  const [selectedState, setSelectedState] = useState<string>("Lagos");
   const plan =
     eligible.find((p) => p._id === planId) ??
     eligible[0] ??
@@ -230,7 +240,7 @@ export function RequestServiceView() {
     });
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const _today = new Date().toISOString().slice(0, 10);
   const partial = !!created.current && submit.isError;
 
   return (
@@ -278,46 +288,92 @@ export function RequestServiceView() {
           <section className="flex flex-col gap-5 rounded-[28px] bg-white p-7">
             <Field label="Which plan is this for?" id="plan">
               <Select
-                id="plan"
                 value={plan._id}
-                onChange={(e) => setPlanId(e.target.value)}
+                onValueChange={(val) => {
+                  if (val) setPlanId(val);
+                }}
                 disabled={
                   partial || (BYPASS_PLAN_REQUIREMENT && eligible.length === 0)
                 }
               >
-                {eligible.length > 0 ? (
-                  eligible.map((p) => (
-                    <option key={p._id} value={p._id}>
-                      {p.coveredPerson.fullName} — {p.packageSnapshot.name} ·{" "}
-                      {formatMoney(p.totalContributedMinor, p.currency)} saved
-                    </option>
-                  ))
-                ) : (
-                  <option value={PREVIEW_FALLBACK_PLAN._id}>
-                    Preview Plan (Bypassed plan requirement)
-                  </option>
-                )}
+                <SelectTrigger id="plan">
+                  <SelectValue placeholder="Choose a plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {eligible.length > 0 ? (
+                    eligible.map((p) => (
+                      <SelectItem key={p._id} value={p._id}>
+                        {p.coveredPerson.fullName} — {p.packageSnapshot.name} ·{" "}
+                        {formatMoney(p.totalContributedMinor, p.currency)} saved
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value={PREVIEW_FALLBACK_PLAN._id}>
+                      Preview Plan (Bypassed plan requirement)
+                    </SelectItem>
+                  )}
+                </SelectContent>
               </Select>
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Date of death" id="dod">
-                <Input id="dod" name="dod" type="date" required max={today} />
+                <DatePicker
+                  id="dod"
+                  value={dod}
+                  onChange={setDod}
+                  placeholder="Select date of death"
+                  maxDate={new Date()}
+                />
+                <input
+                  type="hidden"
+                  name="dod"
+                  value={
+                    dod
+                      ? `${dod.getFullYear()}-${String(dod.getMonth() + 1).padStart(2, "0")}-${String(dod.getDate()).padStart(2, "0")}`
+                      : ""
+                  }
+                  required
+                />
               </Field>
               <Field label="Expected date of service" id="service">
-                <Input
+                <DatePicker
                   id="service"
+                  value={serviceDate}
+                  onChange={setServiceDate}
+                  placeholder="Select date of service"
+                  minDate={new Date()}
+                />
+                <input
+                  type="hidden"
                   name="service"
-                  type="date"
+                  value={
+                    serviceDate
+                      ? `${serviceDate.getFullYear()}-${String(serviceDate.getMonth() + 1).padStart(2, "0")}-${String(serviceDate.getDate()).padStart(2, "0")}`
+                      : ""
+                  }
                   required
-                  min={today}
                 />
               </Field>
               <Field label="State" id="state">
-                <Select id="state" name="state" defaultValue="Lagos">
-                  {STATES.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
+                <Select
+                  value={selectedState}
+                  onValueChange={(val) => {
+                    if (val) setSelectedState(val);
+                  }}
+                  name="state"
+                >
+                  <SelectTrigger id="state">
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATES.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
+                <input type="hidden" name="state" value={selectedState} />
               </Field>
               <Field label="Venue / burial location" id="venue">
                 <Input

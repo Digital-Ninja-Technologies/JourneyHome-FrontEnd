@@ -41,7 +41,7 @@ function PersonalInfo({ me }: { me?: Me }) {
   const [saved, setSaved] = useState(false);
 
   const save = useMutation({
-    mutationFn: (body: { name?: string; phone?: string; email?: string }) =>
+    mutationFn: (body: { name?: string; email?: string }) =>
       api<Me>("/auth/me", { method: "PATCH", body }),
     onSuccess: (updated) => {
       setSaved(true);
@@ -70,7 +70,6 @@ function PersonalInfo({ me }: { me?: Me }) {
     const d = new FormData(e.currentTarget);
     save.mutate({
       name: String(d.get("name") ?? "").trim(),
-      phone: String(d.get("phone") ?? "").trim() || undefined,
       email: String(d.get("email") ?? "").trim(),
     });
   }
@@ -105,17 +104,6 @@ function PersonalInfo({ me }: { me?: Me }) {
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="phone">Phone number</Label>
-          <Input
-            id="phone"
-            name="phone"
-            type="tel"
-            defaultValue={me?.phone ?? ""}
-            autoComplete="tel"
-            placeholder="+234 800 000 0000"
-          />
-        </div>
-        <div className="flex flex-col gap-1.5 sm:col-span-2">
           <Label htmlFor="email">Email address</Label>
           <Input
             id="email"
@@ -265,13 +253,16 @@ function NotificationPreferences({ me }: { me?: Me }) {
   const prefs = me?.preferences ?? {
     paymentReminders: true,
     deficitAlerts: true,
-    serviceUpdates: true,
-    productNews: false,
+    serviceRequestUpdates: true,
+    productNewsOffers: false,
   };
 
   const update = useMutation({
     mutationFn: (next: typeof prefs) =>
-      api<Me>("/auth/me/preferences", { method: "PATCH", body: next }),
+      api<Me>("/auth/notification-preferences", {
+        method: "PATCH",
+        body: next,
+      }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["me"] });
     },
@@ -293,12 +284,12 @@ function NotificationPreferences({ me }: { me?: Me }) {
       "If a monthly charge fails or is missed",
     ],
     [
-      "serviceUpdates",
+      "serviceRequestUpdates",
       "Service updates",
       "When a photographer is assigned or documents are approved",
     ],
     [
-      "productNews",
+      "productNewsOffers",
       "Journey Home news",
       "Occasional product updates and features",
     ],
@@ -424,9 +415,10 @@ function ChangePassword() {
 function CloseAccount() {
   const logoutMutation = useLogoutMutation();
   const [open, setOpen] = useState(false);
-  const [typed, setTyped] = useState("");
+  const [password, setPassword] = useState("");
   const close = useMutation({
-    mutationFn: () => api("/auth/me", { method: "DELETE" }),
+    mutationFn: (pwd: string) =>
+      api("/auth/me", { method: "DELETE", body: { password: pwd } }),
     onSuccess: () => {
       logoutMutation.mutate();
     },
@@ -444,7 +436,7 @@ function CloseAccount() {
         open={open}
         onOpenChange={(o) => {
           setOpen(o);
-          if (!o) setTyped("");
+          if (!o) setPassword("");
         }}
       >
         <DialogContent className="max-w-md gap-5 rounded-3xl p-7">
@@ -459,16 +451,16 @@ function CloseAccount() {
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="type-delete">
-              Type <strong className="text-foreground">DELETE</strong> to
-              confirm
+            <Label htmlFor="close-account-password">
+              Enter your current password to confirm
             </Label>
             <Input
-              id="type-delete"
-              value={typed}
-              onChange={(e) => setTyped(e.target.value)}
-              placeholder="DELETE"
-              autoComplete="off"
+              id="close-account-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Current password"
+              autoComplete="current-password"
             />
           </div>
           {close.isError && (
@@ -482,8 +474,8 @@ function CloseAccount() {
             </Button>
             <Button
               variant="destructive"
-              disabled={typed !== "DELETE" || close.isPending}
-              onClick={() => close.mutate()}
+              disabled={!password || close.isPending}
+              onClick={() => close.mutate(password)}
             >
               {close.isPending ? "Closing…" : "Close my account"}
             </Button>

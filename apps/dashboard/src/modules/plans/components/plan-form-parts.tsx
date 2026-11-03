@@ -1,7 +1,15 @@
+import { DatePicker } from "@journeyhome/ui/components/date-picker";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
-import { Select } from "@journeyhome/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@journeyhome/ui/components/select";
 import { cn } from "@journeyhome/ui/lib/utils";
+import { useState } from "react";
 import { formatMoney } from "@/lib/format";
 import { usePackages } from "@/modules/packages/query-options";
 
@@ -34,6 +42,10 @@ function Field({
 
 /** "Who is this plan for?" fields. Read them back with `planRequestBody`. */
 export function CoveredPersonFields() {
+  const [relationship, setRelationship] = useState("Mother");
+  const [gender, setGender] = useState("Female");
+  const [dob, setDob] = useState<Date | null>(null);
+
   return (
     <fieldset className="flex flex-col gap-4">
       <legend className="mb-3 text-base font-bold">
@@ -50,26 +62,65 @@ export function CoveredPersonFields() {
           />
         </Field>
         <Field label="Relationship" htmlFor="relationship">
-          <Select id="relationship" name="relationship" defaultValue="Mother">
-            {RELATIONSHIPS.map((r) => (
-              <option key={r}>{r}</option>
-            ))}
+          <Select
+            value={relationship}
+            onValueChange={(val) => {
+              if (val) setRelationship(val);
+            }}
+            name="relationship"
+          >
+            <SelectTrigger id="relationship">
+              <SelectValue placeholder="Select relationship" />
+            </SelectTrigger>
+            <SelectContent>
+              {RELATIONSHIPS.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {r}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
+          <input type="hidden" name="relationship" value={relationship} />
         </Field>
         <Field label="Date of birth" htmlFor="dob">
-          <Input
+          <DatePicker
             id="dob"
+            value={dob}
+            onChange={setDob}
+            placeholder="Select date of birth"
+            fromYear={1920}
+            toYear={new Date().getFullYear()}
+            yearOrder="desc"
+            maxDate={new Date()}
+          />
+          <input
+            type="hidden"
             name="dob"
-            type="date"
+            value={
+              dob
+                ? `${dob.getFullYear()}-${String(dob.getMonth() + 1).padStart(2, "0")}-${String(dob.getDate()).padStart(2, "0")}`
+                : ""
+            }
             required
-            max={new Date().toISOString().slice(0, 10)}
           />
         </Field>
         <Field label="Gender" htmlFor="gender">
-          <Select id="gender" name="gender" defaultValue="Female">
-            <option>Female</option>
-            <option>Male</option>
+          <Select
+            value={gender}
+            onValueChange={(val) => {
+              if (val) setGender(val);
+            }}
+            name="gender"
+          >
+            <SelectTrigger id="gender">
+              <SelectValue placeholder="Select gender" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Female">Female</SelectItem>
+              <SelectItem value="Male">Male</SelectItem>
+            </SelectContent>
           </Select>
+          <input type="hidden" name="gender" value={gender} />
         </Field>
         <Field label="Phone number" htmlFor="phone">
           <Input

@@ -12,8 +12,8 @@ export const DEMO_RESET_TOKEN = "demo-token";
 export interface Preferences {
   paymentReminders: boolean;
   deficitAlerts: boolean;
-  serviceUpdates: boolean;
-  productNews: boolean;
+  serviceRequestUpdates: boolean;
+  productNewsOffers: boolean;
 }
 export interface Card {
   _id: string;
@@ -27,8 +27,8 @@ export interface Card {
 const DEFAULT_PREFS: Preferences = {
   paymentReminders: true,
   deficitAlerts: true,
-  serviceUpdates: true,
-  productNews: false,
+  serviceRequestUpdates: true,
+  productNewsOffers: false,
 };
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -107,9 +107,23 @@ export async function mockRequest(
         token: "mock-jwt-token-customer",
       };
     },
+    "POST /auth/resend-verification": () => ({
+      success: true,
+      message: "Verification email resent",
+    }),
     "POST /auth/verification/send": () => ({ sent: true }),
+    "POST /auth/verify-email": () => {
+      const codeOrToken = b.token || b.code;
+      if (
+        codeOrToken &&
+        codeOrToken !== DEMO_CODE &&
+        codeOrToken !== "valid-token"
+      )
+        throw bad("That verification token is incorrect or has expired.");
+      return { success: true, message: "Email verified successfully" };
+    },
     "POST /auth/verification/confirm": () => {
-      if (b.code !== DEMO_CODE)
+      if (b.code !== DEMO_CODE && b.token !== DEMO_CODE)
         throw bad("That code is incorrect or has expired.");
       return { verified: true };
     },
@@ -117,9 +131,10 @@ export async function mockRequest(
     "POST /auth/reset-password": () => {
       if (b.token !== DEMO_RESET_TOKEN)
         throw bad("This reset link is invalid or has expired.");
-      if (!b.password || b.password.length < 6)
+      const pwd = b.newPassword || b.password;
+      if (!pwd || pwd.length < 6)
         throw bad("Password must be at least 6 characters.");
-      return { reset: true };
+      return { reset: true, success: true };
     },
     "GET /auth/me": () => {
       const u = sessionUser();
@@ -145,6 +160,13 @@ export async function mockRequest(
       });
       return { ...u, ...read(`jh_mock:profile:${u.id}`, {}) };
     },
+    "PATCH /auth/change-password": () => {
+      if (b.currentPassword === "wrong")
+        throw bad("Your current password is incorrect.");
+      if (!b.newPassword || b.newPassword.length < 6)
+        throw bad("New password must be at least 6 characters.");
+      return { changed: true, success: true };
+    },
     "PATCH /auth/me/password": () => {
       if (b.currentPassword === "wrong")
         throw bad("Your current password is incorrect.");
@@ -152,13 +174,22 @@ export async function mockRequest(
         throw bad("New password must be at least 6 characters.");
       return { changed: true };
     },
+    "PATCH /auth/notification-preferences": () => {
+      const u = sessionUser();
+      const next = { ...read(`jh_mock:prefs:${u.id}`, {}), ...b };
+      write(`jh_mock:prefs:${u.id}`, next);
+      return { ...DEFAULT_PREFS, ...next };
+    },
     "PATCH /auth/me/preferences": () => {
       const u = sessionUser();
       const next = { ...read(`jh_mock:prefs:${u.id}`, {}), ...b };
       write(`jh_mock:prefs:${u.id}`, next);
       return { ...DEFAULT_PREFS, ...next };
     },
-    "DELETE /auth/me": () => ({ closed: true }),
+    "DELETE /auth/me": () => {
+      if (!b.password) throw bad("Current password is required.");
+      return { success: true, closed: true };
+    },
     "GET /packages": () => [
       {
         _id: "pkg_standard",

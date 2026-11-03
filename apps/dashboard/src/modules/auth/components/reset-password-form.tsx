@@ -13,7 +13,7 @@ export function ResetPasswordForm() {
   const [mismatch, setMismatch] = useState(false);
   const reset = useMutation({
     mutationFn: (password: string) =>
-      api("/auth/reset-password", { body: { token, password } }),
+      api("/auth/reset-password", { body: { token, newPassword: password } }),
   });
 
   if (!token) {
