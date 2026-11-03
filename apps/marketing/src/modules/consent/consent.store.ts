@@ -1,27 +1,19 @@
-/** biome-ignore-all lint/suspicious/noDocumentCookie: <explanation> */
+/** biome-ignore-all lint/suspicious/noDocumentCookie: direct cookie management for consent */
 import { createStore, useSelector } from "@tanstack/react-store";
+import type {
+  CookieConsentState,
+  CookiePreferences,
+  StoredConsent,
+} from "./types";
 
-export interface CookiePreferences {
-  necessary: true;
-  analytics: boolean;
-  marketing: boolean;
-}
-
-export interface StoredConsent {
-  version: 1;
-  consentedAt: string;
-  preferences: CookiePreferences;
-}
-
-export interface CookieConsentState {
-  hasConsented: boolean;
-  isOpen: boolean;
-  view: "banner" | "preferences";
-  preferences: CookiePreferences;
-  isInitialized: boolean;
-}
+export type {
+  CookieConsentState,
+  CookiePreferences,
+  StoredConsent,
+} from "./types";
 
 const STORAGE_KEY = "journey_home_cookie_consent_v1";
+const LEGACY_STORAGE_KEY = "journey_home_cookie_consent";
 const COOKIE_NAME = "journey_home_cookie_consent";
 const ONE_YEAR_SECONDS = 365 * 24 * 60 * 60;
 
@@ -52,7 +44,7 @@ function readStoredConsent(): StoredConsent | null {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as StoredConsent;
-      if (parsed?.preferences) {
+      if (parsed?.version === 1 && parsed?.preferences) {
         return parsed;
       }
     }
@@ -69,13 +61,38 @@ function readStoredConsent(): StoredConsent | null {
       if (match?.[1]) {
         const decoded = decodeURIComponent(match[1]);
         const parsed = JSON.parse(decoded) as StoredConsent;
-        if (parsed?.preferences) {
+        if (parsed?.version === 1 && parsed?.preferences) {
           return parsed;
         }
       }
     }
   } catch (e) {
     console.warn("Unable to read cookie consent from document.cookie", e);
+  }
+
+  // Check legacy localStorage key for smooth migration
+  try {
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy === "accepted") {
+      const migrated: StoredConsent = {
+        version: 1,
+        consentedAt: new Date().toISOString(),
+        preferences: ALL_ACCEPTED_PREFERENCES,
+      };
+      persistConsent(ALL_ACCEPTED_PREFERENCES);
+      return migrated;
+    }
+    if (legacy === "declined") {
+      const migrated: StoredConsent = {
+        version: 1,
+        consentedAt: new Date().toISOString(),
+        preferences: DEFAULT_PREFERENCES,
+      };
+      persistConsent(DEFAULT_PREFERENCES);
+      return migrated;
+    }
+  } catch {
+    // ignore
   }
 
   return null;
@@ -109,6 +126,19 @@ function persistConsent(preferences: CookiePreferences): void {
 }
 
 let initTimer: ReturnType<typeof setTimeout> | null = null;
+let interactionBufferTimer: ReturnType<typeof setTimeout> | null = null;
+let removeInteractionListeners: (() => void) | null = null;
+
+function cleanupDeferredListeners(): void {
+  if (removeInteractionListeners) {
+    removeInteractionListeners();
+    removeInteractionListeners = null;
+  }
+  if (interactionBufferTimer) {
+    clearTimeout(interactionBufferTimer);
+    interactionBufferTimer = null;
+  }
+}
 
 export function initCookieConsent(): () => void {
   if (typeof window === "undefined") return () => {};
@@ -126,18 +156,68 @@ export function initCookieConsent(): () => void {
     return () => {};
   }
 
-  // User has not consented yet: show banner after a gentle delay for smooth entrance
+  const showBanner = () => {
+    if (initTimer) {
+      clearTimeout(initTimer);
+      initTimer = null;
+    }
+    cleanupDeferredListeners();
+    cookieConsentStore.setState((s) => {
+      if (s.hasConsented || s.isOpen) return s;
+      return {
+        ...s,
+        isOpen: true,
+        isInitialized: true,
+      };
+    });
+  };
+
+  const scheduleBanner = () => {
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      window.requestIdleCallback(() => showBanner(), { timeout: 1000 });
+    } else {
+      showBanner();
+    }
+  };
+
+  // 1. Defer showing the banner until 3.5s to ensure LCP has completely settled
   if (initTimer) clearTimeout(initTimer);
-  initTimer = setTimeout(() => {
-    cookieConsentStore.setState((s) => ({
-      ...s,
-      isOpen: true,
-      isInitialized: true,
-    }));
-  }, 600);
+  initTimer = setTimeout(scheduleBanner, 3500);
+
+  // 2. Or trigger on first user interaction after a 2.5s safe buffer
+  cleanupDeferredListeners();
+  interactionBufferTimer = setTimeout(() => {
+    const handleInteraction = () => {
+      cleanupDeferredListeners();
+      scheduleBanner();
+    };
+
+    window.addEventListener("scroll", handleInteraction, {
+      passive: true,
+      once: true,
+    });
+    window.addEventListener("touchstart", handleInteraction, {
+      passive: true,
+      once: true,
+    });
+    window.addEventListener("keydown", handleInteraction, {
+      passive: true,
+      once: true,
+    });
+
+    removeInteractionListeners = () => {
+      window.removeEventListener("scroll", handleInteraction);
+      window.removeEventListener("touchstart", handleInteraction);
+      window.removeEventListener("keydown", handleInteraction);
+    };
+  }, 2500);
 
   return () => {
-    if (initTimer) clearTimeout(initTimer);
+    if (initTimer) {
+      clearTimeout(initTimer);
+      initTimer = null;
+    }
+    cleanupDeferredListeners();
   };
 }
 
@@ -184,18 +264,30 @@ export function saveCookiePreferences(
 }
 
 export function openCookiePreferences(): void {
+  if (initTimer) {
+    clearTimeout(initTimer);
+    initTimer = null;
+  }
+  cleanupDeferredListeners();
   cookieConsentStore.setState((s) => ({
     ...s,
     isOpen: true,
     view: "preferences",
+    isInitialized: true,
   }));
 }
 
 export function openCookieBanner(): void {
+  if (initTimer) {
+    clearTimeout(initTimer);
+    initTimer = null;
+  }
+  cleanupDeferredListeners();
   cookieConsentStore.setState((s) => ({
     ...s,
     isOpen: true,
     view: "banner",
+    isInitialized: true,
   }));
 }
 

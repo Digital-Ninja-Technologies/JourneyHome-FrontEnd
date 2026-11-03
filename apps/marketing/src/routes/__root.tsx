@@ -10,11 +10,9 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
 import { CatchBoundary } from "@/components/catch-boundary";
-import { CookieConsent } from "@/components/cookie-consent";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
-import TanStackQueryDevtools from "@/lib/query/devtools";
-import TanstackQueryProvider from "@/lib/query/root-provider";
+import { QueryDevtools, QueryProvider } from "@/lib/query";
+import { CookieConsent } from "@/modules/consent";
+import { SiteFooter, SiteHeader } from "@/modules/marketing";
 
 import globalsCss from "@/styles/globals.css?url";
 
@@ -78,13 +76,14 @@ function NotFoundComponent() {
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+  const { queryClient } = Route.useRouteContext();
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body className="bg-canvas">
-        <TanstackQueryProvider>{children}</TanstackQueryProvider>
+        <QueryProvider client={queryClient}>{children}</QueryProvider>
         <TanStackDevtools
           config={{
             position: "bottom-right",
@@ -94,7 +93,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
               name: "Tanstack Router",
               render: <TanStackRouterDevtoolsPanel />,
             },
-            TanStackQueryDevtools,
+            QueryDevtools,
           ]}
         />
         <Scripts />
