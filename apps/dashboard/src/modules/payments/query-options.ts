@@ -1,4 +1,5 @@
-import { queryOptions } from "@tanstack/react-query";
+import { useSessionUser } from "@/modules/auth/query-options";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { fetchPayments, fetchSavedCards } from "./api";
 
 export const paymentsQueryOptions = (userId?: string) =>
@@ -14,3 +15,13 @@ export const savedCardsQueryOptions = (userId?: string) =>
     queryFn: () => fetchSavedCards(),
     retry: false,
   });
+
+export function usePayments() {
+  const user = useSessionUser();
+  return useQuery(paymentsQueryOptions(user?.id));
+}
+
+export function useSavedCards() {
+  const user = useSessionUser();
+  return useQuery(savedCardsQueryOptions(user?.id));
+}

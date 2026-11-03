@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { Package } from "@/lib/types";
+import type { Package } from "@journeyhome/schemas";
 
 export async function fetchPackages(): Promise<Package[]> {
   const packages = await api<Package[]>("/packages");

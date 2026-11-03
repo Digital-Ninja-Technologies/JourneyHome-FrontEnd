@@ -28,6 +28,7 @@ export const planSchema = z.object({
   startDate: z.string(),
   nextPaymentDate: z.string(),
   totalContributedMinor: z.number(),
+  targetAmountMinor: z.number().optional(),
   status: PlanStatusEnum,
   lastPaymentAt: z.string().optional(),
   createdAt: z.string(),

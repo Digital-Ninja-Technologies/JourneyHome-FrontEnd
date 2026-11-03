@@ -1,11 +1,16 @@
 import { env } from "@/env/client";
 import { ApiError } from "@journeyhome/api-client";
-import { isUnsupported, UNSUPPORTED_MESSAGE } from "../errors";
 import { apiClient } from "./client";
 import { mockRequest, NOT_MOCKED } from "./mocks";
 
 export { ApiError } from "@journeyhome/api-client";
-export { isUnsupported, UNSUPPORTED_MESSAGE } from "../errors";
+
+export const isUnsupported = (e: unknown): boolean =>
+  e instanceof ApiError &&
+  typeof e.status === "number" &&
+  [404, 405, 501].includes(e.status);
+
+export const UNSUPPORTED_MESSAGE = "This isn't available on the server yet.";
 
 export const USE_MOCKS: boolean = env.VITE_USE_MOCKS;
 

@@ -1,6 +1,6 @@
 import { env } from "#/env/client";
 import { capitalise, daysUntil, formatDay, formatMonthYear } from "@/lib/format";
-import type { Plan } from "@/lib/types";
+import type { Plan } from "@journeyhome/schemas";
 
 export const MARKETING_URL = env.VITE_MARKETING_URL;
 

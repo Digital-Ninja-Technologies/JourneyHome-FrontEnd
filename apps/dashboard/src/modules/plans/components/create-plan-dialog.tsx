@@ -15,8 +15,8 @@ import {
 } from "./plan-form-parts";
 import { api } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
-import { usePackages } from "@/lib/queries";
-import type { Plan } from "@/lib/types";
+import { usePackages } from "@/modules/packages/query-options";
+import type { Plan } from "@journeyhome/schemas";
 
 export function CreatePlanDialog({
   open,

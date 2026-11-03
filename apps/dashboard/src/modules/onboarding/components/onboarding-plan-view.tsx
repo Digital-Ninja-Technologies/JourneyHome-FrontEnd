@@ -15,9 +15,9 @@ import {
   setStoredSelectedPackage,
 } from "@/modules/onboarding/storage";
 import { MARKETING_URL } from "@/modules/plans/plans.utils";
-import { usePackages } from "@/lib/queries";
+import { usePackages } from "@/modules/packages/query-options";
 import { resolveSelectedPackage } from "@/lib/search-schemas";
-import type { Plan } from "@/lib/types";
+import type { Plan } from "@journeyhome/schemas";
 
 export function OnboardingPlanView() {
   const navigate = useNavigate();

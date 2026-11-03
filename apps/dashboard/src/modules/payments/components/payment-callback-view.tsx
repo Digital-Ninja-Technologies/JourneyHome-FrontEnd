@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { api } from "@/lib/api";
 import { getOnboardingPlan } from "@/modules/payments/checkout";
 import { formatMoney } from "@/lib/format";
-import type { Payment } from "@/lib/types";
+import type { Payment } from "@journeyhome/schemas";
 
 export function PaymentCallbackView() {
   const search = useSearch({ from: "/app/payments/callback" });

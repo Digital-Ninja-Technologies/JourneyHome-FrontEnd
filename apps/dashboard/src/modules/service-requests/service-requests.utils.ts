@@ -5,7 +5,7 @@ import type {
   Plan,
   ServiceDocument,
   ServiceRequest,
-} from "@/lib/types";
+} from "@journeyhome/schemas";
 
 export const DOC_LABEL: Record<DocumentType, string> = {
   Death_Certificate: "Death certificate",

@@ -9,7 +9,7 @@ import { useSessionUser } from "@/modules/auth/query-options";
 import { setOnboardingPlan } from "@/modules/payments/checkout";
 import { firstName, formatDate, formatMoney } from "@/lib/format";
 import { relationshipLabel } from "@/modules/plans/plans.utils";
-import { usePlan } from "@/lib/queries";
+import { usePlan } from "@/modules/plans/query-options";
 
 export function WelcomeView() {
   const user = useSessionUser();

@@ -4,14 +4,15 @@ import { Link } from "@tanstack/react-router";
 import { RequestDocuments } from "./request-documents";
 import { Pill } from "@/components/status-pill";
 import { formatDay } from "@/lib/format";
-import { usePlans, useServiceRequests } from "@/lib/queries";
+import { usePlans } from "@/modules/plans/query-options";
+import { useServiceRequests } from "@/modules/service-requests/query-options";
 import {
   ELIGIBLE_PLAN,
   requestMessage,
   requestState,
   STEPS,
 } from "@/modules/service-requests/service-requests.utils";
-import type { Plan, ServiceRequest } from "@/lib/types";
+import type { Plan, ServiceRequest } from "@journeyhome/schemas";
 import { BYPASS_PLAN_REQUIREMENT } from "./request-service-view";
 
 const HOW = [

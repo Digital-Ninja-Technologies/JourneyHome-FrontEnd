@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { ServiceDocument, ServiceRequest } from "@/lib/types";
+import type { ServiceDocument, ServiceRequest } from "@journeyhome/schemas";
 
 export async function fetchServiceRequests(): Promise<ServiceRequest[]> {
   return api<ServiceRequest[]>("/service-requests");

@@ -1,4 +1,4 @@
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { fetchPackages } from "./api";
 
 export const packagesQueryOptions = () =>
@@ -7,3 +7,7 @@ export const packagesQueryOptions = () =>
     queryFn: () => fetchPackages(),
     staleTime: 5 * 60_000,
   });
+
+export function usePackages() {
+  return useQuery(packagesQueryOptions());
+}

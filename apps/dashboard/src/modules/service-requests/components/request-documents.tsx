@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { Pill } from "@/components/status-pill";
 import { formatDay } from "@/lib/format";
-import { useServiceRequest } from "@/lib/queries";
+import { useServiceRequest } from "@/modules/service-requests/query-options";
 import {
   DOC_LABEL,
   openServiceDocument,
@@ -11,7 +11,7 @@ import {
   uploadServiceDocument,
   validateFile,
 } from "@/modules/service-requests/service-requests.utils";
-import type { DocumentType, ServiceDocument } from "@/lib/types";
+import type { DocumentType, ServiceDocument } from "@journeyhome/schemas";
 
 const TONE = {
   Pending: "review",

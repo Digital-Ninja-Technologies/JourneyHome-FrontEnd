@@ -1,4 +1,5 @@
-import { queryOptions } from "@tanstack/react-query";
+import { useSessionUser } from "@/modules/auth/query-options";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { fetchNotifications } from "./api";
 
 export const notificationsQueryOptions = (userId?: string) =>
@@ -7,3 +8,8 @@ export const notificationsQueryOptions = (userId?: string) =>
     queryFn: () => fetchNotifications(),
     staleTime: 30_000,
   });
+
+export function useNotifications() {
+  const user = useSessionUser();
+  return useQuery(notificationsQueryOptions(user?.id));
+}

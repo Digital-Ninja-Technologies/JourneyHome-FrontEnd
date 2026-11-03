@@ -19,7 +19,8 @@ import {
   planNotice,
   startedLabel,
 } from "@/modules/plans/plans.utils";
-import { usePayments, usePlan } from "@/lib/queries";
+import { usePayments } from "@/modules/payments/query-options";
+import { usePlan } from "@/modules/plans/query-options";
 
 function Detail({
   label,

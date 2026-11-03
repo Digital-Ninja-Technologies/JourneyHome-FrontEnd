@@ -11,7 +11,8 @@ import {
   writeSeen,
 } from "@/modules/notifications/notifications.utils";
 import { MARKETING_URL } from "@/modules/plans/plans.utils";
-import { useNotifications, usePlans } from "@/lib/queries";
+import { useNotifications } from "@/modules/notifications/query-options";
+import { usePlans } from "@/modules/plans/query-options";
 import { useSessionUser } from "@/modules/auth/query-options";
 
 const TONE: Record<NoteTone, { icon: typeof Bell; box: string }> = {

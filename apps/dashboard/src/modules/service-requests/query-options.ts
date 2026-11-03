@@ -1,4 +1,5 @@
-import { queryOptions } from "@tanstack/react-query";
+import { useSessionUser } from "@/modules/auth/query-options";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { fetchServiceRequest, fetchServiceRequests } from "./api";
 
 export const serviceRequestsQueryOptions = (userId?: string) =>
@@ -17,3 +18,13 @@ export const serviceRequestQueryOptions = (id?: string, userId?: string) =>
         : Promise.reject(new Error("No service request ID")),
     enabled: Boolean(id),
   });
+
+export function useServiceRequests() {
+  const user = useSessionUser();
+  return useQuery(serviceRequestsQueryOptions(user?.id));
+}
+
+export function useServiceRequest(id: string) {
+  const user = useSessionUser();
+  return useQuery(serviceRequestQueryOptions(id, user?.id));
+}

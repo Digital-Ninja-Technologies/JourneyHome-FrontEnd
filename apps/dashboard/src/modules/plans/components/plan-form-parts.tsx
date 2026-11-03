@@ -3,7 +3,7 @@ import { Label } from "@journeyhome/ui/components/label";
 import { Select } from "@journeyhome/ui/components/select";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { formatMoney } from "@/lib/format";
-import { usePackages } from "@/lib/queries";
+import { usePackages } from "@/modules/packages/query-options";
 
 const RELATIONSHIPS = [
   "Mother",

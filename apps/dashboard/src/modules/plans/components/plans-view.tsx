@@ -14,8 +14,8 @@ import {
   startedLabel,
 } from "@/modules/plans/plans.utils";
 import { formatMoney } from "@/lib/format";
-import { usePlans } from "@/lib/queries";
-import type { Plan } from "@/lib/types";
+import { usePlans } from "@/modules/plans/query-options";
+import type { Plan } from "@journeyhome/schemas";
 import { CreatePlanDialog } from "./create-plan-dialog";
 
 const FINISHED = new Set<Plan["status"]>(["Completed", "Cancelled", "Expired"]);

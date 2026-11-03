@@ -9,7 +9,7 @@ import { Info, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
-import { usePlans } from "@/lib/queries";
+import { usePlans } from "@/modules/plans/query-options";
 import {
   DOC_LABEL,
   ELIGIBLE_PLAN,
@@ -17,7 +17,7 @@ import {
   uploadServiceDocument,
   validateFile,
 } from "@/modules/service-requests/service-requests.utils";
-import type { DocumentType, Plan, ServiceRequest } from "@/lib/types";
+import type { DocumentType, Plan, ServiceRequest } from "@journeyhome/schemas";
 
 // TEMP TOGGLE: Set to false to revert back to requiring an active plan.
 export const BYPASS_PLAN_REQUIREMENT = true;

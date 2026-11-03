@@ -12,8 +12,9 @@ import {
   formatMonthYear,
 } from "@/lib/format";
 import { canPayNow, isDue, LIVE, MARKETING_URL } from "@/modules/plans/plans.utils";
-import { usePayments, usePlans } from "@/lib/queries";
-import type { Payment, Plan } from "@/lib/types";
+import { usePayments } from "@/modules/payments/query-options";
+import { usePlans } from "@/modules/plans/query-options";
+import type { Payment, Plan } from "@journeyhome/schemas";
 
 const PAGE = 10;
 

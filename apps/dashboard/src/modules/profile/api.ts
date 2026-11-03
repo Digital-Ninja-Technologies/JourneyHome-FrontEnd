@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { Me } from "@/lib/queries";
+import type { Me } from "./types";
 
 export async function fetchMe(): Promise<Me> {
   return api<Me>("/auth/me");

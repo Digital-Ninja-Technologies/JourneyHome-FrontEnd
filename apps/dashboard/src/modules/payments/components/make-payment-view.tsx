@@ -13,8 +13,8 @@ import {
   MARKETING_URL,
   relationshipLabel,
 } from "@/modules/plans/plans.utils";
-import { usePlans } from "@/lib/queries";
-import type { Plan } from "@/lib/types";
+import { usePlans } from "@/modules/plans/query-options";
+import type { Plan } from "@journeyhome/schemas";
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (

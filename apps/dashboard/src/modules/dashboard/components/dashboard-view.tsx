@@ -17,8 +17,9 @@ import {
 } from "@/lib/format";
 import { canPayNow, isDue, LIVE } from "@/modules/plans/plans.utils";
 import { env } from "#/env/client";
-import { usePayments, usePlans } from "@/lib/queries";
-import type { Payment, Plan } from "@/lib/types";
+import { usePayments } from "@/modules/payments/query-options";
+import { usePlans } from "@/modules/plans/query-options";
+import type { Payment, Plan } from "@journeyhome/schemas";
 
 const MARKETING_URL = env.VITE_MARKETING_URL;
 const HIDDEN = new Set<Plan["status"]>(["Cancelled", "Expired"]);
