@@ -22,6 +22,7 @@ import {
   PackagesUnavailable,
   packagesQueryOptions,
 } from "@/modules/packages";
+import { cn } from "@journeyhome/ui/lib/utils";
 
 export const Route = createFileRoute("/")({
   loader: async ({ context }) => {
@@ -366,9 +367,16 @@ function Home() {
             A few minutes to set up. Save at your own pace. We&rsquo;ll be ready
             when the time comes.
           </p>
+
           <a
             href={SIGNUP_URL}
-            className={buttonVariants({ variant: "accent", size: "lg" })}
+            className={cn(
+              buttonVariants({
+                size: "lg",
+                variant: "accent",
+                className: "z-10",
+              }),
+            )}
           >
             Start a plan
           </a>
