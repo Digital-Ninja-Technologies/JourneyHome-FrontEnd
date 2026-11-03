@@ -6,7 +6,6 @@ import type { Plan } from "@journeyhome/schemas";
  * State lives in localStorage. Mirrors docs/BACKEND_CONTRACT.md.
  */
 export const NOT_MOCKED = Symbol("not-mocked");
-export const DEMO_CODE = "123456";
 export const DEMO_RESET_TOKEN = "demo-token";
 
 export interface Preferences {
@@ -111,21 +110,10 @@ export async function mockRequest(
       success: true,
       message: "Verification email resent",
     }),
-    "POST /auth/verification/send": () => ({ sent: true }),
     "POST /auth/verify-email": () => {
-      const codeOrToken = b.token || b.code;
-      if (
-        codeOrToken &&
-        codeOrToken !== DEMO_CODE &&
-        codeOrToken !== "valid-token"
-      )
-        throw bad("That verification token is incorrect or has expired.");
+      if (!b.token || b.token === "invalid")
+        throw bad("This verification link is invalid or has expired.");
       return { success: true, message: "Email verified successfully" };
-    },
-    "POST /auth/verification/confirm": () => {
-      if (b.code !== DEMO_CODE && b.token !== DEMO_CODE)
-        throw bad("That code is incorrect or has expired.");
-      return { verified: true };
     },
     "POST /auth/forgot-password": () => ({ sent: true }),
     "POST /auth/reset-password": () => {

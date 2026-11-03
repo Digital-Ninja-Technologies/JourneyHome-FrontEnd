@@ -98,11 +98,7 @@ export function LoginForm() {
               </p>
               {isUnverified && (
                 <p className="mt-1">
-                  <Link
-                    to="/signup/verify"
-                    search={{ redirect: redirectTarget }}
-                    className="font-bold underline"
-                  >
+                  <Link to="/verify-email" className="font-bold underline">
                     Click here to verify your email →
                   </Link>
                 </p>

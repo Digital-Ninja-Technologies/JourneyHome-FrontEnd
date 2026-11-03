@@ -5,11 +5,9 @@ import {
   deleteAccount,
   login,
   logout,
-  resendVerification,
   signup,
   type User,
   updateUserLocally,
-  verifyEmail,
 } from "./api";
 import { sessionQueryOptions } from "./query-options";
 
@@ -52,34 +50,10 @@ export function useSignupMutation() {
     mutationFn: (input: SignupInput) => signup(input),
     onSuccess: () => {
       navigate({
-        to: "/signup/verify",
+        to: "/verify-email",
         replace: true,
       });
     },
-  });
-}
-
-export function useVerifyEmailMutation() {
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-
-  return useMutation({
-    mutationFn: (token: string) => verifyEmail(token),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: sessionQueryOptions().queryKey,
-      });
-      navigate({
-        to: "/login",
-        replace: true,
-      });
-    },
-  });
-}
-
-export function useResendVerificationMutation() {
-  return useMutation({
-    mutationFn: (email: string) => resendVerification(email),
   });
 }
 
