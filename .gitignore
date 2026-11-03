@@ -12,3 +12,4 @@ dist
 .tanstack
 test-results
 playwright-report
+.agents
