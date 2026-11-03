@@ -1,5 +1,5 @@
 import { ApiError } from "@journeyhome/api-client";
-import type { Plan } from "../lib/types";
+import type { Plan } from "@/lib/types";
 
 /**
  * Simulated server for endpoints when running locally with VITE_USE_MOCKS=true.

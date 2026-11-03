@@ -4,11 +4,11 @@ import {
   resolveSelectedPackage,
   signupSearchSchema,
 } from "@/lib/search-schemas";
-import { sessionQueryOptions } from "@/modules/auth";
+import { sessionQueryOptions } from "@/modules/auth/query-options";
 import { SignupForm } from "@/modules/auth/components/signup-form";
 
 export const Route = createFileRoute("/signup/")({
-  validateSearch: (search) => signupSearchSchema.parse(search),
+  validateSearch: signupSearchSchema,
   beforeLoad: async ({ context, search }) => {
     const session = await context.queryClient.query(sessionQueryOptions());
     if (session?.user) {

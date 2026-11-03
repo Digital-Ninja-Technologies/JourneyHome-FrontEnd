@@ -3,7 +3,7 @@ import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { AlertCircle, Bell, Plus } from "lucide-react";
 import { PAYMENT_TEXT, StatusPill } from "@/components/status-pill";
-import { useSessionUser } from "@/modules/auth";
+import { useSessionUser } from "@/modules/auth/query-options";
 import {
   capitalise,
   daysUntil,
@@ -15,7 +15,7 @@ import {
   greeting,
   initials,
 } from "@/lib/format";
-import { canPayNow, isDue, LIVE } from "@/lib/plans";
+import { canPayNow, isDue, LIVE } from "@/modules/plans/plans.utils";
 import { env } from "#/env/client";
 import { usePayments, usePlans } from "@/lib/queries";
 import type { Payment, Plan } from "@/lib/types";
@@ -104,10 +104,7 @@ function PlanCard({ plan }: { plan: Plan }) {
         <Link
           to="/app/payments/new"
           search={{ plan: plan._id }}
-          className={cn(
-            buttonVariants({ variant: "accent" }),
-            "w-full rounded-xl font-bold text-foreground",
-          )}
+          className={cn(buttonVariants({ variant: "accent" }), "w-full")}
         >
           Complete payment
         </Link>
@@ -117,7 +114,7 @@ function PlanCard({ plan }: { plan: Plan }) {
           params={{ id: plan._id }}
           className={cn(
             buttonVariants({ variant: dark ? "outline" : "default" }),
-            "w-full rounded-xl font-bold",
+            "w-full",
             dark && "border-canvas/30 text-canvas hover:bg-canvas/10",
           )}
         >
@@ -221,10 +218,7 @@ export function DashboardView() {
           <Link
             to="/app/plans"
             search={{ new: "1" }}
-            className={cn(
-              buttonVariants({ variant: "default", size: "lg" }),
-              "h-[52px] rounded-2xl gap-2 font-semibold px-4 sm:px-6",
-            )}
+            className={cn(buttonVariants({ variant: "default", size: "lg" }))}
           >
             <Plus className="size-4" />{" "}
             <span className="whitespace-nowrap">Create new plan</span>
@@ -233,8 +227,7 @@ export function DashboardView() {
             to="/app/notifications"
             aria-label="Notifications"
             className={cn(
-              buttonVariants({ variant: "outline" }),
-              "grid size-[52px] shrink-0 place-items-center rounded-2xl border-border bg-white text-foreground hover:bg-muted/40",
+              buttonVariants({ variant: "outline", size: "icon-lg" }),
             )}
           >
             <Bell className="size-[18px]" />

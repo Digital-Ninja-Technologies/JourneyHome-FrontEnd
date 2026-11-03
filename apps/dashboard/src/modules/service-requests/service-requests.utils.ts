@@ -1,11 +1,11 @@
 import type { Tone } from "@/components/status-pill";
-import { api } from "./api";
+import { api } from "@/lib/api";
 import type {
   DocumentType,
   Plan,
   ServiceDocument,
   ServiceRequest,
-} from "./types";
+} from "@/lib/types";
 
 export const DOC_LABEL: Record<DocumentType, string> = {
   Death_Certificate: "Death certificate",

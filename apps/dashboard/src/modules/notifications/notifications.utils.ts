@@ -1,5 +1,5 @@
-import { firstName, formatMoney } from "./format";
-import type { AppNotification, Plan } from "./types";
+import { firstName, formatMoney } from "@/lib/format";
+import type { AppNotification, Plan } from "@/lib/types";
 
 export type NoteTone = "success" | "due" | "alert" | "service" | "info";
 export interface NoteView {

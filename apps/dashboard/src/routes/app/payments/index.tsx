@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { planSearchSchema } from "@/lib/search-schemas";
-import { PaymentsView } from "@/modules/payments";
+import { PaymentsView } from "@/modules/payments/components/payments-view";
 
 export const Route = createFileRoute("/app/payments/")({
-  validateSearch: (search) => planSearchSchema.parse(search),
+  validateSearch: planSearchSchema,
   component: PaymentsView,
 });

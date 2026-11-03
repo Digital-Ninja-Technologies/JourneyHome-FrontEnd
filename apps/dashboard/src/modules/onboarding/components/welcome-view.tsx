@@ -5,10 +5,10 @@ import { Link, useSearch } from "@tanstack/react-router";
 import { Bell, Check, Plus } from "lucide-react";
 import { useEffect } from "react";
 import { StatusPill } from "@/components/status-pill";
-import { useSessionUser } from "@/modules/auth";
-import { setOnboardingPlan } from "@/lib/checkout";
+import { useSessionUser } from "@/modules/auth/query-options";
+import { setOnboardingPlan } from "@/modules/payments/checkout";
 import { firstName, formatDate, formatMoney } from "@/lib/format";
-import { relationshipLabel } from "@/lib/plans";
+import { relationshipLabel } from "@/modules/plans/plans.utils";
 import { usePlan } from "@/lib/queries";
 
 export function WelcomeView() {

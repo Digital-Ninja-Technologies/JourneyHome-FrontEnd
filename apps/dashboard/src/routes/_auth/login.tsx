@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { AsyncBoundary } from "@/components/async-boundary";
 import { redirectSearchSchema } from "@/lib/search-schemas";
 import { LoginForm } from "@/modules/auth/components/login-form";
-import { sessionQueryOptions } from "@/modules/auth";
+import { sessionQueryOptions } from "@/modules/auth/query-options";
 
 export const Route = createFileRoute("/_auth/login")({
   validateSearch: (search) => redirectSearchSchema.parse(search),

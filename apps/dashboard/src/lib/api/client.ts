@@ -1,5 +1,5 @@
 import { createApiClient } from "@journeyhome/api-client";
-import { env } from "#/env/client";
+import { env } from "@/env/client";
 import { queryClient } from "@/router";
 
 const STORAGE_KEY = "jh_session";

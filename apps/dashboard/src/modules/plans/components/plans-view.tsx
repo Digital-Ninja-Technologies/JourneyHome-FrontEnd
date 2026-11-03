@@ -12,7 +12,7 @@ import {
   planNotice,
   relationshipLabel,
   startedLabel,
-} from "@/lib/plans";
+} from "@/modules/plans/plans.utils";
 import { formatMoney } from "@/lib/format";
 import { usePlans } from "@/lib/queries";
 import type { Plan } from "@/lib/types";
@@ -117,10 +117,7 @@ function PlanSection({ plan }: { plan: Plan }) {
             <Link
               to={primary.to}
               search={primary.search}
-              className={cn(
-                buttonVariants({ variant: "accent" }),
-                "h-11 rounded-xl px-5 text-sm font-bold text-foreground",
-              )}
+              className={cn(buttonVariants({ variant: "accent" }))}
             >
               {primary.label}
             </Link>
@@ -131,7 +128,6 @@ function PlanSection({ plan }: { plan: Plan }) {
               params={secondary.params}
               className={cn(
                 buttonVariants({ variant: "outline" }),
-                "h-11 rounded-xl px-5 text-sm font-semibold",
                 dark && "border-canvas/30 text-canvas hover:bg-canvas/10",
               )}
             >

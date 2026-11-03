@@ -16,7 +16,7 @@ import {
   REQUIRED_DOCS,
   uploadServiceDocument,
   validateFile,
-} from "@/lib/service-requests";
+} from "@/modules/service-requests/service-requests.utils";
 import type { DocumentType, Plan, ServiceRequest } from "@/lib/types";
 
 // TEMP TOGGLE: Set to false to revert back to requiring an active plan.

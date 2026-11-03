@@ -11,7 +11,7 @@ import {
   formatMoney,
   formatMonthYear,
 } from "@/lib/format";
-import { canPayNow, isDue, LIVE, MARKETING_URL } from "@/lib/plans";
+import { canPayNow, isDue, LIVE, MARKETING_URL } from "@/modules/plans/plans.utils";
 import { usePayments, usePlans } from "@/lib/queries";
 import type { Payment, Plan } from "@/lib/types";
 

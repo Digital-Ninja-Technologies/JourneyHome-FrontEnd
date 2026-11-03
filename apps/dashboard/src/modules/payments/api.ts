@@ -1,6 +1,6 @@
 import { api } from "@/lib/api";
 import type { Payment } from "@/lib/types";
-import type { Card } from "@/mocks";
+import type { Card } from "@/lib/api/mocks";
 
 export async function fetchPayments(): Promise<Payment[]> {
   return api<Payment[]>("/payments");

@@ -1,6 +1,6 @@
 import { env } from "#/env/client";
-import { capitalise, daysUntil, formatDay, formatMonthYear } from "./format";
-import type { Plan } from "./types";
+import { capitalise, daysUntil, formatDay, formatMonthYear } from "@/lib/format";
+import type { Plan } from "@/lib/types";
 
 export const MARKETING_URL = env.VITE_MARKETING_URL;
 
@@ -27,6 +27,7 @@ export const isDue = (p: Plan) =>
  * Every later contribution is charged automatically, so there is nothing to pay manually.
  */
 export const canPayNow = (p: Plan) => p.status === "Pending";
+
 export const payLink = (p: Plan) => `/app/payments/new?plan=${p._id}`;
 
 export type Notice = {

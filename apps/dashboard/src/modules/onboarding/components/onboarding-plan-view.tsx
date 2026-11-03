@@ -6,15 +6,15 @@ import {
   CoveredPersonFields,
   PackagePicker,
   planRequestBody,
-} from "@/modules/plans";
+} from "@/modules/plans/components/plan-form-parts";
 import { api } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import {
   clearStoredSelectedPackage,
   getStoredSelectedPackage,
   setStoredSelectedPackage,
-} from "@/lib/onboarding-storage";
-import { MARKETING_URL } from "@/lib/plans";
+} from "@/modules/onboarding/storage";
+import { MARKETING_URL } from "@/modules/plans/plans.utils";
 import { usePackages } from "@/lib/queries";
 import { resolveSelectedPackage } from "@/lib/search-schemas";
 import type { Plan } from "@/lib/types";

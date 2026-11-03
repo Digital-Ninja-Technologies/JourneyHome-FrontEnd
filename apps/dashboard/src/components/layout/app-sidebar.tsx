@@ -15,7 +15,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useLogoutMutation } from "@/modules/auth";
+import { useLogoutMutation } from "@/modules/auth/mutations";
 
 export const NAV = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -165,10 +165,7 @@ export function AppSidebar({
           <Link
             to="/app/service-requests/new"
             onClick={onCloseMobile}
-            className={cn(
-              buttonVariants({ variant: "accent" }),
-              "w-full rounded-xl font-bold text-foreground",
-            )}
+            className={cn(buttonVariants({ variant: "accent" }), "w-full")}
           >
             Request service
           </Link>

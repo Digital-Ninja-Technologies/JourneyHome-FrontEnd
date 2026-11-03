@@ -1,10 +1,15 @@
 import { Button } from "@journeyhome/ui/components/button";
-import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  redirect,
+} from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 import { CatchBoundary } from "@/components/catch-boundary";
 import { AppSidebar } from "@/components/layout/app-sidebar";
-import { sessionQueryOptions } from "@/modules/auth";
+import { sessionQueryOptions } from "@/modules/auth/query-options";
 
 const COLLAPSE_KEY = "jh_nav_collapsed";
 
@@ -18,9 +23,7 @@ function readCollapsed() {
 
 export const Route = createFileRoute("/app")({
   beforeLoad: async ({ context, location }) => {
-    const session = await context.queryClient.query(
-      sessionQueryOptions(),
-    );
+    const session = await context.queryClient.query(sessionQueryOptions());
     if (!session?.user) {
       throw redirect({
         to: "/login",

@@ -9,10 +9,10 @@ import {
   type NoteTone,
   readSeen,
   writeSeen,
-} from "@/lib/notifications";
-import { MARKETING_URL } from "@/lib/plans";
+} from "@/modules/notifications/notifications.utils";
+import { MARKETING_URL } from "@/modules/plans/plans.utils";
 import { useNotifications, usePlans } from "@/lib/queries";
-import { useSessionUser } from "@/modules/auth";
+import { useSessionUser } from "@/modules/auth/query-options";
 
 const TONE: Record<NoteTone, { icon: typeof Bell; box: string }> = {
   success: { icon: Check, box: "bg-status-active-bg text-status-active" },

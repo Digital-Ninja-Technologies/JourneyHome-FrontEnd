@@ -1,6 +1,6 @@
 import { cn } from "@journeyhome/ui/lib/utils";
 import { AlertCircle, Info } from "lucide-react";
-import { MARKETING_URL, type Notice } from "../lib/plans";
+import { MARKETING_URL, type Notice } from "@/modules/plans/plans.utils";
 
 const TONE = {
   due: "bg-cream text-status-due",

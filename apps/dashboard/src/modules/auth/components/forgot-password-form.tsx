@@ -6,7 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { DemoNotice } from "@/components/demo-notice";
 import { api, isUnsupported, UNSUPPORTED_MESSAGE, USE_MOCKS } from "@/lib/api";
-import { DEMO_RESET_TOKEN } from "@/mocks";
+import { DEMO_RESET_TOKEN } from "@/lib/api/mocks";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");

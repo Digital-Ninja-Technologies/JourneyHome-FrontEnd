@@ -5,7 +5,7 @@ import { Link, Navigate, useSearch } from "@tanstack/react-router";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { useEffect } from "react";
 import { api } from "@/lib/api";
-import { getOnboardingPlan } from "@/lib/checkout";
+import { getOnboardingPlan } from "@/modules/payments/checkout";
 import { formatMoney } from "@/lib/format";
 import type { Payment } from "@/lib/types";
 

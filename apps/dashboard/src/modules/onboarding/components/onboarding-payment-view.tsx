@@ -1,9 +1,9 @@
 import { Button } from "@journeyhome/ui/components/button";
 import { Link, Navigate, useSearch } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
-import { useStartCheckout } from "@/lib/checkout";
+import { useStartCheckout } from "@/modules/payments/checkout";
 import { firstName, formatMoney } from "@/lib/format";
-import { relationshipLabel } from "@/lib/plans";
+import { relationshipLabel } from "@/modules/plans/plans.utils";
 import { usePlan } from "@/lib/queries";
 import type { Plan } from "@/lib/types";
 

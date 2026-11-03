@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useSessionUser } from "@/modules/auth";
+import { useSessionUser } from "@/modules/auth/query-options";
 import { api } from "./api";
 import type {
   AppNotification,

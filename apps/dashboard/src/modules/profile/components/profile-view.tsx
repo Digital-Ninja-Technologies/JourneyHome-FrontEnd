@@ -10,7 +10,6 @@ import {
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
 import { Switch } from "@journeyhome/ui/components/switch";
-import { cn } from "@journeyhome/ui/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
@@ -29,7 +28,8 @@ import {
   useMe,
   useSavedCards,
 } from "@/lib/queries";
-import { useLogoutMutation, useSessionUser } from "@/modules/auth";
+import { useLogoutMutation } from "@/modules/auth/mutations";
+import { useSessionUser } from "@/modules/auth/query-options";
 
 const card = "flex flex-col gap-6 rounded-[28px] bg-white p-7";
 const h2 = "font-serif text-[28px] font-normal";

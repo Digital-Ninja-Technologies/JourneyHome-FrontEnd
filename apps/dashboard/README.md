@@ -40,23 +40,24 @@ Routing is powered by **TanStack Router** using file-based routing under `src/ro
 
 ### How to Add a New Route
 
-1. **Create a route file** in `src/routes/`:
+1. **Create or use a domain module component** under `src/modules/<feature>/components/`.
+2. **Create a route file** in `src/routes/`:
    - For an unnested route, e.g. `/terms`: create `src/routes/terms.tsx`.
    - For a protected app route, e.g. `/app/documents`: create `src/routes/app/documents.tsx`.
    - For a dynamic route, e.g. `/app/documents/:docId`: create `src/routes/app/documents/$docId.tsx`.
 
-2. **Define the route definition**:
+3. **Define the route definition**:
 
    ```tsx
    import { createFileRoute } from "@tanstack/react-router";
-   import MyPage from "../../pages/MyPage";
+   import { DocumentsView } from "@/modules/documents/components/documents-view";
 
    export const Route = createFileRoute("/app/documents/$docId")({
-     component: MyPage,
+     component: DocumentsView,
    });
    ```
 
-3. **Auto-generate the Route Tree**:
+4. **Auto-generate the Route Tree**:
    - The Vite dev server (`pnpm dev`) automatically watches `src/routes/` and updates `src/routeTree.gen.ts`.
    - You can also run `pnpm build` or `vite build` which automatically regenerates `src/routeTree.gen.ts`.
 

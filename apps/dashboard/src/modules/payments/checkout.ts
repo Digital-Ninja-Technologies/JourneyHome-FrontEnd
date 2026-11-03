@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { api } from "./api";
+import { api } from "@/lib/api";
 
 /** Set while a new customer is onboarding, so the Paystack return page can send them to the welcome screen. */
 export const ONBOARDING_KEY = "jh_onboarding_plan";

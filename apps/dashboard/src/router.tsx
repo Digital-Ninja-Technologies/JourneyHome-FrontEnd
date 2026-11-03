@@ -3,7 +3,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { createRouter, Navigate } from "@tanstack/react-router";
-import { makeQueryClient } from "./lib/query-client";
+import { makeQueryClient } from "./lib/query/client";
 import { routeTree } from "./routeTree.gen";
 
 export const queryClient = makeQueryClient();

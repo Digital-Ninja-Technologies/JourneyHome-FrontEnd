@@ -10,7 +10,7 @@ import {
   REQUIRED_DOCS,
   uploadServiceDocument,
   validateFile,
-} from "@/lib/service-requests";
+} from "@/modules/service-requests/service-requests.utils";
 import type { DocumentType, ServiceDocument } from "@/lib/types";
 
 const TONE = {

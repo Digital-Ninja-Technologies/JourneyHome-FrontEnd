@@ -10,7 +10,7 @@ import { env } from "#/env/client";
 import {
   getStoredSelectedPackage,
   setStoredSelectedPackage,
-} from "@/lib/onboarding-storage";
+} from "@/modules/onboarding/storage";
 import { resolveSelectedPackage } from "@/lib/search-schemas";
 import { useSignupMutation } from "../mutations";
 

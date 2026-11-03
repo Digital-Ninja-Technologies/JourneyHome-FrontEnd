@@ -1,10 +1,11 @@
-import { env } from "#/env/client";
+import { env } from "@/env/client";
 import { ApiError } from "@journeyhome/api-client";
-import { mockRequest, NOT_MOCKED } from "../mocks";
-import { apiClient } from "./api-client";
+import { isUnsupported, UNSUPPORTED_MESSAGE } from "../errors";
+import { apiClient } from "./client";
+import { mockRequest, NOT_MOCKED } from "./mocks";
 
 export { ApiError } from "@journeyhome/api-client";
-export { isUnsupported, UNSUPPORTED_MESSAGE } from "./errors";
+export { isUnsupported, UNSUPPORTED_MESSAGE } from "../errors";
 
 export const USE_MOCKS: boolean = env.VITE_USE_MOCKS;
 

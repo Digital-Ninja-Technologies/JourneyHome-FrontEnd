@@ -1,7 +1,7 @@
 import { Button } from "@journeyhome/ui/components/button";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
-import { useStartCheckout } from "@/lib/checkout";
+import { useStartCheckout } from "@/modules/payments/checkout";
 import {
   firstName,
   formatDay,
@@ -12,7 +12,7 @@ import {
   fullName,
   MARKETING_URL,
   relationshipLabel,
-} from "@/lib/plans";
+} from "@/modules/plans/plans.utils";
 import { usePlans } from "@/lib/queries";
 import type { Plan } from "@/lib/types";
 

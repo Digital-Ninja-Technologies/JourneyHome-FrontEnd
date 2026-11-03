@@ -18,7 +18,7 @@ import {
   nextCell,
   planNotice,
   startedLabel,
-} from "@/lib/plans";
+} from "@/modules/plans/plans.utils";
 import { usePayments, usePlan } from "@/lib/queries";
 
 function Detail({
