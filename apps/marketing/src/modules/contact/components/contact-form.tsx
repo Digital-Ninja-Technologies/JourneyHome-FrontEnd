@@ -9,10 +9,8 @@ import { Label } from "@journeyhome/ui/components/label";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { CONTACT_EMAIL } from "../lib/config";
-import { useSubmitContact } from "../modules/contact/mutations";
-
-// TODO: Consume Submit Contact API when ready.
+import { CONTACT_EMAIL } from "@/lib/config";
+import { useSubmitContact } from "../contact.mutations";
 
 export function ContactForm() {
   const [topic, setTopic] = useState<ContactTopic>(contactTopics[0]);

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Accent, Container, PageHero } from "@/components/section";
 import { createPageHead } from "@/lib/seo";
+import { Accent, Container, PageHero } from "@/modules/marketing";
 
 export const Route = createFileRoute("/faq")({
   head: () =>

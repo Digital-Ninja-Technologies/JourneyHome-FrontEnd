@@ -1,16 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Eye, Heart, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { Photo } from "@/components/photo";
+import { CONTACT_EMAIL, SIGNUP_URL } from "@/lib/config";
+import { images } from "@/lib/images";
+import { createPageHead } from "@/lib/seo";
 import {
   Accent,
   Container,
   CtaBand,
   Eyebrow,
   PageHero,
-} from "@/components/section";
-import { CONTACT_EMAIL, SIGNUP_URL } from "@/lib/config";
-import { images } from "@/lib/images";
-import { createPageHead } from "@/lib/seo";
+} from "@/modules/marketing";
 
 export const Route = createFileRoute("/about")({
   head: () =>

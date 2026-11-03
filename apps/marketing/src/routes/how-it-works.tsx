@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Photo } from "@/components/photo";
-import { Accent, Container, CtaBand, PageHero } from "@/components/section";
 import { SIGNUP_URL } from "@/lib/config";
 import { images } from "@/lib/images";
 import { createPageHead } from "@/lib/seo";
+import { Accent, Container, CtaBand, PageHero } from "@/modules/marketing";
 
 export const Route = createFileRoute("/how-it-works")({
   head: () =>

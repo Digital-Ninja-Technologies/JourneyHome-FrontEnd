@@ -1,14 +1,14 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { AsyncBoundary } from "@/components/async-boundary";
+import { createPageHead } from "@/lib/seo";
+import { Accent, Container, PageHero } from "@/modules/marketing";
 import {
   PackageCards,
   PackageCardsSkeleton,
   PackagesUnavailable,
-} from "@/components/package-cards";
-import { Accent, Container, PageHero } from "@/components/section";
-import { createPageHead } from "@/lib/seo";
-import { packagesQueryOptions } from "@/modules/packages/query-options";
+  packagesQueryOptions,
+} from "@/modules/packages";
 
 export const Route = createFileRoute("/pricing")({
   headers: () => ({

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { LegalPage } from "@/components/legal-page";
 import { CONTACT_EMAIL } from "@/lib/config";
 import { createPageHead } from "@/lib/seo";
+import { LegalPage } from "@/modules/marketing";
 
 export const Route = createFileRoute("/privacy")({
   head: () =>

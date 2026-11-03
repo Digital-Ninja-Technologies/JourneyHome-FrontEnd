@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { AsyncBoundary } from "@/components/async-boundary";
-import { ContactForm } from "@/components/contact-form";
-import { Accent, Container, PageHero } from "@/components/section";
 import { CONTACT_EMAIL } from "@/lib/config";
 import { createPageHead } from "@/lib/seo";
+import { ContactForm } from "@/modules/contact";
+import { Accent, Container, PageHero } from "@/modules/marketing";
 
 export const Route = createFileRoute("/contact")({
   head: () =>

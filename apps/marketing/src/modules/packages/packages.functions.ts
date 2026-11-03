@@ -1,9 +1,6 @@
-import { type Package, packageSchema } from "@journeyhome/schemas";
 import { createServerFn } from "@tanstack/react-start";
-import { api } from "@/lib/api";
-import { DUMMY_PACKAGES } from "@/mocks";
-
-export type { Package };
+import { api, DUMMY_PACKAGES } from "@/lib/api";
+import { type Package, packageSchema } from "./types";
 
 interface CacheEntry {
   data: Package[];
@@ -13,7 +10,7 @@ interface CacheEntry {
 let packageCache: CacheEntry | null = null;
 const CACHE_TTL_MS = 300 * 1000;
 
-export const getPackages = createServerFn({ method: "GET" }).handler(
+export const getPackagesFn = createServerFn({ method: "GET" }).handler(
   async () => {
     const now = Date.now();
     if (packageCache && now - packageCache.timestamp < CACHE_TTL_MS) {
@@ -38,16 +35,3 @@ export const getPackages = createServerFn({ method: "GET" }).handler(
     return fallback;
   },
 );
-
-/** Money is stored in minor units (kobo for NGN). */
-export function formatMoney(minor: number, currency = "NGN") {
-  return new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 0,
-  }).format(minor / 100);
-}
-
-export function packageSubtitle(p: Package) {
-  return p.description ?? "";
-}

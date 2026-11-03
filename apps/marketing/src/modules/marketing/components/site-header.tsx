@@ -3,7 +3,7 @@ import { cn } from "@journeyhome/ui/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { LOGIN_URL, SIGNUP_URL } from "../lib/config";
+import { LOGIN_URL, SIGNUP_URL } from "@/lib/config";
 
 const NAV = [
   { href: "/", label: "Home" },
