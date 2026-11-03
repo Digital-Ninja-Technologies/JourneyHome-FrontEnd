@@ -1,3 +1,5 @@
+import { buttonVariants } from "@journeyhome/ui/components/button";
+import { cn } from "@journeyhome/ui/lib/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
@@ -9,7 +11,6 @@ import {
   ImageIcon,
   MapPin,
 } from "lucide-react";
-import { buttonVariants } from "@journeyhome/ui/components/button";
 import { AsyncBoundary } from "@/components/async-boundary";
 import { Photo } from "@/components/photo";
 import { SIGNUP_URL } from "@/lib/config";
@@ -22,7 +23,6 @@ import {
   PackagesUnavailable,
   packagesQueryOptions,
 } from "@/modules/packages";
-import { cn } from "@journeyhome/ui/lib/utils";
 
 export const Route = createFileRoute("/")({
   loader: async ({ context }) => {

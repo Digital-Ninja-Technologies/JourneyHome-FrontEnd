@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Eye, Heart, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
+import { createFileRoute } from "@tanstack/react-router";
+import { Eye, Heart, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { Photo } from "@/components/photo";
 import { CONTACT_EMAIL, SIGNUP_URL } from "@/lib/config";
 import { images } from "@/lib/images";

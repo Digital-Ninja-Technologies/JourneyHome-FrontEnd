@@ -1,12 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  contactSubmissionSchema,
-  contactTopics,
-} from "@journeyhome/schemas";
+import { contactSubmissionSchema, contactTopics } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import {
   FormInput,
-  FormSelect,
   FormTextarea,
 } from "@journeyhome/ui/components/form-fields";
 import { Label } from "@journeyhome/ui/components/label";
@@ -182,7 +178,9 @@ export function ContactForm() {
               key={t}
               type="button"
               aria-pressed={selectedTopic === t}
-              onClick={() => form.setValue("topic", t, { shouldValidate: true })}
+              onClick={() =>
+                form.setValue("topic", t, { shouldValidate: true })
+              }
               className={cn(
                 "rounded-full border px-4 py-2 text-sm font-semibold transition-all cursor-pointer hover:-translate-y-0.5 active:scale-95",
                 selectedTopic === t
