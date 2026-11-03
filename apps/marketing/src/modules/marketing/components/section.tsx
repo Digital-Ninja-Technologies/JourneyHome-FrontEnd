@@ -81,20 +81,22 @@ export function CtaBand({
   description,
   label = "Start a plan",
   href,
+  className,
 }: {
   title: React.ReactNode;
-  description?: string;
+  description?: React.ReactNode;
   label?: string;
   href: string;
+  className?: string;
 }) {
   return (
-    <Container className="py-12">
-      <div className="relative flex flex-col items-center gap-5 overflow-hidden rounded-[32px] bg-foreground px-8 py-16 text-center md:py-20">
+    <Container className={cn("py-14 md:py-24", className)}>
+      <div className="relative flex flex-col items-center gap-5 overflow-hidden rounded-[40px] bg-foreground px-6 py-14 text-center sm:px-8 md:py-20">
         <div
-          className="absolute -bottom-40 left-1/2 size-[380px] -translate-x-1/2 rounded-full bg-accent/[0.07]"
+          className="absolute -bottom-40 left-1/2 size-[380px] -translate-x-1/2 rounded-full bg-forest/60"
           aria-hidden
         />
-        <h2 className="relative max-w-2xl text-4xl font-extrabold leading-[1.1] tracking-tight text-canvas md:text-5xl">
+        <h2 className="relative max-w-2xl text-4xl font-extrabold tracking-tight text-canvas md:text-5xl">
           {title}
         </h2>
         {description && (
@@ -104,7 +106,13 @@ export function CtaBand({
         )}
         <a
           href={href}
-          className={buttonVariants({ variant: "accent", size: "lg" })}
+          className={cn(
+            buttonVariants({
+              variant: "accent",
+              size: "lg",
+              className: "z-10",
+            }),
+          )}
         >
           {label}
         </a>

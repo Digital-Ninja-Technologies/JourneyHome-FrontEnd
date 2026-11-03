@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Eye, Heart, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { buttonVariants } from "@journeyhome/ui/components/button";
+import { cn } from "@journeyhome/ui/lib/utils";
 import { Photo } from "@/components/photo";
 import { CONTACT_EMAIL, SIGNUP_URL } from "@/lib/config";
 import { images } from "@/lib/images";
@@ -202,7 +203,7 @@ function About() {
           </div>
           <a
             href={`mailto:${CONTACT_EMAIL}`}
-            className={buttonVariants({ variant: "default", size: "lg" })}
+            className={cn(buttonVariants({ variant: "default", size: "lg" }))}
           >
             Get in touch
           </a>

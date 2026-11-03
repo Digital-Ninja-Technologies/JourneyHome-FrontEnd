@@ -76,14 +76,15 @@ export function PackageCards({
             </div>
             <a
               href={`${SIGNUP_URL}?package=${encodeURIComponent(p._id)}`}
-              className={buttonVariants({
-                variant: featured ? "accent" : "outline",
-                size: "lg",
-                className: cn(
-                  "w-full font-bold",
-                  !featured && "border-foreground text-foreground hover:bg-foreground/5",
-                ),
-              })}
+              className={cn(
+                buttonVariants({
+                  variant: featured ? "accent" : "outline",
+                  size: "lg",
+                }),
+                "w-full font-bold",
+                !featured &&
+                  "border-foreground text-foreground hover:bg-foreground/5",
+              )}
             >
               Choose {p.name}
             </a>

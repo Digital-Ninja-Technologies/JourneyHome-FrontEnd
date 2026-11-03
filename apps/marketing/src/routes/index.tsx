@@ -15,7 +15,7 @@ import { Photo } from "@/components/photo";
 import { SIGNUP_URL } from "@/lib/config";
 import { images } from "@/lib/images";
 import { createPageHead } from "@/lib/seo";
-import { Accent, Container, Eyebrow } from "@/modules/marketing";
+import { Accent, Container, CtaBand, Eyebrow } from "@/modules/marketing";
 import {
   PackageCards,
   PackageCardsSkeleton,
@@ -108,13 +108,13 @@ function Home() {
           <div className="flex flex-wrap gap-3">
             <a
               href={SIGNUP_URL}
-              className={buttonVariants({ variant: "default", size: "lg" })}
+              className={cn(buttonVariants({ variant: "default", size: "lg" }))}
             >
               Start saving today
             </a>
             <Link
               to="/how-it-works"
-              className={buttonVariants({ variant: "outline", size: "lg" })}
+              className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
             >
               Watch how it works
             </Link>
@@ -353,35 +353,16 @@ function Home() {
       </section>
 
       {/* CLOSING CTA */}
-      <Container className="py-14 md:py-24">
-        <div className="relative flex flex-col items-center gap-5 overflow-hidden rounded-[40px] bg-foreground px-6 py-14 text-center sm:px-8 md:py-20">
-          <div
-            className="absolute -bottom-40 left-1/2 size-[380px] -translate-x-1/2 rounded-full bg-forest/60"
-            aria-hidden
-          />
-          <h2 className="relative text-4xl font-extrabold tracking-tight text-canvas md:text-5xl">
+      <CtaBand
+        href={SIGNUP_URL}
+        title={
+          <>
             Start your family&rsquo;s plan{" "}
             <Accent className="text-accent">today.</Accent>
-          </h2>
-          <p className="relative max-w-md text-base leading-relaxed text-canvas/80">
-            A few minutes to set up. Save at your own pace. We&rsquo;ll be ready
-            when the time comes.
-          </p>
-
-          <a
-            href={SIGNUP_URL}
-            className={cn(
-              buttonVariants({
-                size: "lg",
-                variant: "accent",
-                className: "z-10",
-              }),
-            )}
-          >
-            Start a plan
-          </a>
-        </div>
-      </Container>
+          </>
+        }
+        description="A few minutes to set up. Save at your own pace. We’ll be ready when the time comes."
+      />
     </main>
   );
 }
