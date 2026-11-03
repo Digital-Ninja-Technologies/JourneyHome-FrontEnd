@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { buttonVariants } from "@journeyhome/ui/components/button";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
-import { AsyncBoundary } from "@/components/async-boundary";
 import { CONTACT_EMAIL } from "@/lib/config";
 import { createPageHead } from "@/lib/seo";
 import { ContactForm } from "@/modules/contact";
@@ -56,9 +55,7 @@ function Contact() {
         We&rsquo;re here to <Accent>help.</Accent>
       </PageHero>
       <Container className="grid gap-10 pb-12 md:grid-cols-[1.4fr_1fr]">
-        <AsyncBoundary>
-          <ContactForm />
-        </AsyncBoundary>
+        <ContactForm />
         <div className="flex flex-col gap-4">
           {INFO.map(({ icon: Icon, title, body, tint, dark }) => (
             <div

@@ -1,4 +1,5 @@
-import { Button } from "@journeyhome/ui/components/button";
+import { Button, buttonVariants } from "@journeyhome/ui/components/button";
+import { cn } from "@journeyhome/ui/lib/utils";
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 
@@ -22,10 +23,7 @@ export function CatchBoundary({ error, reset }: ErrorComponentProps) {
             Try again
           </Button>
         )}
-        <a
-          href="/"
-          className="inline-flex h-10 items-center justify-center rounded-lg border border-foreground/20 bg-canvas px-4 text-sm font-semibold text-foreground transition-colors hover:bg-foreground/5"
-        >
+        <a href="/" className={cn(buttonVariants({ variant: "outline" }))}>
           Return to home
         </a>
       </div>
