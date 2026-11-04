@@ -9,6 +9,7 @@ import {
 import { Link, useSearch } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
+import { getPendingVerificationEmail } from "../api";
 import { useLoginMutation } from "../mutations";
 
 type LoginFormInput = z.input<typeof loginSchema>;
@@ -26,7 +27,7 @@ export function LoginForm() {
   >({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      email: getPendingVerificationEmail() ?? "",
       password: "",
       remember: false,
     },

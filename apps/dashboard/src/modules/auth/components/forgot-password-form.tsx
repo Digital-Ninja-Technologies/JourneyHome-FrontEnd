@@ -5,14 +5,14 @@ import { useMutation } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { DemoNotice } from "@/components/demo-notice";
-import { api, isUnsupported, UNSUPPORTED_MESSAGE, USE_MOCKS } from "@/lib/api";
+import { isUnsupported, UNSUPPORTED_MESSAGE, USE_MOCKS } from "@/lib/api";
 import { DEMO_RESET_TOKEN } from "@/lib/api/mocks";
+import { forgotPassword } from "@/modules/auth/api";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const send = useMutation({
-    mutationFn: (e: string) =>
-      api("/auth/forgot-password", { body: { email: e } }),
+    mutationFn: (e: string) => forgotPassword(e),
   });
   const unsupported = isUnsupported(send.error);
 

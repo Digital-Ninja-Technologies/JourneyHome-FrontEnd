@@ -204,14 +204,27 @@ export function planRequestBody(form: HTMLFormElement, packageId: string) {
   const d = new FormData(form);
   const text = (k: string) => String(d.get(k) ?? "").trim();
   const location = text("location");
+  const dobText = text("dob");
+  let isoDob: string | undefined;
+  if (dobText) {
+    const parsed = new Date(`${dobText}T00:00:00.000Z`);
+    if (!Number.isNaN(parsed.getTime())) {
+      isoDob = parsed.toISOString();
+    }
+  }
+  const rawGender = text("gender").toLowerCase();
+  const gender =
+    rawGender === "male" || rawGender === "female" ? rawGender : "female";
+  const phone = text("phone");
+
   return {
     packageId,
     coveredPerson: {
       fullName: text("fullName"),
       relationship: text("relationship").toLowerCase(),
-      dateOfBirth: new Date(`${text("dob")}T00:00:00.000Z`).toISOString(),
-      gender: text("gender").toLowerCase(),
-      ...(text("phone") && { phoneNumber: text("phone") }),
+      dateOfBirth: isoDob,
+      gender,
+      phoneNumber: phone || undefined,
       // The backend stores a single address string, so state/location is folded into it.
       address: location ? `${text("address")}, ${location}` : text("address"),
     },

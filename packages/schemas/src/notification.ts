@@ -4,13 +4,19 @@ export const appNotificationSchema = z.object({
   _id: z.string(),
   title: z.string(),
   message: z.string(),
-  event: z.string(),
+  event: z.string().optional(),
   isRead: z.boolean().default(false),
   plan: z.string().optional(),
   subject: z.string().optional(),
   createdAt: z.string(),
 });
 export type AppNotification = z.infer<typeof appNotificationSchema>;
+
+export const notificationsListResponseSchema = z.union([
+  z.lazy(() => paginatedNotificationsSchema.transform((r) => r.items)),
+  z.object({ items: z.array(appNotificationSchema) }).transform((r) => r.items),
+  z.array(appNotificationSchema),
+]);
 
 export const paginatedNotificationsSchema = z.object({
   items: z.array(appNotificationSchema),
@@ -25,7 +31,9 @@ export const paginatedNotificationsSchema = z.object({
     totalUnreadNotifications: z.number(),
   }),
 });
-export type PaginatedNotifications = z.infer<typeof paginatedNotificationsSchema>;
+export type PaginatedNotifications = z.infer<
+  typeof paginatedNotificationsSchema
+>;
 
 export const customerPreferencesSchema = z.object({
   paymentReminders: z.boolean(),

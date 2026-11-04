@@ -14,7 +14,11 @@ export const contactSubmissionSchema = z.object({
   phone: z.string().trim().min(5, "Phone number is required").max(30),
   email: z.string().trim().email("Invalid email address"),
   topic: z.enum(contactTopics),
-  message: z.string().trim().min(5, "Message must be at least 5 characters").max(2000),
+  message: z
+    .string()
+    .trim()
+    .min(5, "Message must be at least 5 characters")
+    .max(2000),
 });
 
 export type ContactSubmissionInput = z.infer<typeof contactSubmissionSchema>;

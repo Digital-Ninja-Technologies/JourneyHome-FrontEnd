@@ -1,13 +1,16 @@
-import type { AppNotification } from "@journeyhome/schemas";
-import { api } from "@/lib/api";
+import {
+  type AppNotification,
+  notificationsListResponseSchema,
+} from "@journeyhome/schemas";
+import { api, parseApiResponse } from "@/lib/api";
 
 export async function fetchNotifications(): Promise<AppNotification[]> {
-  const res = await api<AppNotification[] | { items: AppNotification[] }>(
-    "/notifications",
+  const res = await api<unknown>("/notifications");
+  return parseApiResponse(
+    notificationsListResponseSchema,
+    res,
+    "Invalid notifications response from server",
   );
-  if (Array.isArray(res)) return res;
-  if (res && Array.isArray((res as any).items)) return (res as any).items;
-  return [];
 }
 
 export async function markNotificationRead(id: string): Promise<void> {

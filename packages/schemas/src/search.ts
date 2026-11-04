@@ -24,6 +24,19 @@ export const verifyEmailSearchSchema = redirectSearchSchema.extend({
 });
 export type VerifyEmailSearch = z.infer<typeof verifyEmailSearchSchema>;
 
+export const signupSearchSchema = redirectSearchSchema.extend({
+  package: z.string().optional(),
+});
+export type SignupSearch = z.infer<typeof signupSearchSchema>;
+
+export function resolveSelectedPackage(
+  search: { package?: string } | undefined | null,
+): string | undefined {
+  if (!search?.package) return undefined;
+  const p = search.package.trim();
+  return p ? p : undefined;
+}
+
 export const sanitizeRedirect = (
   rawRedirect: string | undefined | null,
   fallback = "/",
@@ -35,6 +48,17 @@ export const sanitizeRedirect = (
     !rawRedirect.includes("://") &&
     !rawRedirect.includes("\\")
   ) {
+    // Prevent self-referencing auth redirects that can trigger infinite loops
+    if (
+      rawRedirect === "/login" ||
+      rawRedirect === "/login/" ||
+      rawRedirect.startsWith("/login?") ||
+      rawRedirect === "/signup" ||
+      rawRedirect === "/signup/" ||
+      rawRedirect.startsWith("/signup?")
+    ) {
+      return fallback;
+    }
     return rawRedirect;
   }
   return fallback;

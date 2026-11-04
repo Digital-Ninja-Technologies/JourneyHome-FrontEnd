@@ -3,6 +3,7 @@ import { Button } from "@journeyhome/ui/components/button";
 import { Link, Navigate, useSearch } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 import { firstName, formatMoney } from "@/lib/format";
+import { clearStoredSelectedPackage } from "@/modules/onboarding/storage";
 import {
   setOnboardingPlan,
   useStartCheckout,
@@ -61,7 +62,10 @@ function Checkout({ plan }: { plan: Plan }) {
       </Button>
       <Link
         to="/app"
-        onClick={() => setOnboardingPlan(null)}
+        onClick={() => {
+          setOnboardingPlan(null);
+          clearStoredSelectedPackage();
+        }}
         className="text-center text-xs font-semibold text-muted underline"
       >
         Skip for now — I&rsquo;ll make my first payment later
@@ -76,8 +80,11 @@ export function OnboardingPaymentView() {
   const plan = planQ.data;
 
   // Already paid: carry on to the welcome screen.
-  if (plan && plan.status !== "Pending")
+  if (plan && plan.status !== "Pending") {
+    setOnboardingPlan(null);
+    clearStoredSelectedPackage();
     return <Navigate to="/welcome" search={{ plan: plan._id }} replace />;
+  }
 
   return (
     <div className="flex w-full max-w-[480px] flex-col items-center gap-8">

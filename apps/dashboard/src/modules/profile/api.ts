@@ -1,13 +1,32 @@
-import { api } from "@/lib/api";
+import {
+  customerMeSchema,
+  customerPreferencesSchema,
+} from "@journeyhome/schemas";
+import { api, parseApiResponse } from "@/lib/api";
 import type { Me } from "./types";
 
 export async function fetchMe(): Promise<Me> {
-  return api<Me>("/auth/me");
+  const res = await api<unknown>("/auth/me");
+  return parseApiResponse(
+    customerMeSchema,
+    res,
+    "Invalid customer profile response",
+  );
 }
 
-export async function updateMe(body: Record<string, string>): Promise<Me> {
-  return api<Me>("/auth/me", { method: "PATCH", body });
+export async function updateMe(
+  body: Partial<Pick<Me, "name" | "email">> | Record<string, unknown>,
+): Promise<Me> {
+  const res = await api<unknown>("/auth/me", { method: "PATCH", body });
+  return parseApiResponse(
+    customerMeSchema,
+    res,
+    "Invalid updated profile response",
+  );
 }
+
+export const updateCustomerProfile = updateMe;
+export const fetchCustomerProfile = fetchMe;
 
 export async function changePassword(body: {
   currentPassword?: string;
@@ -25,10 +44,15 @@ export async function changePassword(body: {
 export async function updatePreferences(
   body: Partial<Me["preferences"]>,
 ): Promise<Me["preferences"]> {
-  return api<Me["preferences"]>("/auth/notification-preferences", {
+  const res = await api<unknown>("/auth/notification-preferences", {
     method: "PATCH",
     body,
   });
+  return parseApiResponse(
+    customerPreferencesSchema,
+    res,
+    "Invalid notification preferences response",
+  );
 }
 
 export async function closeAccount(

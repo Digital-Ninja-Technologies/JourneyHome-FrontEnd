@@ -153,9 +153,8 @@ export function describeNotification(
         link: requests,
       };
     default: {
-      const title = (n.subject ?? n.event)
-        .replace(/([a-z])([A-Z])/g, "$1 $2")
-        .replace(/_/g, " ");
+      const raw = n.title || n.subject || n.event || "Notification";
+      const title = raw.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ");
       return {
         title,
         tone: "info",

@@ -24,6 +24,33 @@ export const loginSchema = z.object({
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 
+export const authLoginResponseSchema = z
+  .object({
+    user: z
+      .object({
+        _id: z.string().optional(),
+        id: z.string().optional(),
+        email: z.string().email(),
+        name: z.string(),
+        role: z.string().optional(),
+        isSuperAdmin: z.boolean().optional(),
+      })
+      .transform((u) => ({
+        id: u.id || u._id || "",
+        email: u.email,
+        name: u.name,
+        role: u.role || "customer",
+        isSuperAdmin: Boolean(u.isSuperAdmin),
+      })),
+    accessToken: z.string().optional(),
+    token: z.string().optional(),
+  })
+  .transform((data) => ({
+    user: data.user,
+    token: data.accessToken || data.token || "",
+  }));
+export type AuthLoginResponse = z.infer<typeof authLoginResponseSchema>;
+
 export const adminLoginSchema = z.object({
   email: z.string().trim().email("Please enter your work email"),
   password: z.string().min(1, "Password is required"),

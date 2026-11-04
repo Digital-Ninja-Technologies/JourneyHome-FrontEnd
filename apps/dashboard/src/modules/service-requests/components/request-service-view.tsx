@@ -1,4 +1,4 @@
-import type { DocumentType, Plan, ServiceRequest } from "@journeyhome/schemas";
+import type { DocumentType, Plan } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import { DatePicker } from "@journeyhome/ui/components/date-picker";
 import { Input } from "@journeyhome/ui/components/input";
@@ -15,9 +15,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Info, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { api } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { usePlans } from "@/modules/plans/query-options";
+import { createServiceRequest } from "@/modules/service-requests/api";
 import {
   DOC_LABEL,
   ELIGIBLE_PLAN,
@@ -199,7 +199,7 @@ export function RequestServiceView() {
   const submit = useMutation({
     mutationFn: async (body: Record<string, unknown>) => {
       if (!created.current) {
-        const req = await api<ServiceRequest>("/service-requests", { body });
+        const req = await createServiceRequest(body);
         created.current = { id: req._id, done: new Set() };
       }
       const { id, done } = created.current;
@@ -225,8 +225,12 @@ export function RequestServiceView() {
     if (!plan) return;
     const d = new FormData(e.currentTarget);
     const text = (k: string) => String(d.get(k) ?? "").trim();
-    const day = (k: string) =>
-      new Date(`${text(k)}T00:00:00.000Z`).toISOString();
+    const day = (k: string) => {
+      const v = text(k);
+      if (!v) return undefined;
+      const parsed = new Date(`${v}T00:00:00.000Z`);
+      return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
+    };
     const extra = text("info");
     submit.mutate({
       planId: plan._id,

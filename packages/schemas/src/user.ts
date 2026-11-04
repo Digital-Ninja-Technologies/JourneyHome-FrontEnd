@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { UserRoleEnum } from "./enums";
-import { adminPreferencesSchema, customerPreferencesSchema } from "./notification";
+import {
+  adminPreferencesSchema,
+  customerPreferencesSchema,
+} from "./notification";
 
 export const customerSchema = z.object({
   _id: z.string(),
@@ -52,8 +55,16 @@ export const auditEntrySchema = z.object({
 export type AuditEntry = z.infer<typeof auditEntrySchema>;
 
 export const updateProfileSchema = z.object({
-  name: z.string().trim().min(2, "Full name must be at least 2 characters").optional(),
-  email: z.string().trim().email("Please enter a valid email address").optional(),
+  name: z
+    .string()
+    .trim()
+    .min(2, "Full name must be at least 2 characters")
+    .optional(),
+  email: z
+    .string()
+    .trim()
+    .email("Please enter a valid email address")
+    .optional(),
 });
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 

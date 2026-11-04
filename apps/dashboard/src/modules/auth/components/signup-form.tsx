@@ -4,15 +4,21 @@ import {
   FormInput,
   FormPasswordInput,
 } from "@journeyhome/ui/components/form-fields";
-import { Link } from "@tanstack/react-router";
+import { Link, useSearch } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { env } from "#/env/client";
+import { resolveSelectedPackage } from "@/lib/search-schemas";
+import { setStoredSelectedPackage } from "@/modules/onboarding/storage";
 import { useSignupMutation } from "../mutations";
 
 // Matches the backend/schema rule (min 6 characters).
-const PASSWORD_CRITERIA = [{ label: "At least 6 characters", regex: /^.{6,}$/ }];
+const PASSWORD_CRITERIA = [
+  { label: "At least 6 characters", regex: /^.{6,}$/ },
+  { label: "At least one uppercase letter", regex: /[A-Z]/ },
+];
 
 const formSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters"),
@@ -24,6 +30,12 @@ type SignupFormValues = z.infer<typeof formSchema>;
 
 export function SignupForm() {
   const signupMutation = useSignupMutation();
+  const search = useSearch({ from: "/signup/" });
+
+  useEffect(() => {
+    const fromUrl = resolveSelectedPackage(search);
+    if (fromUrl) setStoredSelectedPackage(fromUrl);
+  }, [search]);
 
   const { control, handleSubmit } = useForm<SignupFormValues>({
     resolver: zodResolver(formSchema),

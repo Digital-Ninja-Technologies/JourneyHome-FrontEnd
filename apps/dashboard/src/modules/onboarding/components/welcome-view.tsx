@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { StatusPill } from "@/components/status-pill";
 import { firstName, formatDate, formatMoney } from "@/lib/format";
 import { useSessionUser } from "@/modules/auth/query-options";
+import { clearStoredSelectedPackage } from "@/modules/onboarding/storage";
 import { setOnboardingPlan } from "@/modules/payments/checkout";
 import { relationshipLabel } from "@/modules/plans/plans.utils";
 import { usePlan } from "@/modules/plans/query-options";
@@ -17,7 +18,10 @@ export function WelcomeView() {
   const planQ = usePlan(planId);
   const plan = planQ.data;
 
-  useEffect(() => setOnboardingPlan(null), []);
+  useEffect(() => {
+    setOnboardingPlan(null);
+    clearStoredSelectedPackage();
+  }, []);
 
   const person = plan ? firstName(plan.coveredPerson.fullName) : "";
   const money = plan

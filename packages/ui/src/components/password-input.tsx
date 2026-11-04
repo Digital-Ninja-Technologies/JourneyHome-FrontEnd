@@ -13,8 +13,8 @@ export interface PasswordCriterion {
 const DEFAULT_CRITERIA: PasswordCriterion[] = [
   { label: "At least 8 characters", regex: /^.{8,}$/ },
   { label: "At least one uppercase letter", regex: /[A-Z]/ },
-//   { label: "At least one number", regex: /[0-9]/ },
-//   { label: "At least one special character", regex: /[^A-Za-z0-9]/ },
+  //   { label: "At least one number", regex: /[0-9]/ },
+  //   { label: "At least one special character", regex: /[^A-Za-z0-9]/ },
 ];
 
 export interface PasswordInputProps extends React.ComponentProps<typeof Input> {

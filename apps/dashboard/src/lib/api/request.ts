@@ -4,6 +4,7 @@ import { apiClient } from "./client";
 import { mockRequest, NOT_MOCKED } from "./mocks";
 
 export { ApiError } from "@journeyhome/api-client";
+export { ApiValidationError, parseApiResponse } from "@journeyhome/schemas";
 
 export const isUnsupported = (e: unknown): boolean =>
   e instanceof ApiError &&

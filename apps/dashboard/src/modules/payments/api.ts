@@ -1,17 +1,45 @@
-import type { Payment, Subscription } from "@journeyhome/schemas";
-import { api } from "@/lib/api";
+import {
+  type Payment,
+  paymentSchema,
+  paymentsListResponseSchema,
+  type Subscription,
+  subscriptionSchema,
+  subscriptionsListResponseSchema,
+} from "@journeyhome/schemas";
+import { api, parseApiResponse } from "@/lib/api";
 import type { Card } from "@/lib/api/mocks";
 
 export async function fetchPayments(planId?: string): Promise<Payment[]> {
   const query = planId ? `?planId=${encodeURIComponent(planId)}` : "";
-  const res = await api<Payment[] | { items: Payment[] }>(`/payments${query}`);
-  if (Array.isArray(res)) return res;
-  if (res && Array.isArray((res as any).items)) return (res as any).items;
-  return [];
+  const res = await api<unknown>(`/payments${query}`);
+  return parseApiResponse(
+    paymentsListResponseSchema,
+    res,
+    "Invalid payments response from server",
+  );
 }
 
 export async function fetchPayment(id: string): Promise<Payment> {
-  return api<Payment>(`/payments/${id}`);
+  const res = await api<unknown>(`/payments/${id}`);
+  return parseApiResponse(
+    paymentSchema,
+    res,
+    `Invalid payment (${id}) response from server`,
+  );
+}
+
+export async function verifyPayment(reference: string): Promise<Payment> {
+  const res = await api<unknown>(
+    `/payments/verify/${encodeURIComponent(reference)}`,
+    {
+      method: "POST",
+    },
+  );
+  return parseApiResponse(
+    paymentSchema,
+    res,
+    "Invalid payment verification response from server",
+  );
 }
 
 export async function fetchSavedCards(): Promise<Card[]> {
@@ -42,14 +70,19 @@ export async function deleteCard(id: string): Promise<{ removed: boolean }> {
 }
 
 export async function fetchSubscriptions(): Promise<Subscription[]> {
-  const res = await api<Subscription[] | { items: Subscription[] }>(
-    "/subscriptions",
+  const res = await api<unknown>("/subscriptions");
+  return parseApiResponse(
+    subscriptionsListResponseSchema,
+    res,
+    "Invalid subscriptions response from server",
   );
-  if (Array.isArray(res)) return res;
-  if (res && Array.isArray((res as any).items)) return (res as any).items;
-  return [];
 }
 
 export async function fetchSubscription(id: string): Promise<Subscription> {
-  return api<Subscription>(`/subscriptions/${id}`);
+  const res = await api<unknown>(`/subscriptions/${id}`);
+  return parseApiResponse(
+    subscriptionSchema,
+    res,
+    `Invalid subscription (${id}) response from server`,
+  );
 }

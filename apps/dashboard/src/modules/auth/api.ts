@@ -1,5 +1,10 @@
-import type { LoginInput, SignupInput } from "@journeyhome/schemas";
-import { ApiError, api, USE_MOCKS } from "@/lib/api";
+import {
+  authLoginResponseSchema,
+  type LoginInput,
+  type SignupInput,
+} from "@journeyhome/schemas";
+import { z } from "zod";
+import { ApiError, api, parseApiResponse, USE_MOCKS } from "@/lib/api";
 
 export interface User {
   id: string;
@@ -68,6 +73,23 @@ function assertCustomer(user: User) {
   }
 }
 
+const userProfileSchema = z
+  .object({
+    id: z.string().optional(),
+    _id: z.string().optional(),
+    email: z.string().email(),
+    name: z.string(),
+    role: z.string().optional(),
+    isSuperAdmin: z.boolean().optional(),
+  })
+  .transform((u) => ({
+    id: u.id || u._id || "",
+    email: u.email,
+    name: u.name,
+    role: u.role || "customer",
+    isSuperAdmin: Boolean(u.isSuperAdmin),
+  }));
+
 export async function fetchSession(): Promise<Session | null> {
   const session = readSession();
   if (!session) return null;
@@ -77,7 +99,12 @@ export async function fetchSession(): Promise<Session | null> {
   }
 
   try {
-    const me = await api<User>("/auth/me");
+    const raw = await api<unknown>("/auth/me");
+    const me = parseApiResponse(
+      userProfileSchema,
+      raw,
+      "Invalid profile response from server",
+    );
     const updated: Session = {
       ...session,
       user: {
@@ -103,12 +130,18 @@ export async function login(
   input: LoginInput & { remember?: boolean },
 ): Promise<Session> {
   try {
-    const res = await api<{ user: User; token: string }>("/auth/login", {
+    const raw = await api<unknown>("/auth/login", {
       body: {
         email: input.email.trim(),
         password: input.password,
       },
     });
+
+    const res = parseApiResponse(
+      authLoginResponseSchema,
+      raw,
+      "Invalid login response from server",
+    );
 
     assertCustomer(res.user);
 
@@ -159,6 +192,14 @@ export async function signup(
 
 export async function logout(): Promise<void> {
   writeSession(null);
+  setPendingVerificationEmail(null);
+  try {
+    sessionStorage.removeItem("jh_selected_package");
+    localStorage.removeItem("jh_selected_package");
+    sessionStorage.removeItem("jh_onboarding_plan");
+  } catch {
+    // ignore
+  }
 }
 
 export async function verifyEmail(
@@ -168,7 +209,8 @@ export async function verifyEmail(
     method: "POST",
     body: { token: token.trim() },
   });
-  setPendingVerificationEmail(null);
+  // Note: pending verification email is preserved so the login page can prefill it.
+  // It is cleaned upon successful login(), logout(), deleteAccount(), or /app entry.
   return { success: true, message: res?.message };
 }
 
@@ -213,6 +255,14 @@ export async function deleteAccount(password: string): Promise<void> {
     body: { password },
   });
   writeSession(null);
+  setPendingVerificationEmail(null);
+  try {
+    sessionStorage.removeItem("jh_selected_package");
+    localStorage.removeItem("jh_selected_package");
+    sessionStorage.removeItem("jh_onboarding_plan");
+  } catch {
+    // ignore
+  }
 }
 
 export function updateUserLocally(

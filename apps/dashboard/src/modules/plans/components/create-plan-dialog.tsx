@@ -1,4 +1,3 @@
-import type { Plan } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import {
   Dialog,
@@ -9,9 +8,9 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { api } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { usePackages } from "@/modules/packages/query-options";
+import { createPlan } from "@/modules/plans/api";
 import {
   CoveredPersonFields,
   PackagePicker,
@@ -29,9 +28,10 @@ export function CreatePlanDialog({
   const queryClient = useQueryClient();
   const packagesQ = usePackages();
   const [packageId, setPackageId] = useState<string>("");
+  const [formError, setFormError] = useState("");
 
   const create = useMutation({
-    mutationFn: (body: unknown) => api<Plan>("/plans", { body }),
+    mutationFn: (body: unknown) => createPlan(body),
     onSuccess: (plan) => {
       void queryClient.invalidateQueries({ queryKey: ["plans"] });
       onClose();
@@ -43,7 +43,15 @@ export function CreatePlanDialog({
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (selected) create.mutate(planRequestBody(e.currentTarget, selected._id));
+    setFormError("");
+    if (selected) {
+      const body = planRequestBody(e.currentTarget, selected._id);
+      if (!body.coveredPerson.dateOfBirth) {
+        setFormError("Please select a date of birth for the covered person.");
+        return;
+      }
+      create.mutate(body);
+    }
   }
 
   return (
@@ -67,6 +75,15 @@ export function CreatePlanDialog({
             The package is fixed for the life of a plan and can&rsquo;t be
             changed once started.
           </p>
+
+          {formError && (
+            <p
+              role="alert"
+              className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-[13px] text-status-cancelled"
+            >
+              {formError}
+            </p>
+          )}
 
           {create.isError && (
             <p

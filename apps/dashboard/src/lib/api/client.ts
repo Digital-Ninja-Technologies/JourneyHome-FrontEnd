@@ -26,13 +26,18 @@ export const apiClient = createApiClient({
     try {
       localStorage.removeItem(STORAGE_KEY);
       sessionStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem("jh_selected_package");
+      localStorage.removeItem("jh_selected_package");
+      sessionStorage.removeItem("jh_pending_verification_email");
+      sessionStorage.removeItem("jh_onboarding_plan");
       queryClient.setQueryData(["auth", "session"], null);
       queryClient.cancelQueries();
       queryClient.removeQueries();
       if (
         typeof window !== "undefined" &&
         !window.location.pathname.startsWith("/login") &&
-        !window.location.pathname.startsWith("/signup")
+        !window.location.pathname.startsWith("/signup") &&
+        !window.location.pathname.startsWith("/verify-email")
       ) {
         window.location.href = `/login?redirect=${encodeURIComponent(
           window.location.pathname + window.location.search,

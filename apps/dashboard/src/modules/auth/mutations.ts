@@ -1,6 +1,7 @@
 import type { LoginInput, SignupInput } from "@journeyhome/schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { sanitizeRedirect } from "@/lib/search-schemas";
 import {
   deleteAccount,
   login,
@@ -21,7 +22,7 @@ export function useLoginMutation() {
     ) => login(input),
     onSuccess: (session, variables) => {
       queryClient.setQueryData(sessionQueryOptions().queryKey, session);
-      const to = variables.redirect || "/app";
+      const to = sanitizeRedirect(variables.redirect, "/app");
       navigate({ to: to as any, replace: true });
     },
   });

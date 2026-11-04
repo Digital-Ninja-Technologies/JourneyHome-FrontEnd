@@ -38,6 +38,11 @@ export const serviceRequestSchema = z.object({
 });
 export type ServiceRequest = z.infer<typeof serviceRequestSchema>;
 
+export const serviceRequestsListResponseSchema = z.union([
+  z.object({ items: z.array(serviceRequestSchema) }).transform((r) => r.items),
+  z.array(serviceRequestSchema),
+]);
+
 export const createServiceRequestSchema = z.object({
   plan: z.string().min(1, "Plan selection is required"),
   dateOfDeath: z.string().min(1, "Date of passing is required"),

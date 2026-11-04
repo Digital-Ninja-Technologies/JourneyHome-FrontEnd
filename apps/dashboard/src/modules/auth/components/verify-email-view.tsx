@@ -11,6 +11,7 @@ import {
   setPendingVerificationEmail,
   verifyEmail,
 } from "@/modules/auth/api";
+import { getStoredSelectedPackage } from "@/modules/onboarding/storage";
 
 const COOLDOWN = 30;
 
@@ -86,6 +87,10 @@ function ResendBox({ initialEmail }: { initialEmail: string }) {
 export function VerifyEmailView() {
   const { token } = useSearch({ from: "/_auth/verify-email" });
   const pendingEmail = getPendingVerificationEmail() ?? "";
+  const storedPackage = getStoredSelectedPackage();
+  const planRedirect = storedPackage
+    ? `/signup/plan?package=${encodeURIComponent(storedPackage)}`
+    : "/signup/plan";
 
   const verify = useMutation({
     mutationFn: (t: string) => verifyEmail(t),
@@ -121,7 +126,11 @@ export function VerifyEmailView() {
         </section>
         <div className="text-center text-[13px] text-status-paused">
           Already verified?{" "}
-          <Link to="/login" className="font-bold text-link underline">
+          <Link
+            to="/login"
+            search={{ redirect: planRedirect }}
+            className="font-bold text-link underline"
+          >
             Log in
           </Link>
         </div>
@@ -140,7 +149,7 @@ export function VerifyEmailView() {
         </div>
         <Link
           to="/login"
-          search={{ redirect: "/signup/plan" }}
+          search={{ redirect: planRedirect }}
           className={cn(
             buttonVariants({ size: "lg" }),
             "h-[52px] w-full rounded-[14px] font-bold",

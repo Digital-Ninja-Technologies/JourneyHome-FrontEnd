@@ -1,12 +1,17 @@
-import type { Plan } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
+import { resolveSelectedPackage } from "@/lib/search-schemas";
+import {
+  clearStoredSelectedPackage,
+  getStoredSelectedPackage,
+  setStoredSelectedPackage,
+} from "@/modules/onboarding/storage";
 import { usePackages } from "@/modules/packages/query-options";
 import { setOnboardingPlan } from "@/modules/payments/checkout";
+import { createPlan } from "@/modules/plans/api";
 import {
   CoveredPersonFields,
   PackagePicker,
@@ -17,23 +22,36 @@ import { MARKETING_URL } from "@/modules/plans/plans.utils";
 export function OnboardingPlanView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const search = useSearch({ from: "/signup/plan" });
   const packagesQ = usePackages();
   const [packageId, setPackageId] = useState("");
   const selected = packagesQ.data?.find((p) => p._id === packageId);
 
-  // Default to the first available package if none is selected yet
+  const wanted =
+    resolveSelectedPackage(search) ?? getStoredSelectedPackage() ?? undefined;
+
+  // Pre-select the package chosen on the marketing site (URL first, then session backup),
+  // once the list has loaded and only if it's still an available package.
   useEffect(() => {
     if (packageId || !packagesQ.data || packagesQ.data.length === 0) return;
-    setPackageId(packagesQ.data[0]._id);
-  }, [packagesQ.data, packageId]);
+    if (wanted && packagesQ.data.some((p) => p._id === wanted)) {
+      setPackageId(wanted);
+    } else {
+      setPackageId(packagesQ.data[0]._id);
+    }
+  }, [packagesQ.data, packageId, wanted]);
 
   function choosePackage(id: string) {
     setPackageId(id);
+    setStoredSelectedPackage(id);
   }
 
+  const [formError, setFormError] = useState("");
+
   const create = useMutation({
-    mutationFn: (body: unknown) => api<Plan>("/plans", { body }),
+    mutationFn: (body: unknown) => createPlan(body),
     onSuccess: (plan) => {
+      clearStoredSelectedPackage();
       void queryClient.invalidateQueries({ queryKey: ["plans"] });
       navigate({ to: "/signup/payment", search: { plan: plan._id } });
     },
@@ -52,7 +70,10 @@ export function OnboardingPlanView() {
         <div className="mt-2">
           <Link
             to="/app"
-            onClick={() => setOnboardingPlan(null)}
+            onClick={() => {
+              clearStoredSelectedPackage();
+              setOnboardingPlan(null);
+            }}
             className="text-xs font-semibold text-muted underline hover:text-foreground"
           >
             Skip for now — I&rsquo;ll set up a plan later
@@ -63,8 +84,17 @@ export function OnboardingPlanView() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (selected)
-              create.mutate(planRequestBody(e.currentTarget, selected._id));
+            setFormError("");
+            if (selected) {
+              const body = planRequestBody(e.currentTarget, selected._id);
+              if (!body.coveredPerson.dateOfBirth) {
+                setFormError(
+                  "Please select a date of birth for the covered person.",
+                );
+                return;
+              }
+              create.mutate(body);
+            }
           }}
           className="flex flex-col gap-6"
         >
@@ -79,12 +109,12 @@ export function OnboardingPlanView() {
               Compare full package details
             </a>
           </section>
-          {create.isError && (
+          {(formError || create.isError) && (
             <p
               role="alert"
               className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-[13px] text-status-cancelled"
             >
-              {create.error.message}
+              {formError || create.error?.message}
             </p>
           )}
           <Button

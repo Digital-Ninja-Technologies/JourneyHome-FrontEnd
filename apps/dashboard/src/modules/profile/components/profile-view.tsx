@@ -16,11 +16,18 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { DemoNotice } from "@/components/demo-notice";
-import { ApiError, api, isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/api";
+import { ApiError, isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/api";
 import { formatMonthYearLong, initials } from "@/lib/format";
-import { useLogoutMutation } from "@/modules/auth/mutations";
+import { updateUserLocally } from "@/modules/auth/api";
+import { useDeleteAccountMutation } from "@/modules/auth/mutations";
 import { useSessionUser } from "@/modules/auth/query-options";
+import { deleteCard, initializeCard } from "@/modules/payments/api";
 import { useSavedCards } from "@/modules/payments/query-options";
+import {
+  changePassword,
+  updateCustomerProfile,
+  updatePreferences,
+} from "@/modules/profile/api";
 import { useMe } from "@/modules/profile/query-options";
 import type { Me } from "@/modules/profile/types";
 
@@ -42,25 +49,12 @@ function PersonalInfo({ me }: { me?: Me }) {
 
   const save = useMutation({
     mutationFn: (body: { name?: string; email?: string }) =>
-      api<Me>("/auth/me", { method: "PATCH", body }),
+      updateCustomerProfile(body),
     onSuccess: (updated) => {
       setSaved(true);
       void queryClient.invalidateQueries({ queryKey: ["me"] });
       void queryClient.invalidateQueries({ queryKey: ["session"] });
-      try {
-        const raw = localStorage.getItem("jh_session");
-        if (raw) {
-          const s = JSON.parse(raw);
-          s.user = {
-            ...s.user,
-            name: updated.name,
-            email: updated.email,
-          };
-          localStorage.setItem("jh_session", JSON.stringify(s));
-        }
-      } catch {
-        /* ignore */
-      }
+      updateUserLocally({ name: updated.name, email: updated.email });
       setTimeout(() => setSaved(false), 2500);
     },
   });
@@ -147,18 +141,14 @@ function PaymentMethod() {
   const justAdded = search.card_added === "1";
 
   const add = useMutation({
-    mutationFn: () =>
-      api<{ authorizationUrl: string }>("/payments/methods/setup", {
-        method: "POST",
-      }),
+    mutationFn: () => initializeCard(),
     onSuccess: ({ authorizationUrl }) => {
       window.location.href = authorizationUrl;
     },
   });
 
   const remove = useMutation({
-    mutationFn: (id: string) =>
-      api(`/payments/methods/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => deleteCard(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["cards"] });
     },
@@ -258,11 +248,7 @@ function NotificationPreferences({ me }: { me?: Me }) {
   };
 
   const update = useMutation({
-    mutationFn: (next: typeof prefs) =>
-      api<Me>("/auth/notification-preferences", {
-        method: "PATCH",
-        body: next,
-      }),
+    mutationFn: (next: typeof prefs) => updatePreferences(next),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["me"] });
     },
@@ -324,8 +310,8 @@ function ChangePassword() {
   const [open, setOpen] = useState(false);
   const [mismatch, setMismatch] = useState(false);
   const change = useMutation({
-    mutationFn: (body: Record<string, string>) =>
-      api("/auth/me/password", { method: "PATCH", body }),
+    mutationFn: (body: { currentPassword?: string; newPassword?: string }) =>
+      changePassword(body),
   });
   return (
     <div className="border-t border-border">
@@ -413,16 +399,10 @@ function ChangePassword() {
 }
 
 function CloseAccount() {
-  const logoutMutation = useLogoutMutation();
+  const deleteAccountMutation = useDeleteAccountMutation();
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
-  const close = useMutation({
-    mutationFn: (pwd: string) =>
-      api("/auth/me", { method: "DELETE", body: { password: pwd } }),
-    onSuccess: () => {
-      logoutMutation.mutate();
-    },
-  });
+
   return (
     <>
       <button
@@ -463,9 +443,9 @@ function CloseAccount() {
               autoComplete="current-password"
             />
           </div>
-          {close.isError && (
+          {deleteAccountMutation.isError && (
             <p role="alert" className={errCls}>
-              {explain(close.error)}
+              {explain(deleteAccountMutation.error)}
             </p>
           )}
           <DialogFooter className="gap-2 sm:justify-end">
@@ -474,10 +454,12 @@ function CloseAccount() {
             </Button>
             <Button
               variant="destructive"
-              disabled={!password || close.isPending}
-              onClick={() => close.mutate(password)}
+              disabled={!password || deleteAccountMutation.isPending}
+              onClick={() => deleteAccountMutation.mutate(password)}
             >
-              {close.isPending ? "Closing…" : "Close my account"}
+              {deleteAccountMutation.isPending
+                ? "Closing…"
+                : "Close my account"}
             </Button>
           </DialogFooter>
         </DialogContent>

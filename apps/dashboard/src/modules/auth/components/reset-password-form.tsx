@@ -6,14 +6,14 @@ import { useMutation } from "@tanstack/react-query";
 import { Link, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { DemoNotice } from "@/components/demo-notice";
-import { api, isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/api";
+import { isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/api";
+import { resetPassword } from "@/modules/auth/api";
 
 export function ResetPasswordForm() {
   const { token } = useSearch({ from: "/_auth/reset-password" });
   const [mismatch, setMismatch] = useState(false);
   const reset = useMutation({
-    mutationFn: (password: string) =>
-      api("/auth/reset-password", { body: { token, newPassword: password } }),
+    mutationFn: (password: string) => resetPassword(token || "", password),
   });
 
   if (!token) {

@@ -13,6 +13,12 @@ export const packageSchema = z.object({
 
 export type Package = z.infer<typeof packageSchema>;
 
+export const packagesListResponseSchema = z.union([
+  z.array(packageSchema),
+  z.object({ data: z.array(packageSchema) }).transform((r) => r.data),
+  z.object({ items: z.array(packageSchema) }).transform((r) => r.items),
+]);
+
 export const createPackageSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
   description: z.string().optional(),

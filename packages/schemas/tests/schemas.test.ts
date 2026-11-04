@@ -150,7 +150,7 @@ describe("@journeyhome/schemas", () => {
       expect(sanitizeRedirect("/app/plans")).toBe("/app/plans");
     });
 
-    it("blocks open redirect attempts", () => {
+    it("blocks open redirect attempts and auth loops", () => {
       expect(
         redirectSearchSchema.safeParse({ redirect: "https://evil.com" }).success,
       ).toBe(false);
@@ -160,6 +160,12 @@ describe("@journeyhome/schemas", () => {
       expect(sanitizeRedirect("https://evil.com", "/app")).toBe("/app");
       expect(sanitizeRedirect("//evil.com", "/app")).toBe("/app");
       expect(sanitizeRedirect(undefined, "/app")).toBe("/app");
+      expect(sanitizeRedirect("/login", "/app")).toBe("/app");
+      expect(sanitizeRedirect("/login?redirect=/login", "/app")).toBe("/app");
+      expect(sanitizeRedirect("/signup", "/app")).toBe("/app");
+      expect(sanitizeRedirect("/signup/plan?package=pkg_1", "/app")).toBe(
+        "/signup/plan?package=pkg_1",
+      );
     });
   });
 

@@ -8,7 +8,10 @@ export type PlanSearch = z.infer<typeof planSearchSchema>;
 export {
   type RedirectSearch,
   redirectSearchSchema,
+  resolveSelectedPackage,
+  type SignupSearch,
   sanitizeRedirect,
+  signupSearchSchema,
   type VerifyEmailSearch,
   verifyEmailSearchSchema,
 } from "@journeyhome/schemas";

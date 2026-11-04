@@ -1,21 +1,44 @@
-import type { DashboardSummary, Plan } from "@journeyhome/schemas";
-import { api } from "@/lib/api";
+import {
+  type DashboardSummary,
+  dashboardSummarySchema,
+  type Plan,
+  planSchema,
+  plansListResponseSchema,
+} from "@journeyhome/schemas";
+import { api, parseApiResponse } from "@/lib/api";
 
 export async function fetchPlans(): Promise<Plan[]> {
-  const res = await api<Plan[] | { items: Plan[] }>("/plans");
-  if (Array.isArray(res)) return res;
-  if (res && Array.isArray((res as any).items)) return (res as any).items;
-  return [];
+  const res = await api<unknown>("/plans");
+  return parseApiResponse(
+    plansListResponseSchema,
+    res,
+    "Invalid plans response from server",
+  );
 }
 
 export async function fetchPlan(id: string): Promise<Plan> {
-  return api<Plan>(`/plans/${id}`);
+  const res = await api<unknown>(`/plans/${id}`);
+  return parseApiResponse(
+    planSchema,
+    res,
+    `Invalid plan (${id}) response from server`,
+  );
 }
 
 export async function createPlan(data: unknown): Promise<Plan> {
-  return api<Plan>("/plans", { body: data });
+  const res = await api<unknown>("/plans", { body: data });
+  return parseApiResponse(
+    planSchema,
+    res,
+    "Invalid created plan response from server",
+  );
 }
 
 export async function fetchPlansDashboardSummary(): Promise<DashboardSummary> {
-  return api<DashboardSummary>("/plans/dashboard");
+  const res = await api<unknown>("/plans/dashboard");
+  return parseApiResponse(
+    dashboardSummarySchema,
+    res,
+    "Invalid plans dashboard summary response from server",
+  );
 }

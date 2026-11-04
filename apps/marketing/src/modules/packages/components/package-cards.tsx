@@ -75,7 +75,7 @@ export function PackageCards({
               </span>
             </div>
             <a
-              href={SIGNUP_URL}
+              href={`${SIGNUP_URL}?package=${encodeURIComponent(p._id)}`}
               className={cn(
                 buttonVariants({
                   variant: featured ? "accent" : "outline",

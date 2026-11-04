@@ -185,7 +185,10 @@ export function PlanDetailView() {
             }
           />
           <Detail label="Gender" value={capitalise(person.gender ?? "")} />
-          <Detail label="Phone number" value={person.phoneNumber} />
+          <Detail
+            label="Phone number"
+            value={person.phoneNumber || undefined}
+          />
           <Detail label="Started" value={formatMonthYear(plan.startDate)} />
           <Detail label="Home address" value={person.address} wide />
         </div>
