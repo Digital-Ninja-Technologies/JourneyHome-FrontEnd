@@ -1,7 +1,13 @@
-import { Select } from "@journeyhome/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@journeyhome/ui/components/select";
 import { cn } from "@journeyhome/ui/lib/utils";
-import { useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { DemoNotice } from "@/components/demo-notice";
 import {
   PageHeader,
@@ -46,7 +52,7 @@ function Kpi({
 }) {
   return (
     <div className="rounded-[20px] bg-white p-5 shadow-sm">
-      <div className="text-[11px] font-semibold uppercase tracking-[2px] text-muted">
+      <div className="text-[11px] font-semibold uppercase tracking-[2px] text-muted-foreground">
         {label}
       </div>
       <div className={cn("mt-1 font-serif text-[30px] leading-tight", tone)}>
@@ -95,7 +101,7 @@ export default function Payments() {
         <PageHeader title="Payments" />
         <section className="rounded-3xl border border-dashed border-foreground/30 p-8">
           <div className="font-serif text-2xl">Not available yet</div>
-          <p className="mt-2 text-sm leading-relaxed text-muted">
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             {UNSUPPORTED_MESSAGE} It needs an admin payments endpoint (
             <code>GET /payments/admin</code>).
           </p>
@@ -174,7 +180,7 @@ export default function Payments() {
           value={formatMoney(
             sum((p) => p.status === "Refunded" && isThisMonth(when(p))),
           )}
-          tone="text-muted"
+          tone="text-muted-foreground"
         />
       </section>
       <div className="flex flex-wrap gap-3">
@@ -187,24 +193,36 @@ export default function Payments() {
           placeholder="Search by user, reference, or plan…"
         />
         <Select
-          aria-label="Filter by status"
           value={status}
-          onChange={(e) => {
-            setStatus(e.target.value as typeof status);
-            setShown(PAGE);
+          onValueChange={(val) => {
+            if (val) {
+              setStatus(val as typeof status);
+              setShown(PAGE);
+            }
           }}
-          className="h-11 w-auto min-w-[150px] bg-white"
         >
-          <option value="all">All statuses</option>
-          {STATUSES.map((s) => (
-            <option key={s}>{s}</option>
-          ))}
+          <SelectTrigger
+            aria-label="Filter by status"
+            className="h-11 w-auto min-w-[150px] bg-white"
+          >
+            <SelectValue placeholder="All statuses">
+              {status === "all" ? "All statuses" : status}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All statuses</SelectItem>
+            {STATUSES.map((s) => (
+              <SelectItem key={s} value={s}>
+                {s}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
       </div>
       <div className="overflow-x-auto rounded-3xl bg-white p-4 sm:p-6">
         <table className="w-full min-w-[820px] text-left text-sm">
           <thead>
-            <tr className="text-xs font-semibold uppercase tracking-wider text-muted">
+            <tr className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {[
                 "User",
                 "Reference",
@@ -269,12 +287,12 @@ export default function Payments() {
           </tbody>
         </table>
         {q.isPending && (
-          <p className="py-6 text-center text-sm text-muted">
+          <p className="py-6 text-center text-sm text-muted-foreground">
             Loading payments…
           </p>
         )}
         {q.isSuccess && rows.length === 0 && (
-          <p className="py-6 text-center text-sm text-muted">
+          <p className="py-6 text-center text-sm text-muted-foreground">
             No payments match.
           </p>
         )}

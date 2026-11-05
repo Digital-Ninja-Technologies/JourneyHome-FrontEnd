@@ -64,9 +64,9 @@ export default function ServiceRequests() {
           }}
         />
       )}
-      {reqQ.isPending && <p className="text-muted">Loading requests…</p>}
+      {reqQ.isPending && <p className="text-muted-foreground">Loading requests…</p>}
       {reqQ.isSuccess && rows.length === 0 && (
-        <p className="rounded-2xl sm:rounded-3xl bg-white p-6 sm:p-8 text-sm text-muted">
+        <p className="rounded-2xl sm:rounded-3xl bg-white p-6 sm:p-8 text-sm text-muted-foreground">
           No service requests here.
         </p>
       )}
@@ -88,7 +88,7 @@ export default function ServiceRequests() {
                 <div className="font-bold">
                   {r.coveredPersonSnapshot.fullName}&rsquo;s service
                 </div>
-                <div className="text-[13px] text-muted">
+                <div className="text-[13px] text-muted-foreground">
                   Requested by {dir.nameOf(r.owner)} · {formatDate(r.createdAt)}{" "}
                   · {r.burialLocation}
                   {pkg ? ` · ${pkg} package` : ""}

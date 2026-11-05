@@ -101,7 +101,7 @@ export default function Users() {
       <div className="overflow-x-auto rounded-2xl sm:rounded-3xl bg-white p-4 sm:p-6">
         <table className="w-full min-w-[760px] text-left text-sm">
           <thead>
-            <tr className="text-xs font-semibold uppercase tracking-wider text-muted">
+            <tr className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {[
                 "Name",
                 "Email",
@@ -144,10 +144,10 @@ export default function Users() {
           </tbody>
         </table>
         {loading && (
-          <p className="py-6 text-center text-sm text-muted">Loading users…</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">Loading users…</p>
         )}
         {!loading && filtered.length === 0 && (
-          <p className="py-6 text-center text-sm text-muted">No users match.</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">No users match.</p>
         )}
         {filtered.length > shown && (
           <div className="border-t border-border pt-4 text-center">

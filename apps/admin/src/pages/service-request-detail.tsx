@@ -75,7 +75,7 @@ export default function ServiceRequestDetail() {
   });
 
   if (q.isPending)
-    return <main className="p-4 sm:p-6 md:p-10 text-muted">Loading request…</main>;
+    return <main className="p-4 sm:p-6 md:p-10 text-muted-foreground">Loading request…</main>;
   if (q.isError)
     return (
       <main className="p-4 sm:p-6 md:p-10">
@@ -169,7 +169,7 @@ export default function ServiceRequestDetail() {
           <Card>
             <CardTitle className="mb-4">Submitted documents</CardTitle>
             {docs.length === 0 && (
-              <p className="text-sm text-muted">No documents uploaded yet.</p>
+              <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
             )}
             <div className="flex flex-col gap-3">
               {docs.map((d) => {
@@ -191,7 +191,7 @@ export default function ServiceRequestDetail() {
                           <div className="text-sm font-bold">
                             {DOC_LABEL[d.documentType]}
                           </div>
-                          <div className="text-xs text-muted">
+                          <div className="text-xs text-muted-foreground">
                             Uploaded {formatDate(d.uploadedAt)}
                             {d.rejectionReason ? ` · ${d.rejectionReason}` : ""}
                           </div>

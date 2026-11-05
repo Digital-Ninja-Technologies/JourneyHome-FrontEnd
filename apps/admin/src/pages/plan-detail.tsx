@@ -1,5 +1,11 @@
 import { Button } from "@journeyhome/ui/components/button";
-import { Select } from "@journeyhome/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@journeyhome/ui/components/select";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
@@ -43,7 +49,11 @@ export default function PlanDetail() {
   });
 
   if (planQ.isPending)
-    return <main className="p-4 sm:p-6 md:p-10 text-muted">Loading plan…</main>;
+    return (
+      <main className="p-4 sm:p-6 md:p-10 text-muted-foreground">
+        Loading plan…
+      </main>
+    );
   if (planQ.isError)
     return (
       <main className="p-4 sm:p-6 md:p-10">
@@ -143,20 +153,39 @@ export default function PlanDetail() {
                 Update status
               </label>
               <Select
-                id="status"
                 value={next}
-                onChange={(e) => {
-                  setNext(e.target.value as PlanStatus);
+                onValueChange={(val) => {
+                  setNext((val ?? "") as PlanStatus | "");
                   setSaved(false);
                 }}
-                className="border-canvas/15 bg-sidebar text-canvas"
               >
-                <option value="">{label} (current)</option>
-                {options.map((s) => (
-                  <option key={s} value={s}>
-                    {PLAN_STATUS[s][0]}
-                  </option>
-                ))}
+                <SelectTrigger
+                  id="status"
+                  className="border-canvas/15 bg-sidebar text-canvas data-placeholder:text-canvas/60"
+                >
+                  <SelectValue placeholder={`${label} (current)`}>
+                    {next
+                      ? (PLAN_STATUS[next]?.[0] ?? next)
+                      : `${label} (current)`}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="border-canvas/15 bg-sidebar text-canvas">
+                  <SelectItem
+                    value=""
+                    className="text-canvas focus:bg-canvas/10 focus:text-canvas"
+                  >
+                    {label} (current)
+                  </SelectItem>
+                  {options.map((s) => (
+                    <SelectItem
+                      key={s}
+                      value={s}
+                      className="text-canvas focus:bg-canvas/10 focus:text-canvas"
+                    >
+                      {PLAN_STATUS[s][0]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
               <Button
                 type="submit"

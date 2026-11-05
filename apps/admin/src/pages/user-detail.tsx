@@ -18,7 +18,7 @@ export default function UserDetail() {
   const customer = customersQ.data?.find((c) => c._id === id);
 
   if (customersQ.isPending || plansQ.isPending || reqQ.isPending)
-    return <main className="p-4 sm:p-6 md:p-10 text-muted">Loading…</main>;
+    return <main className="p-4 sm:p-6 md:p-10 text-muted-foreground">Loading…</main>;
   if (error)
     return (
       <main className="p-4 sm:p-6 md:p-10">
@@ -60,14 +60,14 @@ export default function UserDetail() {
           }
           title={customer.name}
         />
-        <p className="text-sm text-muted">
+        <p className="text-sm text-muted-foreground">
           {customer.email} · Joined {formatDate(customer.createdAt)}
         </p>
       </div>
       <Card>
         <CardTitle className="mb-3">Plans ({plans.length})</CardTitle>
         {plans.length === 0 && (
-          <p className="border-t border-border pt-4 text-sm text-muted">
+          <p className="border-t border-border pt-4 text-sm text-muted-foreground">
             No plans yet.
           </p>
         )}
@@ -83,12 +83,12 @@ export default function UserDetail() {
               <div>
                 <div className="text-[15px] font-bold">
                   {p.coveredPerson.fullName}{" "}
-                  <span className="font-normal text-muted">
+                  <span className="font-normal text-muted-foreground">
                     · {capitalise(p.coveredPerson.relationship)} ·{" "}
                     {p.packageSnapshot.name}
                   </span>
                 </div>
-                <div className="text-xs text-muted">
+                <div className="text-xs text-muted-foreground">
                   {formatMoney(p.totalContributedMinor, p.currency)} saved ·
                   started {formatMonthYear(p.startDate)}
                 </div>
@@ -103,7 +103,7 @@ export default function UserDetail() {
           Service requests ({requests.length})
         </CardTitle>
         {requests.length === 0 && (
-          <p className="border-t border-border pt-4 text-sm text-muted">
+          <p className="border-t border-border pt-4 text-sm text-muted-foreground">
             No service requests.
           </p>
         )}
@@ -120,7 +120,7 @@ export default function UserDetail() {
                 <div className="text-[15px] font-bold">
                   {r.coveredPersonSnapshot.fullName}&rsquo;s service
                 </div>
-                <div className="text-xs text-muted">
+                <div className="text-xs text-muted-foreground">
                   Requested {formatDate(r.createdAt)} · {r.burialLocation}
                 </div>
               </div>
