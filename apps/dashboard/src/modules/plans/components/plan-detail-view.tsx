@@ -1,4 +1,5 @@
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
+import { formatPhoneDisplay } from "@journeyhome/ui/lib/phone";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link, useParams } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
@@ -191,7 +192,11 @@ export function PlanDetailView() {
           <Detail label="Gender" value={capitalise(person.gender ?? "")} />
           <Detail
             label="Phone number"
-            value={person.phoneNumber || undefined}
+            value={
+              person.phoneNumber
+                ? formatPhoneDisplay(person.phoneNumber)
+                : undefined
+            }
           />
           <Detail label="Started" value={formatMonthYear(plan.startDate)} />
           <Detail label="Home address" value={person.address} wide />

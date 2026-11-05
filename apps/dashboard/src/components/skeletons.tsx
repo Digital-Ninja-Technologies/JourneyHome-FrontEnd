@@ -540,16 +540,15 @@ export function PackageChoiceSkeleton({ count = 3 }: { count?: number }) {
     <div
       role="status"
       aria-label="Loading packages..."
-      className="grid gap-3 sm:grid-cols-3"
+      className="grid gap-2.5 sm:grid-cols-3 sm:gap-3"
     >
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="flex flex-col gap-2 rounded-2xl border border-border bg-white p-4"
+          className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-white p-3.5 sm:flex-col sm:items-stretch sm:gap-2 sm:p-4"
         >
           <Skeleton className="h-5 w-24 rounded-md" />
           <Skeleton className="h-6 w-20 rounded-md" />
-          <Skeleton className="h-3.5 w-full rounded" />
         </div>
       ))}
     </div>

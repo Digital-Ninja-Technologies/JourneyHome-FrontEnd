@@ -1,8 +1,11 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@journeyhome/ui/components/button";
+import { FieldGroup } from "@journeyhome/ui/components/field";
 import { toast } from "@journeyhome/ui/components/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { formatMoney } from "@/lib/format";
 import { resolveSelectedPackage } from "@/lib/search-schemas";
 import {
@@ -13,11 +16,14 @@ import {
 import { usePackages } from "@/modules/packages/query-options";
 import { setOnboardingPlan } from "@/modules/payments/checkout";
 import { createPlan } from "@/modules/plans/api";
+import { CoveredPersonFields } from "@/modules/plans/components/covered-person-fields";
+import { FormPackagePicker } from "@/modules/plans/components/form-package-picker";
 import {
-  CoveredPersonFields,
-  PackagePicker,
-  planRequestBody,
-} from "@/modules/plans/components/plan-form-parts";
+  type PlanFormValues,
+  planFormDefaults,
+  planFormSchema,
+  toCreatePlanBody,
+} from "@/modules/plans/plan-form";
 import { MARKETING_URL } from "@/modules/plans/plans.utils";
 
 export function OnboardingPlanView() {
@@ -25,7 +31,13 @@ export function OnboardingPlanView() {
   const queryClient = useQueryClient();
   const search = useSearch({ from: "/signup/plan" });
   const packagesQ = usePackages();
-  const [packageId, setPackageId] = useState("");
+
+  const form = useForm<PlanFormValues>({
+    resolver: zodResolver(planFormSchema),
+    defaultValues: planFormDefaults,
+  });
+  const { control, getValues, setValue } = form;
+  const packageId = useWatch({ control, name: "packageId" });
   const selected = packagesQ.data?.find((p) => p._id === packageId);
 
   const wanted =
@@ -34,23 +46,17 @@ export function OnboardingPlanView() {
   // Pre-select the package chosen on the marketing site (URL first, then session backup),
   // once the list has loaded and only if it's still an available package.
   useEffect(() => {
-    if (packageId || !packagesQ.data || packagesQ.data.length === 0) return;
-    if (wanted && packagesQ.data.some((p) => p._id === wanted)) {
-      setPackageId(wanted);
-    } else {
-      setPackageId(packagesQ.data[0]._id);
-    }
-  }, [packagesQ.data, packageId, wanted]);
-
-  function choosePackage(id: string) {
-    setPackageId(id);
-    setStoredSelectedPackage(id);
-  }
-
-  const [formError, setFormError] = useState("");
+    if (getValues("packageId") || !packagesQ.data?.length) return;
+    const pick =
+      wanted && packagesQ.data.some((p) => p._id === wanted)
+        ? wanted
+        : packagesQ.data[0]._id;
+    setValue("packageId", pick);
+  }, [packagesQ.data, wanted, getValues, setValue]);
 
   const create = useMutation({
-    mutationFn: (body: unknown) => createPlan(body),
+    mutationFn: (values: PlanFormValues) =>
+      createPlan(toCreatePlanBody(values)),
     onSuccess: (plan) => {
       clearStoredSelectedPackage();
       void queryClient.invalidateQueries({ queryKey: ["plans"] });
@@ -65,7 +71,8 @@ export function OnboardingPlanView() {
       toast.add({
         type: "error",
         title: "Could not create plan",
-        description: error.message || "Failed to create plan. Please try again.",
+        description:
+          error.message || "Failed to create plan. Please try again.",
       });
     },
   });
@@ -95,26 +102,25 @@ export function OnboardingPlanView() {
       </div>
       <div className="flex w-full flex-col gap-6">
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setFormError("");
-            if (selected) {
-              const body = planRequestBody(e.currentTarget, selected._id);
-              if (!body.coveredPerson.dateOfBirth) {
-                setFormError(
-                  "Please select a date of birth for the covered person.",
-                );
-                return;
-              }
-              create.mutate(body);
-            }
-          }}
+          noValidate
+          onSubmit={form.handleSubmit((values) => create.mutate(values))}
           className="flex flex-col gap-6"
         >
-          <section className="flex flex-col gap-6 rounded-[28px] bg-white p-7 shadow-sm">
-            <CoveredPersonFields />
+          <section className="flex flex-col gap-6 rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-base font-bold">Who is this plan for?</h2>
+              <FieldGroup className="grid gap-4 sm:grid-cols-2">
+                <CoveredPersonFields
+                  control={control}
+                  addressClassName="sm:col-span-2"
+                />
+              </FieldGroup>
+            </div>
             <hr className="border-border" />
-            <PackagePicker value={packageId} onChange={choosePackage} />
+            <FormPackagePicker
+              control={control}
+              onChange={setStoredSelectedPackage}
+            />
             <a
               href={`${MARKETING_URL}/pricing`}
               className="self-start text-xs font-semibold underline"
@@ -122,12 +128,12 @@ export function OnboardingPlanView() {
               Compare full package details
             </a>
           </section>
-          {(formError || create.isError) && (
+          {create.isError && (
             <p
               role="alert"
               className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-[13px] text-status-cancelled"
             >
-              {formError || create.error?.message}
+              {create.error.message}
             </p>
           )}
           <Button
