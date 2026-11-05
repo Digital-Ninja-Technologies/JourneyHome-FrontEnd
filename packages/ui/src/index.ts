@@ -22,6 +22,11 @@ export * from "./components/empty";
 export * from "./components/input-otp";
 export * from "./components/password-input";
 export * from "./components/popover";
+export * from "./components/separator";
+export * from "./components/sheet";
+export * from "./components/sidebar";
+export * from "./components/toast";
+export * from "./components/tooltip";
 
 // Lib utils
 export * from "./lib/utils";
