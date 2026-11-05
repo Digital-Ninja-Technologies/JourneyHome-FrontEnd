@@ -73,7 +73,7 @@ export function ContactForm() {
   };
 
   if (isSuccess) {
-    const referenceId = submitMutation.data?.id || submitMutation.data?._id;
+    const referenceId = submitMutation.data?._id;
     return (
       <div className="flex flex-col items-center justify-center gap-5 rounded-[28px] border border-border bg-white p-10 text-center shadow-xs">
         <div className="grid size-14 place-items-center rounded-full bg-status-active-bg text-status-active">
@@ -83,12 +83,12 @@ export function ContactForm() {
           <h3 className="font-heading text-2xl font-bold tracking-tight text-foreground">
             Message received!
           </h3>
-          <p className="max-w-md text-sm leading-relaxed text-muted">
+          <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
             Thank you for reaching out. A member of our team will review your
             inquiry and respond within one business day.
           </p>
           {referenceId && (
-            <span className="text-xs text-muted/80">
+            <span className="text-xs text-muted-foreground/80">
               Reference ID: {referenceId}
             </span>
           )}
@@ -169,7 +169,7 @@ export function ContactForm() {
       />
 
       <div className="flex flex-col gap-2">
-        <Label className="text-xs font-bold uppercase tracking-wider text-muted">
+        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
           What&rsquo;s this about?
         </Label>
         <div className="flex flex-wrap gap-2">

@@ -33,7 +33,7 @@ export function SiteFooter() {
       <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div className="flex flex-col gap-3.5">
           <Logo />
-          <p className="max-w-[260px] text-sm leading-relaxed text-muted">
+          <p className="max-w-[260px] text-sm leading-relaxed text-muted-foreground">
             Save ahead. Prepare with dignity. Capture the memories that matter.
           </p>
         </div>
@@ -62,7 +62,7 @@ export function SiteFooter() {
           </div>
         ))}
       </div>
-      <div className="flex flex-col gap-3 border-t border-border pt-6 text-[13px] text-muted sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 border-t border-border pt-6 text-[13px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <span>
           © {new Date().getFullYear()} Journey Home. All rights reserved.
         </span>

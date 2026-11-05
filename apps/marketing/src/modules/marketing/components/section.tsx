@@ -65,7 +65,7 @@ export function PageHero({
       {intro && (
         <p
           className={cn(
-            "max-w-xl text-lg leading-relaxed text-muted",
+            "max-w-xl text-lg leading-relaxed text-muted-foreground",
             center && "mx-auto",
           )}
         >

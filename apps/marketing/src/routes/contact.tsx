@@ -2,11 +2,11 @@ import { buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { AsyncBoundary } from "@/components/async-boundary";
 import { CONTACT_EMAIL } from "@/lib/config";
 import { createPageHead } from "@/lib/seo";
 import { ContactForm } from "@/modules/contact";
 import { Accent, Container, PageHero } from "@/modules/marketing";
-import { AsyncBoundary } from "@/components/async-boundary";
 
 export const Route = createFileRoute("/contact")({
   head: () =>
@@ -77,7 +77,7 @@ function Contact() {
               </div>
               <div>
                 <div
-                  className={`text-xs font-bold uppercase tracking-wider ${dark ? "text-canvas/60" : "text-muted"}`}
+                  className={`text-xs font-bold uppercase tracking-wider ${dark ? "text-canvas/60" : "text-muted-foreground"}`}
                 >
                   {title}
                 </div>
