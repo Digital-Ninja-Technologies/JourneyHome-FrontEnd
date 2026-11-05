@@ -30,6 +30,7 @@ import { Route as AppPaymentsNewRouteImport } from './routes/app/payments/new'
 import { Route as AppPlansIndexRouteImport } from './routes/app/plans/index'
 import { Route as AppPlansIdRouteImport } from './routes/app/plans/$id'
 import { Route as AppServiceRequestsIndexRouteImport } from './routes/app/service-requests/index'
+import { Route as AppServiceRequestsIdRouteImport } from './routes/app/service-requests/$id'
 import { Route as AppServiceRequestsNewRouteImport } from './routes/app/service-requests/new'
 
 const IndexRoute = IndexRouteImport.update({
@@ -136,6 +137,11 @@ const AppServiceRequestsIndexRoute = AppServiceRequestsIndexRouteImport.update({
   path: '/service-requests/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppServiceRequestsIdRoute = AppServiceRequestsIdRouteImport.update({
+  id: '/service-requests/$id',
+  path: '/service-requests/$id',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppServiceRequestsNewRoute = AppServiceRequestsNewRouteImport.update({
   id: '/service-requests/new',
   path: '/service-requests/new',
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/app/payments/callback': typeof AppPaymentsCallbackRoute
   '/app/payments/new': typeof AppPaymentsNewRoute
   '/app/plans/$id': typeof AppPlansIdRoute
+  '/app/service-requests/$id': typeof AppServiceRequestsIdRoute
   '/app/service-requests/new': typeof AppServiceRequestsNewRoute
   '/app/payments/': typeof AppPaymentsIndexRoute
   '/app/plans/': typeof AppPlansIndexRoute
@@ -181,6 +188,7 @@ export interface FileRoutesByTo {
   '/app/payments/callback': typeof AppPaymentsCallbackRoute
   '/app/payments/new': typeof AppPaymentsNewRoute
   '/app/plans/$id': typeof AppPlansIdRoute
+  '/app/service-requests/$id': typeof AppServiceRequestsIdRoute
   '/app/service-requests/new': typeof AppServiceRequestsNewRoute
   '/app/payments': typeof AppPaymentsIndexRoute
   '/app/plans': typeof AppPlansIndexRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/app/payments/callback': typeof AppPaymentsCallbackRoute
   '/app/payments/new': typeof AppPaymentsNewRoute
   '/app/plans/$id': typeof AppPlansIdRoute
+  '/app/service-requests/$id': typeof AppServiceRequestsIdRoute
   '/app/service-requests/new': typeof AppServiceRequestsNewRoute
   '/app/payments/': typeof AppPaymentsIndexRoute
   '/app/plans/': typeof AppPlansIndexRoute
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/app/payments/callback'
     | '/app/payments/new'
     | '/app/plans/$id'
+    | '/app/service-requests/$id'
     | '/app/service-requests/new'
     | '/app/payments/'
     | '/app/plans/'
@@ -252,6 +262,7 @@ export interface FileRouteTypes {
     | '/app/payments/callback'
     | '/app/payments/new'
     | '/app/plans/$id'
+    | '/app/service-requests/$id'
     | '/app/service-requests/new'
     | '/app/payments'
     | '/app/plans'
@@ -276,6 +287,7 @@ export interface FileRouteTypes {
     | '/app/payments/callback'
     | '/app/payments/new'
     | '/app/plans/$id'
+    | '/app/service-requests/$id'
     | '/app/service-requests/new'
     | '/app/payments/'
     | '/app/plans/'
@@ -439,6 +451,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppServiceRequestsIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/app/service-requests/$id': {
+      id: '/app/service-requests/$id'
+      path: '/service-requests/$id'
+      fullPath: '/app/service-requests/$id'
+      preLoaderRoute: typeof AppServiceRequestsIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/app/service-requests/new': {
       id: '/app/service-requests/new'
       path: '/service-requests/new'
@@ -474,6 +493,7 @@ interface AppRouteRouteChildren {
   AppPaymentsCallbackRoute: typeof AppPaymentsCallbackRoute
   AppPaymentsNewRoute: typeof AppPaymentsNewRoute
   AppPlansIdRoute: typeof AppPlansIdRoute
+  AppServiceRequestsIdRoute: typeof AppServiceRequestsIdRoute
   AppServiceRequestsNewRoute: typeof AppServiceRequestsNewRoute
   AppPaymentsIndexRoute: typeof AppPaymentsIndexRoute
   AppPlansIndexRoute: typeof AppPlansIndexRoute
@@ -487,6 +507,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppPaymentsCallbackRoute: AppPaymentsCallbackRoute,
   AppPaymentsNewRoute: AppPaymentsNewRoute,
   AppPlansIdRoute: AppPlansIdRoute,
+  AppServiceRequestsIdRoute: AppServiceRequestsIdRoute,
   AppServiceRequestsNewRoute: AppServiceRequestsNewRoute,
   AppPaymentsIndexRoute: AppPaymentsIndexRoute,
   AppPlansIndexRoute: AppPlansIndexRoute,

@@ -400,6 +400,39 @@ export function RequestServiceSkeleton() {
   );
 }
 
+export function ServiceRequestDetailSkeleton() {
+  return (
+    <main
+      role="status"
+      aria-label="Loading service request..."
+      className="flex max-w-4xl flex-1 flex-col gap-6"
+    >
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-4 w-48 rounded-md" />
+        <Skeleton className="h-12 w-80 max-w-full rounded-xl" />
+      </div>
+      <div className="flex flex-col gap-5 rounded-[28px] bg-foreground p-8">
+        <Skeleton className="h-1 w-full rounded-full bg-canvas/20" />
+        <Skeleton className="h-4 w-full rounded-md bg-canvas/15" />
+        <Skeleton className="h-4 w-2/3 rounded-md bg-canvas/15" />
+      </div>
+      <div className="flex flex-col gap-4 rounded-[28px] bg-white p-8">
+        <Skeleton className="h-7 w-40 rounded-lg" />
+        <Skeleton className="h-20 w-full rounded-2xl" />
+        <Skeleton className="h-20 w-full rounded-2xl" />
+      </div>
+      <div className="grid gap-6 rounded-[28px] bg-white p-8 sm:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="flex flex-col gap-1.5">
+            <Skeleton className="h-3.5 w-20 rounded" />
+            <Skeleton className="h-5 w-32 rounded-md" />
+          </div>
+        ))}
+      </div>
+    </main>
+  );
+}
+
 export function ServiceDocumentsSkeleton() {
   return (
     <div

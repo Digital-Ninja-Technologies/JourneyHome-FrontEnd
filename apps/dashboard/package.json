@@ -27,6 +27,7 @@
 		"lucide-react": "^1.60.0",
 		"react": "^19.3.1",
 		"react-dom": "^19.3.1",
+		"react-dropzone": "^20.1.4",
 		"react-error-boundary": "^6.1.6",
 		"react-hook-form": "^7.90.0",
 		"zod": "^4.6.7"
