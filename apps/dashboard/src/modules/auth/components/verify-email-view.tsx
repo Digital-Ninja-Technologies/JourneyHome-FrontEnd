@@ -1,6 +1,7 @@
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
+import { toast } from "@journeyhome/ui/components/toast";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useSearch } from "@tanstack/react-router";
@@ -33,6 +34,18 @@ function ResendBox({ initialEmail }: { initialEmail: string }) {
     onSuccess: () => {
       setPendingVerificationEmail(email.trim());
       setWait(COOLDOWN);
+      toast.add({
+        type: "success",
+        title: "Verification link sent",
+        description: "A new link was sent to your email address.",
+      });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Failed to send link",
+        description: error.message || "Please try again later.",
+      });
     },
   });
 
@@ -94,6 +107,20 @@ export function VerifyEmailView() {
 
   const verify = useMutation({
     mutationFn: (t: string) => verifyEmail(t),
+    onSuccess: () => {
+      toast.add({
+        type: "success",
+        title: "Email verified",
+        description: "Your account is active. Log in to continue.",
+      });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Verification failed",
+        description: error.message || "The verification link may be invalid or expired.",
+      });
+    },
   });
 
   // The link in the email lands here with ?token=...; verify it once.

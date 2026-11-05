@@ -1,5 +1,6 @@
 import type { AppNotification } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
+import { toast } from "@journeyhome/ui/components/toast";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -66,6 +67,17 @@ export function NotificationsView() {
     mutationFn: (id: string) => deleteNotification(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      toast.add({
+        type: "success",
+        title: "Notification removed",
+      });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Could not remove notification",
+        description: error.message,
+      });
     },
   });
 
@@ -83,14 +95,19 @@ export function NotificationsView() {
 
   async function markAllRead() {
     const unreadNotes = notes.filter((n) => isUnread(n));
+    if (unreadNotes.length === 0) return;
     setSeen(new Date().toISOString());
     for (const note of unreadNotes) {
       void markReadMutation.mutateAsync(note._id);
     }
+    toast.add({
+      type: "info",
+      title: "All notifications marked as read",
+    });
   }
 
   return (
-    <main className="flex flex-col gap-6 p-5 md:p-10">
+    <main className="flex flex-1 flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="text-sm text-muted-foreground">
@@ -99,9 +116,7 @@ export function NotificationsView() {
             </Link>{" "}
             / Notifications
           </div>
-          <h1 className="font-serif text-[36px] font-normal leading-[1.05] sm:text-[44px] md:text-[56px]">
-            Notifications
-          </h1>
+          <h1 className="page-title">Notifications</h1>
         </div>
         {unread > 0 && (
           <Button

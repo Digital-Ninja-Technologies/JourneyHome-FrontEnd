@@ -1,4 +1,5 @@
 import { Button } from "@journeyhome/ui/components/button";
+import { toast } from "@journeyhome/ui/components/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -53,7 +54,19 @@ export function OnboardingPlanView() {
     onSuccess: (plan) => {
       clearStoredSelectedPackage();
       void queryClient.invalidateQueries({ queryKey: ["plans"] });
+      toast.add({
+        type: "success",
+        title: "Plan created",
+        description: "Proceeding to checkout to complete your plan setup.",
+      });
       navigate({ to: "/signup/payment", search: { plan: plan._id } });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Could not create plan",
+        description: error.message || "Failed to create plan. Please try again.",
+      });
     },
   });
 

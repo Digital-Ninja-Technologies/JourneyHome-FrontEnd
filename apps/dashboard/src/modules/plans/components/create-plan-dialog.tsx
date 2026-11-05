@@ -5,6 +5,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@journeyhome/ui/components/dialog";
+import { toast } from "@journeyhome/ui/components/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -34,8 +35,20 @@ export function CreatePlanDialog({
     mutationFn: (body: unknown) => createPlan(body),
     onSuccess: (plan) => {
       void queryClient.invalidateQueries({ queryKey: ["plans"] });
+      toast.add({
+        type: "success",
+        title: "Plan created",
+        description: "Your new coverage plan has been created.",
+      });
       onClose();
       navigate({ to: "/app/plans/$id", params: { id: plan._id } });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Could not create plan",
+        description: error.message || "Failed to create plan. Please try again.",
+      });
     },
   });
 

@@ -1,5 +1,6 @@
 import type { DocumentType, ServiceDocument } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
+import { toast } from "@journeyhome/ui/components/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { ServiceDocumentsSkeleton } from "@/components/skeletons";
@@ -55,13 +56,32 @@ export function RequestDocuments({
       setError(null);
       void queryClient.invalidateQueries({ queryKey: ["service-request"] });
       void queryClient.invalidateQueries({ queryKey: ["service-requests"] });
+      toast.add({
+        type: "success",
+        title: "Document uploaded",
+        description: "Your document was uploaded successfully.",
+      });
     },
-    onError: (e: Error) => setError(e.message),
+    onError: (e: Error) => {
+      setError(e.message);
+      toast.add({
+        type: "error",
+        title: "Upload failed",
+        description: e.message || "Failed to upload document.",
+      });
+    },
   });
 
   const open = useMutation({
     mutationFn: (id: string) => openServiceDocument(requestId, id),
-    onError: (e: Error) => setError(e.message),
+    onError: (e: Error) => {
+      setError(e.message);
+      toast.add({
+        type: "error",
+        title: "Could not open document",
+        description: e.message,
+      });
+    },
   });
 
   if (q.isPending) return <ServiceDocumentsSkeleton />;

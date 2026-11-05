@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@journeyhome/ui/components/select";
+import { toast } from "@journeyhome/ui/components/toast";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
@@ -228,7 +229,19 @@ export function RequestServiceView() {
       void queryClient.invalidateQueries({ queryKey: ["plans"] });
       void queryClient.invalidateQueries({ queryKey: ["plan"] });
       void queryClient.invalidateQueries({ queryKey: ["service-requests"] });
+      toast.add({
+        type: "success",
+        title: "Service request submitted",
+        description: "Our care team will review your details and contact you shortly.",
+      });
       navigate({ to: "/app/service-requests" });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Submission failed",
+        description: error.message || "Could not submit service request.",
+      });
     },
     onSettled: () => setProgress(null),
   });
@@ -264,15 +277,19 @@ export function RequestServiceView() {
   const partial = !!created.current && submit.isError;
 
   return (
-    <main className="flex max-w-[660px] flex-col gap-6 p-5 md:p-10">
+    <main className="flex flex-1 flex-col gap-6 max-w-2xl">
       <header className="flex flex-col gap-2">
         <div className="text-sm text-muted-foreground">
+          <Link to="/app" className="hover:underline">
+            Dashboard
+          </Link>{" "}
+          /{" "}
           <Link to="/app/service-requests" className="hover:underline">
             Service requests
           </Link>{" "}
           / New request
         </div>
-        <h1 className="font-serif text-[52px] font-normal leading-[1.05]">
+        <h1 className="page-title">
           Request the <span className="italic">service</span>
         </h1>
         <p className="text-sm text-muted-foreground">

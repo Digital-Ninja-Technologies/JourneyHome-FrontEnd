@@ -1,4 +1,5 @@
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
+import { toast } from "@journeyhome/ui/components/toast";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, Navigate, useSearch } from "@tanstack/react-router";
@@ -29,12 +30,25 @@ export function PaymentCallbackView() {
   });
 
   useEffect(() => {
-    if (verify.isSuccess) {
+    if (verify.isSuccess && verify.data) {
       void queryClient.invalidateQueries({ queryKey: ["plans"] });
       void queryClient.invalidateQueries({ queryKey: ["plan"] });
       void queryClient.invalidateQueries({ queryKey: ["payments"] });
+      if (verify.data.status === "Successful") {
+        toast.add({
+          type: "success",
+          title: "Payment confirmed",
+          description: "Your contribution has been received successfully.",
+        });
+      } else if (verify.data.status === "Failed") {
+        toast.add({
+          type: "error",
+          title: "Payment unsuccessful",
+          description: "The transaction was not completed. Please try again.",
+        });
+      }
     }
-  }, [verify.isSuccess, queryClient]);
+  }, [verify.isSuccess, verify.data, queryClient]);
 
   const pay = verify.data;
 
@@ -136,7 +150,7 @@ export function PaymentCallbackView() {
 
   return (
     <main
-      className="flex max-w-[540px] flex-col items-start gap-4 p-5 md:p-10 pt-24"
+      className="flex flex-1 flex-col items-start gap-4 max-w-xl pt-12"
       aria-live="polite"
     >
       {icon}

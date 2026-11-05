@@ -1,6 +1,7 @@
 import { Button } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
+import { toast } from "@journeyhome/ui/components/toast";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -14,6 +15,20 @@ export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const send = useMutation({
     mutationFn: (e: string) => forgotPassword(e),
+    onSuccess: () => {
+      toast.add({
+        type: "success",
+        title: "Reset link sent",
+        description: "Check your email for instructions to reset your password.",
+      });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Request failed",
+        description: error.message || "Could not send password reset email.",
+      });
+    },
   });
   const unsupported = isUnsupported(send.error);
 

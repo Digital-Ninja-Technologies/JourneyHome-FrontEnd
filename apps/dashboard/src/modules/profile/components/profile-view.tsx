@@ -10,6 +10,7 @@ import {
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
 import { Switch } from "@journeyhome/ui/components/switch";
+import { toast } from "@journeyhome/ui/components/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, ShieldCheck } from "lucide-react";
@@ -127,6 +128,18 @@ function NotificationPreferences({ me }: { me?: Me }) {
     mutationFn: (next: typeof prefs) => updatePreferences(next),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["me"] });
+      toast.add({
+        type: "success",
+        title: "Preferences saved",
+        description: "Your notification settings have been updated.",
+      });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Failed to update preferences",
+        description: error.message || "Please try again.",
+      });
     },
   });
 
@@ -215,7 +228,24 @@ function ChangePassword() {
                 currentPassword: String(d.get("current")),
                 newPassword: String(d.get("next")),
               },
-              { onSuccess: () => form.reset() },
+              {
+                onSuccess: () => {
+                  form.reset();
+                  setOpen(false);
+                  toast.add({
+                    type: "success",
+                    title: "Password changed",
+                    description: "Your password was updated successfully.",
+                  });
+                },
+                onError: (err: any) => {
+                  toast.add({
+                    type: "error",
+                    title: "Password change failed",
+                    description: explain(err) || "Could not change password.",
+                  });
+                },
+              },
             );
           }}
           className="mb-5 flex flex-col gap-3"
@@ -370,7 +400,7 @@ function SecuritySection() {
 export function ProfileView() {
   const meQ = useMe();
   return (
-    <main className="flex max-w-[820px] flex-col gap-6 p-5 md:p-10">
+    <main className="flex flex-1 flex-col gap-6 max-w-4xl">
       <div>
         <div className="text-sm text-muted-foreground">
           <Link to="/app" className="hover:underline">
@@ -378,7 +408,7 @@ export function ProfileView() {
           </Link>{" "}
           / Profile
         </div>
-        <h1 className="font-serif text-[36px] font-normal leading-[1.05] sm:text-[44px] md:text-[56px]">
+        <h1 className="page-title">
           Profile &amp; <span className="italic">settings</span>
         </h1>
       </div>
