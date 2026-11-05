@@ -1,456 +1,240 @@
-"use client";
-
-import * as React from "react";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
-import { cn } from "../lib/utils";
-import { Button } from "./button";
+import { Button, buttonVariants } from "@journeyhome/ui/components/button";
+import { cn } from "cn";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./select";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "lucide-react";
+import * as React from "react";
+import {
+  type DayButton,
+  DayPicker,
+  getDefaultClassNames,
+  type Locale,
+  useDayPicker,
+} from "react-day-picker";
 
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-] as const;
+function Calendar({
+  className,
+  classNames,
+  showOutsideDays = true,
+  captionLayout = "label",
+  buttonVariant = "ghost",
+  locale,
+  formatters,
+  components,
+  ...props
+}: React.ComponentProps<typeof DayPicker> & {
+  buttonVariant?: React.ComponentProps<typeof Button>["variant"];
+}) {
+  const defaultClassNames = getDefaultClassNames();
 
-const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"] as const;
-
-export function isSameDay(d1: Date, d2: Date): boolean {
   return (
-    d1.getFullYear() === d2.getFullYear() &&
-    d1.getMonth() === d2.getMonth() &&
-    d1.getDate() === d2.getDate()
+    <DayPicker
+      showOutsideDays={showOutsideDays}
+      className={cn(
+        "group/calendar bg-background p-3 [--cell-radius:var(--radius,0.75rem)] [--cell-size:2rem] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
+        String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
+        String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
+        className,
+      )}
+      captionLayout={captionLayout}
+      locale={locale}
+      formatters={{
+        formatMonthDropdown: (date) =>
+          date.toLocaleString(locale?.code, { month: "short" }),
+        ...formatters,
+      }}
+      classNames={{
+        root: cn("w-fit", defaultClassNames.root),
+        months: cn(
+          "relative flex flex-col gap-4 md:flex-row",
+          defaultClassNames.months,
+        ),
+        month: cn("flex w-full flex-col gap-4", defaultClassNames.month),
+        nav: cn(
+          "absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1",
+          defaultClassNames.nav,
+        ),
+        button_previous: cn(
+          buttonVariants({ variant: buttonVariant }),
+          "size-(--cell-size) p-0 select-none aria-disabled:opacity-50 hover:bg-muted/40 hover:text-foreground hover:translate-y-0 active:scale-95",
+          defaultClassNames.button_previous,
+        ),
+        button_next: cn(
+          buttonVariants({ variant: buttonVariant }),
+          "size-(--cell-size) p-0 select-none aria-disabled:opacity-50 hover:bg-muted/40 hover:text-foreground hover:translate-y-0 active:scale-95",
+          defaultClassNames.button_next,
+        ),
+        month_caption: cn(
+          "flex h-(--cell-size) w-full items-center justify-center px-(--cell-size) font-medium text-foreground text-sm",
+          defaultClassNames.month_caption,
+        ),
+        dropdowns: cn(
+          "flex h-(--cell-size) w-full items-center justify-center gap-1.5 text-sm font-medium",
+          defaultClassNames.dropdowns,
+        ),
+        dropdown_root: cn(
+          "relative rounded-lg border border-border/70 bg-secondary/50 px-2 py-0.5 text-xs font-semibold hover:bg-secondary transition-colors",
+          defaultClassNames.dropdown_root,
+        ),
+        dropdown: cn(
+          "absolute inset-0 bg-popover opacity-0 cursor-pointer",
+          defaultClassNames.dropdown,
+        ),
+        caption_label: cn(
+          "font-medium select-none text-foreground",
+          captionLayout === "label"
+            ? "text-sm"
+            : "flex items-center gap-1 rounded-(--cell-radius) text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground",
+          defaultClassNames.caption_label,
+        ),
+        month_grid: cn("w-full border-collapse", defaultClassNames.month_grid),
+        weekdays: cn("flex", defaultClassNames.weekdays),
+        weekday: cn(
+          "flex-1 rounded-(--cell-radius) text-[0.8rem] font-medium text-muted-foreground select-none",
+          defaultClassNames.weekday,
+        ),
+        week: cn("mt-2 flex w-full", defaultClassNames.week),
+        week_number_header: cn(
+          "w-(--cell-size) select-none",
+          defaultClassNames.week_number_header,
+        ),
+        week_number: cn(
+          "text-[0.8rem] text-muted-foreground select-none",
+          defaultClassNames.week_number,
+        ),
+        day: cn(
+          "group/day relative aspect-square h-full w-full rounded-(--cell-radius) p-0 text-center select-none [&:last-child[data-selected=true]_button]:rounded-r-(--cell-radius)",
+          props.showWeekNumber
+            ? "[&:nth-child(2)[data-selected=true]_button]:rounded-l-(--cell-radius)"
+            : "[&:first-child[data-selected=true]_button]:rounded-l-(--cell-radius)",
+          defaultClassNames.day,
+        ),
+        range_start: cn(
+          "relative isolate z-0 rounded-l-(--cell-radius) bg-muted/30 after:absolute after:inset-y-0 after:right-0 after:w-4 after:bg-muted/30",
+          defaultClassNames.range_start,
+        ),
+        range_middle: cn("rounded-none", defaultClassNames.range_middle),
+        range_end: cn(
+          "relative isolate z-0 rounded-r-(--cell-radius) bg-muted/30 after:absolute after:inset-y-0 after:left-0 after:w-4 after:bg-muted/30",
+          defaultClassNames.range_end,
+        ),
+        today: cn(
+          "rounded-(--cell-radius) bg-muted/30 font-semibold text-foreground data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
+          defaultClassNames.today,
+        ),
+        outside: cn(
+          "text-muted-foreground/60 aria-selected:text-muted-foreground",
+          defaultClassNames.outside,
+        ),
+        disabled: cn(
+          "text-muted-foreground opacity-85",
+          defaultClassNames.disabled,
+        ),
+        hidden: cn("invisible", defaultClassNames.hidden),
+        ...classNames,
+      }}
+      components={{
+        Root: CalendarRoot,
+        Chevron: CalendarChevron,
+        DayButton: CalendarDayButton,
+        WeekNumber: CalendarWeekNumber,
+        ...components,
+      }}
+      {...props}
+    />
   );
 }
 
-export function startOfDay(d: Date): Date {
-  const res = new Date(d);
-  res.setHours(0, 0, 0, 0);
-  return res;
-}
-
-export function endOfDay(d: Date): Date {
-  const res = new Date(d);
-  res.setHours(23, 59, 59, 999);
-  return res;
-}
-
-export function parseDateInput(value: Date | string | null | undefined): Date | null {
-  if (!value) return null;
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value;
-  }
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    if (!trimmed) return null;
-    const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (isoMatch) {
-      const year = Number.parseInt(isoMatch[1], 10);
-      const month = Number.parseInt(isoMatch[2], 10) - 1;
-      const day = Number.parseInt(isoMatch[3], 10);
-      return new Date(year, month, day);
-    }
-    const d = new Date(trimmed);
-    return Number.isNaN(d.getTime()) ? null : d;
-  }
-  return null;
-}
-
-export interface CalendarProps {
-  value?: Date | string | null;
-  onSelect?: (date: Date) => void;
-  minDate?: Date | string;
-  maxDate?: Date | string;
-  fromYear?: number;
-  toYear?: number;
-  yearOrder?: "asc" | "desc";
-  className?: string;
-  disabledDates?: (date: Date) => boolean;
-}
-
-interface CalendarDay {
-  date: Date;
-  dayNumber: number;
-  isCurrentMonth: boolean;
-  isDisabled: boolean;
-  isSelected: boolean;
-  isToday: boolean;
-}
-
-export function Calendar({
-  value,
-  onSelect,
-  minDate,
-  maxDate,
-  fromYear,
-  toYear,
-  yearOrder,
+function CalendarRoot({
   className,
-  disabledDates,
-}: CalendarProps) {
-  const parsedValue = React.useMemo(() => parseDateInput(value), [value]);
-  const parsedMin = React.useMemo(() => parseDateInput(minDate), [minDate]);
-  const parsedMax = React.useMemo(() => parseDateInput(maxDate), [maxDate]);
+  rootRef,
+  ...props
+}: React.ComponentProps<"div"> & { rootRef?: React.Ref<HTMLDivElement> }) {
+  return (
+    <div
+      data-slot="calendar"
+      ref={rootRef}
+      className={cn(className)}
+      {...props}
+    />
+  );
+}
 
-  const currentYear = new Date().getFullYear();
-  const computedFromYear = fromYear ?? (parsedMin ? parsedMin.getFullYear() : 1920);
-  const computedToYear = toYear ?? (parsedMax ? parsedMax.getFullYear() : currentYear + 10);
+function CalendarChevron({
+  className,
+  orientation,
+  ...props
+}: React.ComponentProps<"svg"> & {
+  orientation?: "left" | "right" | "up" | "down";
+}) {
+  if (orientation === "left") {
+    return <ChevronLeftIcon className={cn("size-4", className)} {...props} />;
+  }
 
-  const defaultOrder: "asc" | "desc" =
-    yearOrder ?? (computedToYear <= currentYear ? "desc" : "asc");
+  if (orientation === "right") {
+    return <ChevronRightIcon className={cn("size-4", className)} {...props} />;
+  }
 
-  const years = React.useMemo(() => {
-    const list: number[] = [];
-    const start = Math.min(computedFromYear, computedToYear);
-    const end = Math.max(computedFromYear, computedToYear);
-    for (let y = start; y <= end; y++) {
-      list.push(y);
-    }
-    return defaultOrder === "desc" ? list.reverse() : list;
-  }, [computedFromYear, computedToYear, defaultOrder]);
+  return <ChevronDownIcon className={cn("size-4", className)} {...props} />;
+}
 
-  const initialDate = parsedValue ?? parsedMin ?? new Date();
-  const [viewMonth, setViewMonth] = React.useState<number>(initialDate.getMonth());
-  const [viewYear, setViewYear] = React.useState<number>(initialDate.getFullYear());
+function CalendarWeekNumber({
+  children,
+  ...props
+}: React.ComponentProps<"td">) {
+  return (
+    <td {...props}>
+      <div className="flex size-(--cell-size) items-center justify-center text-center">
+        {children}
+      </div>
+    </td>
+  );
+}
 
+function CalendarDayButton({
+  className,
+  day,
+  modifiers,
+  locale: propLocale,
+  ...props
+}: React.ComponentProps<typeof DayButton> & { locale?: Partial<Locale> }) {
+  const defaultClassNames = getDefaultClassNames();
+  const dayPicker = useDayPicker();
+  const activeLocale = propLocale ?? dayPicker.dayPickerProps?.locale;
+
+  const ref = React.useRef<HTMLButtonElement>(null);
   React.useEffect(() => {
-    if (parsedValue) {
-      setViewMonth(parsedValue.getMonth());
-      setViewYear(parsedValue.getFullYear());
-    }
-  }, [parsedValue]);
-
-  const isPrevDisabled = React.useMemo(() => {
-    if (!parsedMin) return false;
-    const prevMonthEnd = new Date(viewYear, viewMonth, 0);
-    return prevMonthEnd < startOfDay(parsedMin);
-  }, [parsedMin, viewYear, viewMonth]);
-
-  const isNextDisabled = React.useMemo(() => {
-    if (!parsedMax) return false;
-    const nextMonthStart = new Date(viewYear, viewMonth + 1, 1);
-    return nextMonthStart > endOfDay(parsedMax);
-  }, [parsedMax, viewYear, viewMonth]);
-
-  const handlePrevMonth = () => {
-    if (viewMonth === 0) {
-      setViewMonth(11);
-      setViewYear((y) => y - 1);
-    } else {
-      setViewMonth((m) => m - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (viewMonth === 11) {
-      setViewMonth(0);
-      setViewYear((y) => y + 1);
-    } else {
-      setViewMonth((m) => m + 1);
-    }
-  };
-
-  const isMonthDisabled = (mIndex: number, year: number): boolean => {
-    if (parsedMin) {
-      const lastDayOfMonth = new Date(year, mIndex + 1, 0);
-      if (lastDayOfMonth < startOfDay(parsedMin)) return true;
-    }
-    if (parsedMax) {
-      const firstDayOfMonth = new Date(year, mIndex, 1);
-      if (firstDayOfMonth > endOfDay(parsedMax)) return true;
-    }
-    return false;
-  };
-
-  const isYearDisabled = (y: number): boolean => {
-    if (parsedMin && y < parsedMin.getFullYear()) return true;
-    if (parsedMax && y > parsedMax.getFullYear()) return true;
-    return false;
-  };
-
-  const calendarDays = React.useMemo(() => {
-    const today = new Date();
-    const min = parsedMin ? startOfDay(parsedMin) : null;
-    const max = parsedMax ? endOfDay(parsedMax) : null;
-
-    const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
-    const daysInCurrentMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-    const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
-
-    const days: CalendarDay[] = [];
-
-    // Previous month padding days
-    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-      const dayNum = daysInPrevMonth - i;
-      const date = new Date(viewYear, viewMonth - 1, dayNum);
-      const isDisabled =
-        (min !== null && date < min) ||
-        (max !== null && date > max) ||
-        (disabledDates ? disabledDates(date) : false);
-
-      days.push({
-        date,
-        dayNumber: dayNum,
-        isCurrentMonth: false,
-        isDisabled,
-        isSelected: parsedValue !== null && isSameDay(date, parsedValue),
-        isToday: isSameDay(date, today),
-      });
-    }
-
-    // Current month days
-    for (let d = 1; d <= daysInCurrentMonth; d++) {
-      const date = new Date(viewYear, viewMonth, d);
-      const isDisabled =
-        (min !== null && date < min) ||
-        (max !== null && date > max) ||
-        (disabledDates ? disabledDates(date) : false);
-
-      days.push({
-        date,
-        dayNumber: d,
-        isCurrentMonth: true,
-        isDisabled,
-        isSelected: parsedValue !== null && isSameDay(date, parsedValue),
-        isToday: isSameDay(date, today),
-      });
-    }
-
-    // Next month padding days to complete 42 cells (6 rows x 7 cols)
-    const remainingCells = 42 - days.length;
-    for (let d = 1; d <= remainingCells; d++) {
-      const date = new Date(viewYear, viewMonth + 1, d);
-      const isDisabled =
-        (min !== null && date < min) ||
-        (max !== null && date > max) ||
-        (disabledDates ? disabledDates(date) : false);
-
-      days.push({
-        date,
-        dayNumber: d,
-        isCurrentMonth: false,
-        isDisabled,
-        isSelected: parsedValue !== null && isSameDay(date, parsedValue),
-        isToday: isSameDay(date, today),
-      });
-    }
-
-    return days;
-  }, [viewYear, viewMonth, parsedValue, parsedMin, parsedMax, disabledDates]);
+    if (modifiers.focused) ref.current?.focus();
+  }, [modifiers.focused]);
 
   return (
-    <div className={cn("p-2 select-none w-72", className)}>
-      {/* Month & Year Selectors with Navigation Chevrons */}
-      <div className="flex items-center justify-between gap-1 pb-2 border-b border-border">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="size-7"
-          onClick={handlePrevMonth}
-          disabled={isPrevDisabled}
-        >
-          <ChevronLeft className="size-4" />
-          <span className="sr-only">Previous month</span>
-        </Button>
-
-        <div className="flex items-center gap-1.5">
-          {/* Month Select Dropdown */}
-          <Select
-            value={String(viewMonth)}
-            onValueChange={(val) => setViewMonth(Number(val))}
-          >
-            <SelectTrigger className="h-7 px-2 text-xs font-medium border-border/60">
-              <SelectValue>{MONTHS[viewMonth]}</SelectValue>
-            </SelectTrigger>
-            <SelectContent className="max-h-56">
-              {MONTHS.map((month, index) => (
-                <SelectItem
-                  key={month}
-                  value={String(index)}
-                  disabled={isMonthDisabled(index, viewYear)}
-                >
-                  {month}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Year Select Dropdown */}
-          <Select
-            value={String(viewYear)}
-            onValueChange={(val) => setViewYear(Number(val))}
-          >
-            <SelectTrigger className="h-7 px-2 text-xs font-medium border-border/60">
-              <SelectValue>{String(viewYear)}</SelectValue>
-            </SelectTrigger>
-            <SelectContent className="max-h-56">
-              {years.map((y) => (
-                <SelectItem
-                  key={y}
-                  value={String(y)}
-                  disabled={isYearDisabled(y)}
-                >
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="size-7"
-          onClick={handleNextMonth}
-          disabled={isNextDisabled}
-        >
-          <ChevronRight className="size-4" />
-          <span className="sr-only">Next month</span>
-        </Button>
-      </div>
-
-      {/* Weekdays Header */}
-      <div className="grid grid-cols-7 gap-1 pt-2" role="row">
-        {WEEKDAYS.map((day) => (
-          <div
-            key={day}
-            className="text-center text-[0.75rem] font-medium text-muted-foreground h-8 flex items-center justify-center"
-            aria-label={day}
-          >
-            {day}
-          </div>
-        ))}
-      </div>
-
-      {/* Days Grid */}
-      <div className="grid grid-cols-7 gap-1" role="grid">
-        {calendarDays.map((d, idx) => (
-          <button
-            key={idx}
-            type="button"
-            disabled={d.isDisabled}
-            onClick={() => {
-              if (!d.isDisabled && onSelect) {
-                onSelect(d.date);
-              }
-            }}
-            className={cn(
-              "h-8 w-8 text-xs font-normal rounded-lg flex items-center justify-center transition-colors outline-none",
-              d.isSelected &&
-                "bg-primary text-primary-foreground font-semibold hover:bg-primary/90",
-              !d.isSelected &&
-                d.isToday &&
-                "border border-primary text-foreground font-semibold",
-              !d.isSelected &&
-                !d.isToday &&
-                d.isCurrentMonth &&
-                "text-foreground hover:bg-muted",
-              !d.isSelected &&
-                !d.isToday &&
-                !d.isCurrentMonth &&
-                "text-muted-foreground/40 hover:bg-muted/30",
-              d.isDisabled &&
-                "opacity-25 pointer-events-none cursor-not-allowed text-muted-foreground"
-            )}
-            aria-selected={d.isSelected}
-            aria-disabled={d.isDisabled}
-          >
-            {d.dayNumber}
-          </button>
-        ))}
-      </div>
-    </div>
+    <Button
+      variant="ghost"
+      size="icon"
+      data-day={day.date.toLocaleDateString(activeLocale?.code)}
+      data-selected-single={
+        modifiers.selected &&
+        !modifiers.range_start &&
+        !modifiers.range_end &&
+        !modifiers.range_middle
+      }
+      data-range-start={modifiers.range_start}
+      data-range-end={modifiers.range_end}
+      data-range-middle={modifiers.range_middle}
+      className={cn(
+        "relative isolate z-10 flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 border-0 leading-none font-normal transition-colors hover:translate-y-0 active:scale-95 group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-accent group-data-[focused=true]/day:ring-2 group-data-[focused=true]/day:ring-accent/40 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted/30 data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground data-[selected-single=true]:font-semibold dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70",
+        defaultClassNames.day,
+        className,
+      )}
+      {...props}
+    />
   );
 }
 
-export interface DatePickerProps {
-  value?: Date | string | null;
-  onChange?: (date: Date | null) => void;
-  placeholder?: string;
-  minDate?: Date | string;
-  maxDate?: Date | string;
-  fromYear?: number;
-  toYear?: number;
-  yearOrder?: "asc" | "desc";
-  disabled?: boolean;
-  className?: string;
-  id?: string;
-  disabledDates?: (date: Date) => boolean;
-}
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  buttonVariant?: React.ComponentProps<typeof Button>["variant"];
+};
 
-export function DatePicker({
-  value,
-  onChange,
-  placeholder = "Pick a date",
-  minDate,
-  maxDate,
-  fromYear,
-  toYear,
-  yearOrder,
-  disabled,
-  className,
-  id,
-  disabledDates,
-}: DatePickerProps) {
-  const [open, setOpen] = React.useState(false);
-  const parsedDate = React.useMemo(() => parseDateInput(value), [value]);
-
-  const handleSelect = (date: Date) => {
-    onChange?.(date);
-    setOpen(false);
-  };
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        id={id}
-        disabled={disabled}
-        className={cn(
-          "flex w-full items-center justify-start gap-2 rounded-4xl border border-input bg-input/30 px-3 py-2 text-sm text-left font-normal transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 h-9",
-          !parsedDate && "text-muted-foreground",
-          className
-        )}
-      >
-        <CalendarIcon className="size-4 shrink-0 text-muted-foreground" />
-        <span>
-          {parsedDate
-            ? parsedDate.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })
-            : placeholder}
-        </span>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-3" align="start" sideOffset={4}>
-        <Calendar
-          value={parsedDate}
-          onSelect={handleSelect}
-          minDate={minDate}
-          maxDate={maxDate}
-          fromYear={fromYear}
-          toYear={toYear}
-          yearOrder={yearOrder}
-          disabledDates={disabledDates}
-        />
-      </PopoverContent>
-    </Popover>
-  );
-}
+export { Calendar, CalendarDayButton };

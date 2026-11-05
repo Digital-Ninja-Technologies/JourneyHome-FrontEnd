@@ -56,7 +56,7 @@ export const PasswordInput = React.forwardRef<
             variant="ghost"
             size="icon"
             tabIndex={-1}
-            className="absolute right-1 top-1/2 size-9 -translate-y-1/2 rounded-lg text-muted-foreground hover:bg-transparent hover:text-foreground"
+            className="absolute right-1 top-1/2 size-9 -translate-y-1/2 rounded-lg text-muted-foreground hover:bg-transparent hover:text-foreground hover:-translate-y-1/2 active:translate-y-[0.5%]"
             onClick={() => setShow((prev) => !prev)}
           >
             {show ? (

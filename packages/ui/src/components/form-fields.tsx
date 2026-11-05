@@ -1,7 +1,7 @@
 "use client";
 
+import type * as React from "react";
 import type { ComponentProps } from "react";
-import * as React from "react";
 import {
   type Control,
   Controller,
@@ -9,19 +9,11 @@ import {
   type Path,
   useController,
 } from "react-hook-form";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "../lib/utils";
+import { Checkbox } from "./checkbox";
+import { DatePicker } from "./date-picker";
 import { Field, FieldDescription, FieldError, FieldLabel } from "./field";
 import { Input } from "./input";
-import { Textarea } from "./textarea";
-import { Checkbox } from "./checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./select";
 import {
   InputOTP,
   InputOTPGroup,
@@ -29,8 +21,14 @@ import {
   InputOTPSlot,
 } from "./input-otp";
 import { PasswordInput } from "./password-input";
-import { Calendar, parseDateInput } from "./calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
+import { Textarea } from "./textarea";
 
 export interface BaseFormProps<T extends FieldValues> {
   control?: Control<T, any, any>;
@@ -179,7 +177,10 @@ export function FormCheckbox<T extends FieldValues>({
       />
       <div className="space-y-1 leading-none">
         {label && (
-          <FieldLabel htmlFor={field.name} className="cursor-pointer font-normal">
+          <FieldLabel
+            htmlFor={field.name}
+            className="cursor-pointer font-normal"
+          >
             {label}
           </FieldLabel>
         )}
@@ -194,7 +195,8 @@ export function FormCheckbox<T extends FieldValues>({
 /*                                 FormOtpInput                               */
 /* -------------------------------------------------------------------------- */
 
-export interface FormOtpInputProps<T extends FieldValues> extends BaseFormProps<T> {
+export interface FormOtpInputProps<T extends FieldValues>
+  extends BaseFormProps<T> {
   maxLength?: number;
   onComplete?: (value: string) => void;
   className?: string;
@@ -248,7 +250,9 @@ export function FormOtpInput<T extends FieldValues>({
         )}
       />
       {description && (
-        <FieldDescription className="text-center">{description}</FieldDescription>
+        <FieldDescription className="text-center">
+          {description}
+        </FieldDescription>
       )}
     </Field>
   );
@@ -264,7 +268,8 @@ export interface SelectOption {
   disabled?: boolean;
 }
 
-export interface FormSelectProps<T extends FieldValues> extends BaseFormProps<T> {
+export interface FormSelectProps<T extends FieldValues>
+  extends BaseFormProps<T> {
   placeholder?: string;
   options?: readonly (string | SelectOption)[];
   items?: readonly (string | SelectOption)[];
@@ -307,8 +312,8 @@ export function FormSelect<T extends FieldValues>({
           className={cn("w-full", className)}
         >
           <SelectValue placeholder={placeholder}>
-            {normalizedOptions.find((opt) => opt.value === field.value)?.label ??
-              placeholder}
+            {normalizedOptions.find((opt) => opt.value === field.value)
+              ?.label ?? placeholder}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -364,14 +369,12 @@ export function FormDatePicker<T extends FieldValues>({
   disabledDates,
 }: FormDatePickerProps<T>) {
   const { field, fieldState } = useController({ name, control, disabled });
-  const [open, setOpen] = React.useState(false);
 
-  const parsedDate = React.useMemo(
-    () => parseDateInput(field.value),
-    [field.value]
-  );
-
-  const handleSelect = (date: Date) => {
+  const handleDateChange = (date: Date | null) => {
+    if (!date) {
+      field.onChange(null);
+      return;
+    }
     if (valueFormat === "date") {
       field.onChange(date);
     } else if (valueFormat === "date-string") {
@@ -382,49 +385,29 @@ export function FormDatePicker<T extends FieldValues>({
     } else {
       field.onChange(date.toISOString());
     }
-    setOpen(false);
   };
 
   return (
     <Field data-invalid={fieldState.invalid}>
       {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger
-          id={field.name}
-          ref={field.ref}
-          onBlur={field.onBlur}
-          disabled={disabled ?? field.disabled}
-          aria-invalid={fieldState.invalid}
-          className={cn(
-            "flex w-full items-center justify-start gap-2 rounded-4xl border border-input bg-input/30 px-3 py-2 text-sm text-left font-normal transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 h-9",
-            !parsedDate && "text-muted-foreground",
-            className
-          )}
-        >
-          <CalendarIcon className="size-4 shrink-0 text-muted-foreground" />
-          <span>
-            {parsedDate
-              ? parsedDate.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })
-              : placeholder}
-          </span>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-3" align="start" sideOffset={4}>
-          <Calendar
-            value={parsedDate}
-            onSelect={handleSelect}
-            minDate={minDate}
-            maxDate={maxDate}
-            fromYear={fromYear}
-            toYear={toYear}
-            yearOrder={yearOrder}
-            disabledDates={disabledDates}
-          />
-        </PopoverContent>
-      </Popover>
+      <DatePicker
+        id={field.name}
+        value={field.value}
+        onChange={handleDateChange}
+        placeholder={placeholder}
+        minDate={minDate}
+        maxDate={maxDate}
+        fromYear={fromYear}
+        toYear={toYear}
+        yearOrder={yearOrder}
+        disabled={disabled ?? field.disabled}
+        className={cn(
+          fieldState.invalid &&
+            "border-destructive ring-destructive/20 ring-[3px]",
+          className,
+        )}
+        disabledDates={disabledDates}
+      />
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError>{fieldState.error?.message}</FieldError>
     </Field>
