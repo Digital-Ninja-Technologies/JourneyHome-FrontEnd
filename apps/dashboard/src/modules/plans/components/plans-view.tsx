@@ -140,10 +140,7 @@ function PlanSection({ plan }: { plan: Plan }) {
             <Link
               to={secondary.to}
               params={secondary.params}
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                dark && "border-canvas/30 text-canvas hover:bg-canvas/10",
-              )}
+              className={cn(buttonVariants({ variant: "secondary" }))}
             >
               {secondary.label}
             </Link>

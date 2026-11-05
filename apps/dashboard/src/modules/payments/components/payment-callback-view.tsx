@@ -123,7 +123,7 @@ export function PaymentCallbackView() {
     icon = <XCircle className="size-10 text-status-cancelled" />;
     title = "That payment didn’t go through";
     body =
-      (pay as any).failureMessage ??
+      (pay as unknown as { failureMessage?: string }).failureMessage ??
       "You haven’t been charged. You can try again whenever you’re ready.";
     action = (
       <Link

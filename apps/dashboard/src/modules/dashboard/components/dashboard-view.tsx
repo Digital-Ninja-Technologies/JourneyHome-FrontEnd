@@ -151,7 +151,14 @@ function RecentPayments({
   plans: Plan[];
 }) {
   const byId = new Map(plans.map((p) => [p._id, p]));
-  const rows = payments.filter((p) => p.status !== "Pending").slice(0, 4);
+  const rows = [...payments]
+    .filter((p) => p.status !== "Pending")
+    .sort(
+      (a, b) =>
+        +new Date(b.processedAt ?? b.createdAt) -
+        +new Date(a.processedAt ?? a.createdAt),
+    )
+    .slice(0, 8);
   return (
     <>
       {rows.length === 0 && (
@@ -211,6 +218,10 @@ export function DashboardView() {
   const now = new Date();
 
   const plans = (plansQ.data ?? []).filter((p) => !HIDDEN.has(p.status));
+  const recentPlans = [...plans]
+    .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+    .slice(0, 4);
+
   const payments = paymentsQ.data ?? [];
   const live = plans.filter((p) => LIVE.has(p.status));
   const nextPlan = [...live]
@@ -355,7 +366,7 @@ export function DashboardView() {
             loadingFallback={<PlansCardsSkeleton count={2} />}
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              {plans.map((p) => (
+              {recentPlans.map((p) => (
                 <PlanCard key={p._id} plan={p} />
               ))}
               <Link

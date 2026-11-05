@@ -48,7 +48,8 @@ export function useStartCheckout(
       toast.add({
         type: "error",
         title: "Checkout failed",
-        description: error.message || "Could not start checkout with payment provider.",
+        description:
+          error.message || "Could not start checkout with payment provider.",
       });
     },
   });

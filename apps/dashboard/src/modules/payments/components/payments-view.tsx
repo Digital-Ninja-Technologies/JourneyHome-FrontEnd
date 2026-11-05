@@ -1,14 +1,7 @@
-import type { Payment, Plan } from "@journeyhome/schemas";
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
-import { useState } from "react";
-import {
-  AsyncBoundary,
-  PaymentRowsSkeleton,
-} from "@/components/async-boundary";
-import { PAYMENT_TEXT } from "@/components/status-pill";
 import {
   daysUntil,
   firstName,
@@ -24,8 +17,7 @@ import {
   MARKETING_URL,
 } from "@/modules/plans/plans.utils";
 import { usePlans } from "@/modules/plans/query-options";
-
-const PAGE = 10;
+import { PaymentsTable } from "./payments-table";
 
 function SummaryCard({
   label,
@@ -73,81 +65,14 @@ function SummaryCard({
   );
 }
 
-function PaymentRow({ pay, plan }: { pay: Payment; plan?: Plan }) {
-  // Only a pending plan's first contribution can be (re)started from here.
-  const canResume =
-    plan?.status === "Pending" &&
-    pay.purpose === "initial_contribution" &&
-    pay.status !== "Successful" &&
-    pay.status !== "Refunded";
-  const resumeLabel =
-    pay.status === "Failed" || pay.status === "Cancelled"
-      ? "Retry"
-      : "Continue";
-  return (
-    <div className="flex items-center justify-between gap-4 border-t border-border py-4">
-      <div>
-        <div className="text-sm font-semibold">
-          Journey Home Plan
-          {plan && (
-            <span className="font-normal text-muted-foreground">
-              {" "}
-              · {firstName(plan.coveredPerson.fullName)}
-            </span>
-          )}
-        </div>
-        <div className="text-xs text-muted-foreground">
-          {formatDay(pay.processedAt ?? pay.createdAt)}{" "}
-          {new Date(pay.processedAt ?? pay.createdAt).getFullYear()} ·{" "}
-          {pay.purpose === "initial_contribution"
-            ? "First contribution"
-            : "Monthly contribution"}
-        </div>
-        {(pay as any).failureMessage && pay.status === "Failed" && (
-          <div className="mt-0.5 text-xs text-status-cancelled">
-            {(pay as any).failureMessage}
-          </div>
-        )}
-      </div>
-      <div className="flex items-center gap-4">
-        <div className="text-right">
-          <div className="text-sm font-bold">
-            {formatMoney(pay.amount, pay.currency)}
-          </div>
-          <div
-            className={cn("text-xs font-semibold", PAYMENT_TEXT[pay.status])}
-          >
-            {pay.status}
-          </div>
-        </div>
-        {canResume && plan && (
-          <Link
-            to="/app/payments/new"
-            search={{ plan: plan._id }}
-            className={cn(
-              buttonVariants({ variant: "default", size: "sm" }),
-              "h-9 rounded-xl px-4 text-xs font-bold text-canvas",
-            )}
-          >
-            {resumeLabel}
-          </Link>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export function PaymentsView() {
   const plansQ = usePlans();
   const paymentsQ = usePayments();
   const navigate = useNavigate({ from: "/app/payments/" });
   const { plan: filter } = useSearch({ from: "/app/payments/" });
-  const [shown, setShown] = useState(PAGE);
 
   const plans = plansQ.data ?? [];
-  const byId = new Map(plans.map((p) => [p._id, p]));
   const payments = paymentsQ.data ?? [];
-  const rows = filter ? payments.filter((p) => p.plan === filter) : payments;
 
   const successful = payments.filter((p) => p.status === "Successful");
   const firstSuccess = successful
@@ -248,80 +173,19 @@ export function PaymentsView() {
         )}
       </section>
 
-      <section className="flex flex-col rounded-3xl bg-white p-8">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-serif text-[28px] font-normal">
-            Payment history
-          </h2>
-          {plans.length > 1 && (
-            <div
-              className="flex gap-1 rounded-full text-sm"
-              role="group"
-              aria-label="Filter by plan"
-            >
-              {[
-                { id: null, label: "All plans" },
-                ...plans.map((p) => ({
-                  id: p._id,
-                  label: firstName(p.coveredPerson.fullName),
-                })),
-              ].map((f) => (
-                <button
-                  key={f.id ?? "all"}
-                  type="button"
-                  aria-pressed={filter === f.id}
-                  onClick={() => {
-                    navigate({
-                      search: f.id ? { plan: f.id } : {},
-                      replace: true,
-                    });
-                    setShown(PAGE);
-                  }}
-                  className={cn(
-                    "rounded-full px-4 py-2 font-semibold text-sm transition-colors cursor-pointer",
-                    filter === f.id
-                      ? "bg-foreground text-canvas"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <AsyncBoundary
+      <section className="flex flex-col gap-6 rounded-3xl bg-white p-6 sm:p-8">
+        <PaymentsTable
+          payments={payments}
+          plans={plans}
           isLoading={paymentsQ.isPending}
-          isError={paymentsQ.isError}
-          error={paymentsQ.error}
-          onReset={() => void paymentsQ.refetch()}
-          loadingFallback={<PaymentRowsSkeleton count={5} />}
-        >
-          {paymentsQ.isSuccess && rows.length === 0 && (
-            <p className="border-t border-border py-8 text-sm text-muted-foreground">
-              {filter
-                ? "No payments on this plan yet."
-                : "No payments yet. They’ll appear here once you make your first contribution."}
-            </p>
-          )}
-          {rows.slice(0, shown).map((pay) => (
-            <PaymentRow key={pay._id} pay={pay} plan={byId.get(pay.plan)} />
-          ))}
-        </AsyncBoundary>
-        {rows.length > shown && (
-          <div className="border-t border-border pt-4 text-center">
-            <Button
-              type="button"
-              variant="link"
-              size="sm"
-              onClick={() => setShown((n) => n + PAGE)}
-              className="text-sm font-semibold text-link hover:text-link-hover"
-            >
-              Load earlier payments
-            </Button>
-          </div>
-        )}
+          selectedPlanId={filter}
+          onSelectPlanId={(id) => {
+            navigate({
+              search: (prev) => ({ ...prev, plan: id }),
+              replace: true,
+            });
+          }}
+        />
       </section>
 
       <div className="flex items-start gap-3 rounded-2xl bg-cream px-5 py-4 text-[13px] leading-relaxed text-status-due">

@@ -2,8 +2,14 @@ import { z } from "zod";
 
 export const planSearchSchema = z.object({
   plan: z.coerce.string().optional(),
+  status: z.coerce.string().optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).optional(),
+  search: z.coerce.string().optional(),
 });
 export type PlanSearch = z.infer<typeof planSearchSchema>;
+export const paymentsSearchSchema = planSearchSchema;
+export type PaymentsSearch = PlanSearch;
 
 export {
   type RedirectSearch,
