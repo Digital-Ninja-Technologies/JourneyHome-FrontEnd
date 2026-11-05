@@ -31,16 +31,21 @@ import { toast } from "@journeyhome/ui/components/toast";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import {
+  type Column,
   createColumnHelper,
+  createPaginatedRowModel,
   createSortedRowModel,
+  rowPaginationFeature,
   rowSortingFeature,
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
 import {
   AlertCircle,
-  ArrowUpDown,
+  ArrowDown,
+  ArrowUp,
   CheckCircle,
+  ChevronsUpDown,
   Clock,
   Copy,
   RotateCcw,
@@ -54,12 +59,58 @@ import { PaymentDetailsSheet } from "./payment-details-sheet";
 
 const features = tableFeatures({
   rowSortingFeature,
+  rowPaginationFeature,
   sortedRowModel: createSortedRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
 });
 
 const columnHelper = createColumnHelper<typeof features, Payment>();
 
 const EMPTY_DATA: Payment[] = [];
+
+const PAGE_SIZES = [10, 20, 50] as const;
+const ALL = "all";
+
+const STATUS_OPTIONS = [
+  { value: ALL, label: "All" },
+  { value: "Successful", label: "Successful" },
+  { value: "Pending", label: "Pending" },
+  { value: "Processing", label: "Processing" },
+  { value: "Failed", label: "Failed" },
+  { value: "Cancelled", label: "Cancelled" },
+  { value: "Refunded", label: "Refunded" },
+] as const;
+
+/** Column header that toggles sorting; shows the current direction. */
+function SortHeader({
+  column,
+  children,
+}: {
+  // biome-ignore lint/suspicious/noExplicitAny: header value type varies per column
+  column: Column<typeof features, Payment, any>;
+  children: React.ReactNode;
+}) {
+  const sorted = column.getIsSorted();
+  return (
+    <button
+      type="button"
+      onClick={column.getToggleSortingHandler()}
+      className={cn(
+        "group -ml-2 inline-flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 uppercase tracking-wider transition-colors hover:bg-muted hover:text-foreground",
+        sorted && "text-foreground",
+      )}
+    >
+      {children}
+      {sorted === "asc" ? (
+        <ArrowUp className="size-3" />
+      ) : sorted === "desc" ? (
+        <ArrowDown className="size-3" />
+      ) : (
+        <ChevronsUpDown className="size-3 opacity-40 transition-opacity group-hover:opacity-100" />
+      )}
+    </button>
+  );
+}
 
 export interface PaymentsTableProps {
   payments: Payment[];
@@ -123,10 +174,7 @@ export function PaymentsTable({
   onSelectPlanId,
 }: PaymentsTableProps) {
   const [search, setSearch] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState<string>("all");
-  const [pageSize, setPageSize] = React.useState<number>(10);
-  const [page, setPage] = React.useState<number>(1);
-  const [sortOrder, setSortOrder] = React.useState<"desc" | "asc">("desc");
+  const [statusFilter, setStatusFilter] = React.useState<string>(ALL);
   const [selectedPayment, setSelectedPayment] = React.useState<Payment | null>(
     null,
   );
@@ -136,21 +184,27 @@ export function PaymentsTable({
     [plans],
   );
 
-  // Filter & sort data
-  const filteredRows = React.useMemo(() => {
-    let list = [...payments];
+  const planLabel = React.useCallback(
+    (id: string | null | undefined) => {
+      const plan = id ? plansById.get(id) : undefined;
+      if (!plan) return "All plans";
+      return `${firstName(plan.coveredPerson.fullName)} (${plan.coveredPerson.relationship})`;
+    },
+    [plansById],
+  );
 
-    // Filter by Plan
+  // Filtering happens before the table; sorting + pagination are TanStack's job.
+  const filteredRows = React.useMemo(() => {
+    let list = payments;
+
     if (selectedPlanId) {
       list = list.filter((p) => p.plan === selectedPlanId);
     }
 
-    // Filter by Status
-    if (statusFilter && statusFilter !== "all") {
+    if (statusFilter !== ALL) {
       list = list.filter((p) => p.status === statusFilter);
     }
 
-    // Filter by Search Query
     const q = search.trim().toLowerCase();
     if (q) {
       list = list.filter((p) => {
@@ -168,30 +222,8 @@ export function PaymentsTable({
       });
     }
 
-    // Sort by Date
-    list.sort((a, b) => {
-      const dateA = +new Date(a.processedAt ?? a.createdAt);
-      const dateB = +new Date(b.processedAt ?? b.createdAt);
-      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
-    });
-
     return list;
-  }, [payments, selectedPlanId, statusFilter, search, sortOrder, plansById]);
-
-  // Reset page when filters change
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reset page when filter criteria change
-  React.useEffect(() => {
-    setPage(1);
-  }, [search, statusFilter, selectedPlanId, pageSize]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, filteredRows.length);
-  const pageRows = React.useMemo(
-    () => filteredRows.slice(startIndex, endIndex),
-    [filteredRows, startIndex, endIndex],
-  );
+  }, [payments, selectedPlanId, statusFilter, search, plansById]);
 
   const handleCopyReference = React.useCallback(
     (e: React.MouseEvent, ref: string) => {
@@ -207,13 +239,12 @@ export function PaymentsTable({
 
   const handleResetFilters = () => {
     setSearch("");
-    setStatusFilter("all");
+    setStatusFilter(ALL);
     onSelectPlanId?.(undefined);
-    setPage(1);
   };
 
   const hasActiveFilters =
-    Boolean(search) || statusFilter !== "all" || Boolean(selectedPlanId);
+    Boolean(search) || statusFilter !== ALL || Boolean(selectedPlanId);
 
   // TanStack Table columns definition
   const columns = React.useMemo(
@@ -221,11 +252,12 @@ export function PaymentsTable({
       columnHelper.columns([
         columnHelper.accessor("reference", {
           header: "Reference",
+          enableSorting: false,
           cell: (info) => {
             const ref = info.getValue() as string;
             return (
               <div className="flex items-center gap-1.5 py-1">
-                <span className="font-mono text-xs font-semibold text-foreground truncate max-w-[130px] sm:max-w-none">
+                <span className="font-mono text-xs font-semibold text-foreground truncate max-w-[120px]">
                   {ref}
                 </span>
                 <button
@@ -243,6 +275,7 @@ export function PaymentsTable({
 
         columnHelper.accessor("plan", {
           header: "Plan",
+          enableSorting: false,
           cell: (info) => {
             const planId = info.getValue() as string;
             const plan = plansById.get(planId);
@@ -266,21 +299,28 @@ export function PaymentsTable({
           },
         }),
 
-        columnHelper.accessor((row) => row.processedAt ?? row.createdAt, {
-          id: "date",
-          header: "Date",
-          cell: (info) => {
-            const dateStr = info.getValue() as string;
-            return (
-              <span className="text-xs text-muted-foreground tabular-nums whitespace-nowrap">
-                {formatDay(dateStr)} {new Date(dateStr).getFullYear()}
-              </span>
-            );
+        columnHelper.accessor(
+          (row) => +new Date(row.processedAt ?? row.createdAt),
+          {
+            id: "date",
+            header: ({ column }) => (
+              <SortHeader column={column}>Date</SortHeader>
+            ),
+            cell: (info) => {
+              const dateStr =
+                info.row.original.processedAt ?? info.row.original.createdAt;
+              return (
+                <span className="text-xs text-muted-foreground tabular-nums whitespace-nowrap">
+                  {formatDay(dateStr)} {new Date(dateStr).getFullYear()}
+                </span>
+              );
+            },
           },
-        }),
+        ),
 
         columnHelper.accessor("purpose", {
           header: "Type",
+          enableSorting: false,
           cell: (info) => {
             const purpose = info.getValue() as string;
             return (
@@ -294,7 +334,9 @@ export function PaymentsTable({
         }),
 
         columnHelper.accessor("amount", {
-          header: "Amount",
+          header: ({ column }) => (
+            <SortHeader column={column}>Amount</SortHeader>
+          ),
           cell: (info) => {
             const row = info.row.original;
             return (
@@ -307,6 +349,7 @@ export function PaymentsTable({
 
         columnHelper.accessor("status", {
           header: "Status",
+          enableSorting: false,
           cell: (info) => {
             const status = info.getValue() as Payment["status"];
             return <TableStatusBadge status={status} />;
@@ -366,169 +409,166 @@ export function PaymentsTable({
     [plansById, handleCopyReference],
   );
 
-  const tableData = isLoading ? EMPTY_DATA : pageRows;
-
-  // TanStack Table instance
+  // TanStack Table instance (sorting + pagination are table-managed state)
   const table = useTable({
     features,
     columns,
-    data: tableData,
+    data: isLoading ? EMPTY_DATA : filteredRows,
+    enableSortingRemoval: false,
+    initialState: {
+      sorting: [{ id: "date", desc: true }],
+      pagination: { pageIndex: 0, pageSize: PAGE_SIZES[0] },
+    },
   });
+
+  const { pageIndex, pageSize } = table.state.pagination;
+  const totalRows = filteredRows.length;
+  const pageCount = Math.max(1, table.getPageCount());
+  const currentPage = Math.min(pageIndex + 1, pageCount);
+  const firstRow = totalRows === 0 ? 0 : pageIndex * pageSize + 1;
+  const lastRow = Math.min((pageIndex + 1) * pageSize, totalRows);
 
   return (
     <div className="flex flex-col gap-5 w-full min-w-0">
-      {/* Top Header: Title & Plan Filter Pills */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="font-serif text-[26px] sm:text-[28px] font-normal leading-tight text-foreground">
-            Payment history
-          </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Review past contributions, references, and transaction statuses.
-          </p>
-        </div>
-
-        {/* Plan Filter Pills */}
-        {plans.length > 1 && (
-          <nav
-            className="flex flex-wrap items-center gap-1.5 rounded-full p-1 bg-muted/40"
-            aria-label="Filter by plan"
-          >
-            {[
-              { id: null, label: "All plans" },
-              ...plans.map((p) => ({
-                id: p._id,
-                label: `${firstName(p.coveredPerson.fullName)}'s plan`,
-              })),
-            ].map((f) => (
-              <button
-                key={f.id ?? "all"}
-                type="button"
-                aria-pressed={(selectedPlanId || null) === f.id}
-                onClick={() => onSelectPlanId?.(f.id ?? undefined)}
-                className={cn(
-                  "rounded-full px-3.5 py-1 text-xs font-semibold transition-all cursor-pointer",
-                  (selectedPlanId || null) === f.id
-                    ? "bg-foreground text-canvas shadow-xs"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/80",
-                )}
-              >
-                {f.label}
-              </button>
-            ))}
-          </nav>
-        )}
+      {/* Heading */}
+      <div>
+        <h2 className="font-serif text-[26px] sm:text-[28px] font-normal leading-tight text-foreground">
+          Payment history
+        </h2>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Review past contributions, references, and transaction statuses.
+        </p>
       </div>
 
-      {/* Search & Filter Toolbar (Compact h-8 controls, Select dropdown for status, no refresh button) */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-muted/30 p-2.5 rounded-xl border border-border/70">
-        {/* Search Input */}
-        <div className="relative flex-1 max-w-sm min-w-0">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-          <Input
-            type="search"
-            placeholder="Search reference, person, or amount..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="h-8 pl-8 pr-7 text-xs rounded-lg bg-background border-border/70 focus:bg-background focus:border-border transition-all w-full min-w-0"
-          />
-          {search && (
-            <button
-              type="button"
-              onClick={() => setSearch("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 cursor-pointer"
-            >
-              <X className="size-3" />
-            </button>
-          )}
-        </div>
+      {/* Table card: toolbar → table → footer */}
+      <div className="w-full max-w-full min-w-0 rounded-2xl border border-border/80 bg-white overflow-hidden shadow-xs">
+        {/* Toolbar */}
+        <div className="flex flex-col gap-2.5 border-b border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative w-full min-w-0 sm:max-w-xs">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+            <Input
+              type="search"
+              aria-label="Search payments"
+              placeholder="Search reference, person, or amount"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-10 w-full min-w-0 rounded-lg border-border/70 bg-accent/10 pl-8 pr-7 text-xs"
+            />
+            {search && (
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() => setSearch("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer p-0.5 text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-3" />
+              </button>
+            )}
+          </div>
 
-        {/* Filter Controls: Status Select & Sort Button */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Status Select Filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-muted-foreground font-medium shrink-0">
-              Status:
-            </span>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Plan filter: a dropdown scales to any number of plans */}
+            {plans.length > 1 && (
+              <Select
+                value={selectedPlanId ?? ALL}
+                onValueChange={(val) =>
+                  onSelectPlanId?.(!val || val === ALL ? undefined : val)
+                }
+              >
+                <SelectTrigger
+                  size="xs"
+                  aria-label="Filter by plan"
+                  className="w-auto min-w-0 max-w-full bg-white sm:max-w-56"
+                >
+                  <span className="text-muted-foreground">Plan</span>
+                  <SelectValue>
+                    {(v: string | null) => planLabel(v === ALL ? null : v)}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent
+                  size="xs"
+                  align="end"
+                  alignItemWithTrigger={false}
+                  className="min-w-52"
+                >
+                  <SelectItem value={ALL}>All plans</SelectItem>
+                  {plans.map((p) => (
+                    <SelectItem key={p._id} value={p._id}>
+                      {planLabel(p._id)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
             <Select
               value={statusFilter}
               onValueChange={(val) => {
                 if (val) setStatusFilter(val);
               }}
             >
-              <SelectTrigger className="h-8 w-32 text-xs rounded-lg bg-background border-border/80">
-                <SelectValue placeholder="All Status">
-                  {statusFilter === "all" ? "All" : statusFilter}
+              <SelectTrigger
+                size="xs"
+                aria-label="Filter by status"
+                className="w-auto bg-white"
+              >
+                <span className="text-muted-foreground">Status</span>
+                <SelectValue>
+                  {(v: string | null) =>
+                    STATUS_OPTIONS.find((o) => o.value === v)?.label ?? "All"
+                  }
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="text-xs">
-                  All
-                </SelectItem>
-                <SelectItem value="Successful" className="text-xs">
-                  Successful
-                </SelectItem>
-                <SelectItem value="Pending" className="text-xs">
-                  Pending
-                </SelectItem>
-                <SelectItem value="Processing" className="text-xs">
-                  Processing
-                </SelectItem>
-                <SelectItem value="Failed" className="text-xs">
-                  Failed
-                </SelectItem>
+              <SelectContent size="xs" align="end" alignItemWithTrigger={false}>
+                {STATUS_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>
+                    {o.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
+
+            {hasActiveFilters && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleResetFilters}
+                className="h-8 gap-1 rounded-lg px-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-3" />
+                Reset
+              </Button>
+            )}
           </div>
-
-          {/* Age / Date Sorter Button */}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
-            }
-            className="h-8 px-2.5 rounded-lg text-xs gap-1.5 bg-background border-border/80 hover:bg-muted/40 shrink-0 font-medium"
-            title={`Sort date ${sortOrder === "desc" ? "oldest first" : "newest first"}`}
-          >
-            <ArrowUpDown className="size-3 text-muted-foreground" />
-            <span>{sortOrder === "desc" ? "Newest" : "Oldest"}</span>
-          </Button>
-
-          {/* Reset Active Filters */}
-          {hasActiveFilters && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleResetFilters}
-              className="h-8 px-2 rounded-lg text-xs text-muted-foreground hover:text-foreground shrink-0 font-medium"
-              title="Reset all filters"
-            >
-              Reset
-            </Button>
-          )}
         </div>
-      </div>
 
-      {/* TanStack Table Container */}
-      <div className="w-full max-w-full min-w-0 rounded-2xl border border-border/80 bg-white overflow-hidden shadow-xs">
+        {/* Table */}
         <div className="w-full max-w-full min-w-0 overflow-x-auto">
           <Table className="w-full min-w-[680px]">
             <TableHeader className="bg-muted/30">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id} className="border-border/60">
-                  {headerGroup.headers.map((header) => (
-                    <TableHead
-                      key={header.id}
-                      className="h-9 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
-                    >
-                      {header.isPlaceholder ? null : (
-                        <table.FlexRender header={header} />
-                      )}
-                    </TableHead>
-                  ))}
+                  {headerGroup.headers.map((header) => {
+                    const sorted = header.column.getIsSorted();
+                    return (
+                      <TableHead
+                        key={header.id}
+                        aria-sort={
+                          sorted === "asc"
+                            ? "ascending"
+                            : sorted === "desc"
+                              ? "descending"
+                              : undefined
+                        }
+                        className="h-9 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                      >
+                        {header.isPlaceholder ? null : (
+                          <table.FlexRender header={header} />
+                        )}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
               ))}
             </TableHeader>
@@ -606,101 +646,114 @@ export function PaymentsTable({
           </Table>
         </div>
 
-        {/* Pagination Footer */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-border/60 bg-muted/10 w-full">
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span>
-              Showing{" "}
-              <span className="font-semibold text-foreground">
-                {filteredRows.length > 0 ? startIndex + 1 : 0}
-              </span>
-              {" – "}
-              <span className="font-semibold text-foreground">{endIndex}</span>{" "}
-              of{" "}
-              <span className="font-semibold text-foreground">
-                {filteredRows.length}
-              </span>{" "}
-              payments
-            </span>
+        {/* Footer: result count (left) · rows per page + pager (right) */}
+        <div className="flex flex-col gap-3 border-t border-border/60 bg-muted/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-muted-foreground" aria-live="polite">
+            Showing{" "}
+            <span className="font-semibold text-foreground tabular-nums">
+              {firstRow}–{lastRow}
+            </span>{" "}
+            of{" "}
+            <span className="font-semibold text-foreground tabular-nums">
+              {totalRows}
+            </span>{" "}
+            {totalRows === 1 ? "payment" : "payments"}
+          </p>
 
-            {/* Per Page Selector with reduced h-8 height */}
-            <div className="flex items-center gap-1.5 ml-2">
-              <span className="text-[11px]">Per page:</span>
-              <Select
-                value={String(pageSize)}
-                onValueChange={(val) => {
-                  if (val) setPageSize(Number(val));
-                }}
-              >
-                <SelectTrigger className="h-8 w-[68px] text-xs rounded-lg bg-background border-border/80">
-                  <SelectValue placeholder="10" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10" className="text-xs">
-                    10
-                  </SelectItem>
-                  <SelectItem value="20" className="text-xs">
-                    20
-                  </SelectItem>
-                  <SelectItem value="50" className="text-xs">
-                    50
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 sm:justify-end">
+            {totalRows > PAGE_SIZES[0] && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  Rows per page
+                </span>
+                <Select
+                  value={String(pageSize)}
+                  onValueChange={(val) => {
+                    if (val) table.setPageSize(Number(val));
+                  }}
+                >
+                  <SelectTrigger
+                    size="xs"
+                    aria-label="Rows per page"
+                    className="w-16 bg-white"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent
+                    size="xs"
+                    alignItemWithTrigger={false}
+                    className="min-w-16"
+                  >
+                    {PAGE_SIZES.map((n) => (
+                      <SelectItem key={n} value={String(n)}>
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <Pagination className="mx-0 w-auto justify-end">
-              <PaginationContent className="gap-1">
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage <= 1}
-                  />
-                </PaginationItem>
+            {pageCount > 1 && (
+              <Pagination className="mx-0 w-auto justify-end">
+                <PaginationContent className="gap-1">
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => table.previousPage()}
+                      disabled={!table.getCanPreviousPage()}
+                    />
+                  </PaginationItem>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((p) => {
-                    return (
-                      p === 1 ||
-                      p === totalPages ||
-                      Math.abs(p - currentPage) <= 1
-                    );
-                  })
-                  .map((p, idx, arr) => {
-                    const prev = arr[idx - 1];
-                    const hasGap = prev && p - prev > 1;
+                  {/* Compact "Page x of y" on small screens */}
+                  <PaginationItem className="px-2 text-xs text-muted-foreground tabular-nums sm:hidden">
+                    {currentPage} / {pageCount}
+                  </PaginationItem>
 
-                    return (
-                      <React.Fragment key={p}>
-                        {hasGap && (
-                          <PaginationItem>
-                            <PaginationEllipsis />
+                  {Array.from({ length: pageCount }, (_, i) => i + 1)
+                    .filter(
+                      (p) =>
+                        p === 1 ||
+                        p === pageCount ||
+                        Math.abs(p - currentPage) <= 1,
+                    )
+                    .map((p, idx, arr) => {
+                      const prev = arr[idx - 1];
+                      const hasGap = prev !== undefined && p - prev > 1;
+
+                      return (
+                        <React.Fragment key={p}>
+                          {hasGap && (
+                            <PaginationItem className="hidden sm:block">
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          )}
+                          <PaginationItem className="hidden sm:block">
+                            <PaginationLink
+                              isActive={p === currentPage}
+                              onClick={() => table.setPageIndex(p - 1)}
+                              className={cn(
+                                "text-xs",
+                                p === currentPage &&
+                                  "border-foreground bg-foreground text-primary-foreground hover:bg-foreground/90 hover:text-primary-foreground",
+                              )}
+                            >
+                              {p}
+                            </PaginationLink>
                           </PaginationItem>
-                        )}
-                        <PaginationItem>
-                          <PaginationLink
-                            isActive={p === currentPage}
-                            onClick={() => setPage(p)}
-                          >
-                            {p}
-                          </PaginationLink>
-                        </PaginationItem>
-                      </React.Fragment>
-                    );
-                  })}
+                        </React.Fragment>
+                      );
+                    })}
 
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={currentPage >= totalPages}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => table.nextPage()}
+                      disabled={!table.getCanNextPage()}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </div>
         </div>
       </div>
 
