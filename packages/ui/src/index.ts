@@ -10,6 +10,7 @@ export * from "./components/date-picker";
 export * from "./components/dialog";
 export * from "./components/empty";
 export * from "./components/field";
+export * from "./components/form-combobox";
 export * from "./components/form-fields";
 export * from "./components/input";
 export * from "./components/input-otp";
@@ -36,4 +37,5 @@ export * from "./components/tooltip";
 export * from "./hooks/use-mobile";
 
 // Lib utils
+export * from "./lib/phone";
 export * from "./lib/utils";
