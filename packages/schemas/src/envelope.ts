@@ -1,20 +1,36 @@
 import { z } from "zod";
 
+/**
+ * Standard API response envelope aligned with OpenAPI components.schemas.Envelope.
+ */
+export const envelopeSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+});
+export type Envelope = z.infer<typeof envelopeSchema>;
+
+/**
+ * Wraps any data schema in the standard success envelope.
+ */
 export const apiResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
-  z.object({
-    success: z.boolean(),
-    message: z.string(),
+  envelopeSchema.extend({
     data: dataSchema,
   });
+
+export type ApiResponse<T> = {
+  success: boolean;
+  message: string;
+  data: T;
+};
 
 export type ApiResponseSchema<T extends z.ZodType> = z.infer<
   ReturnType<typeof apiResponseSchema<T>>
 >;
 
 export class ApiValidationError extends Error {
-  public issues: z.ZodIssue[];
+  public issues: z.core.$ZodIssue[];
 
-  constructor(message: string, issues: z.ZodIssue[] = []) {
+  constructor(message: string, issues: z.core.$ZodIssue[] = []) {
     super(message);
     this.name = "ApiValidationError";
     this.issues = issues;

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { paginationQuerySchema } from "./pagination";
 
 export const redirectSearchSchema = z.object({
   redirect: z
@@ -70,10 +71,7 @@ export const querySearchSchema = z.object({
 });
 export type QuerySearch = z.infer<typeof querySearchSchema>;
 
-export const paginationSearchSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().positive().optional().default(20),
-});
+export const paginationSearchSchema = paginationQuerySchema;
 export type PaginationSearch = z.infer<typeof paginationSearchSchema>;
 
 export const planFilterSearchSchema = z.object({

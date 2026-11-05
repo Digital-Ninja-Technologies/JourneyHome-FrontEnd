@@ -4,6 +4,7 @@ export * from "./enums";
 export * from "./envelope";
 export * from "./notification";
 export * from "./package";
+export * from "./pagination";
 export * from "./payment";
 export * from "./plan";
 export * from "./search";

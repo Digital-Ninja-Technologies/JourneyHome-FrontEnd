@@ -1,13 +1,23 @@
 import { z } from "zod";
 import { UserRoleEnum } from "./enums";
 
-export const sessionUserSchema = z.object({
+/**
+ * Authenticated user object returned by login endpoints.
+ * Aligned with OpenAPI components.schemas.AuthUser.
+ */
+export const authUserSchema = z.object({
   id: z.string(),
   email: z.string().email(),
   name: z.string().min(1),
   role: UserRoleEnum,
   isSuperAdmin: z.boolean(),
 });
+export type AuthUser = z.infer<typeof authUserSchema>;
+
+/**
+ * Session user representation used in client session state.
+ */
+export const sessionUserSchema = authUserSchema;
 export type SessionUser = z.infer<typeof sessionUserSchema>;
 
 export const sessionSchema = z.object({
@@ -20,35 +30,18 @@ export type Session = z.infer<typeof sessionSchema>;
 export const loginSchema = z.object({
   email: z.string().trim().email("Please enter a valid email address"),
   password: z.string().min(1, "Password is required"),
-  remember: z.boolean().optional().default(false),
+  remember: z.boolean().optional(),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 
-export const authLoginResponseSchema = z
-  .object({
-    user: z
-      .object({
-        _id: z.string().optional(),
-        id: z.string().optional(),
-        email: z.string().email(),
-        name: z.string(),
-        role: z.string().optional(),
-        isSuperAdmin: z.boolean().optional(),
-      })
-      .transform((u) => ({
-        id: u.id || u._id || "",
-        email: u.email,
-        name: u.name,
-        role: u.role || "customer",
-        isSuperAdmin: Boolean(u.isSuperAdmin),
-      })),
-    accessToken: z.string().optional(),
-    token: z.string().optional(),
-  })
-  .transform((data) => ({
-    user: data.user,
-    token: data.accessToken || data.token || "",
-  }));
+/**
+ * Payload data returned inside LoginResponse envelope.
+ * Aligned with OpenAPI components.schemas.LoginResponse data shape.
+ */
+export const authLoginResponseSchema = z.object({
+  user: authUserSchema,
+  token: z.string(),
+});
 export type AuthLoginResponse = z.infer<typeof authLoginResponseSchema>;
 
 export const adminLoginSchema = z.object({

@@ -34,6 +34,7 @@ export const ServiceRequestStatusEnum = z.enum([
   "Approved",
   "Rejected",
   "Cancelled",
+  "Closed",
 ]);
 export type ServiceRequestStatus = z.infer<typeof ServiceRequestStatusEnum>;
 

@@ -1,51 +1,63 @@
 import { z } from "zod";
+import { createPaginatedDataSchema, paginationQuerySchema } from "./pagination";
 
+/**
+ * In-app notification record schema.
+ * Aligned with OpenAPI components.schemas.Notification.
+ */
 export const appNotificationSchema = z.object({
   _id: z.string(),
+  userId: z.string().optional(),
   title: z.string(),
   message: z.string(),
   event: z.string().optional(),
+  dedupeKey: z.string().optional(),
+  channel: z.string().optional(),
   isRead: z.boolean().default(false),
-  plan: z.string().optional(),
-  subject: z.string().optional(),
   createdAt: z.string(),
+  __v: z.number().optional(),
 });
 export type AppNotification = z.infer<typeof appNotificationSchema>;
 
-export const notificationsListResponseSchema = z.union([
-  z.lazy(() => paginatedNotificationsSchema.transform((r) => r.items)),
-  z.object({ items: z.array(appNotificationSchema) }).transform((r) => r.items),
-  z.array(appNotificationSchema),
-]);
+/**
+ * Counts object returned in notification list responses.
+ */
+export const notificationCountsSchema = z.object({
+  totalNotifications: z.number().int().default(0),
+  totalUnreadNotifications: z.number().int().default(0),
+});
+export type NotificationCounts = z.infer<typeof notificationCountsSchema>;
 
-export const paginatedNotificationsSchema = z.object({
-  items: z.array(appNotificationSchema),
-  pagination: z.object({
-    total: z.number(),
-    page: z.number(),
-    limit: z.number(),
-    totalPages: z.number(),
-  }),
-  counts: z.object({
-    totalNotifications: z.number(),
-    totalUnreadNotifications: z.number(),
-  }),
+/**
+ * Paginated notifications response data shape.
+ * Aligned with OpenAPI components.schemas.NotificationListResponse data shape.
+ */
+export const paginatedNotificationsSchema = createPaginatedDataSchema(
+  appNotificationSchema,
+).extend({
+  counts: notificationCountsSchema,
 });
 export type PaginatedNotifications = z.infer<
   typeof paginatedNotificationsSchema
 >;
 
-export const customerPreferencesSchema = z.object({
-  paymentReminders: z.boolean(),
-  deficitAlerts: z.boolean(),
-  serviceRequestUpdates: z.boolean(),
-  productNewsOffers: z.boolean(),
+/**
+ * Query schema for `GET /notifications`.
+ */
+export const notificationQuerySchema = paginationQuerySchema.extend({
+  title: z.string().optional(),
+  isRead: z.coerce.boolean().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
 });
-export type CustomerPreferences = z.infer<typeof customerPreferencesSchema>;
+export type NotificationQueryInput = z.infer<typeof notificationQuerySchema>;
 
-export const adminPreferencesSchema = z.object({
-  newServiceRequest: z.boolean(),
-  paymentFailed: z.boolean(),
-  weeklyDigest: z.boolean(),
-});
-export type AdminPreferences = z.infer<typeof adminPreferencesSchema>;
+// Re-export preference schemas from user module for convenience
+export {
+  type AdminMe,
+  adminMeSchema,
+  type CustomerPreferences,
+  customerPreferencesSchema,
+  type NotificationPreferences,
+  notificationPreferencesSchema,
+} from "./user";
