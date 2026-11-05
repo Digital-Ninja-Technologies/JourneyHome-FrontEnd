@@ -5,6 +5,8 @@ import { createRouter, Navigate } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { queryClient } from "./lib/query";
 import { routeTree } from "./routeTree.gen";
+import { TooltipProvider } from "@journeyhome/ui/components/tooltip";
+import { Toaster } from "@journeyhome/ui/components/toast";
 
 export const router = createRouter({
   routeTree,
@@ -19,7 +21,8 @@ export const router = createRouter({
   defaultNotFoundComponent: () => <Navigate to="/app" replace />,
   Wrap: ({ children }) => (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <TooltipProvider>{children}</TooltipProvider>
+      <Toaster />
 
       <TanStackDevtools
         config={{

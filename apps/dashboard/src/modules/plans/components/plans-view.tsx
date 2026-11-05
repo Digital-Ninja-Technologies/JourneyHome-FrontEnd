@@ -212,7 +212,7 @@ export function PlansView() {
   );
 
   return (
-    <main className="flex max-w-[1200px] flex-col gap-6 p-5 md:p-10">
+    <main className="flex flex-1 flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="text-sm text-muted-foreground">
@@ -221,7 +221,7 @@ export function PlansView() {
             </Link>{" "}
             / My plans
           </div>
-          <h1 className="font-serif text-[36px] font-normal leading-[1.05] sm:text-[44px] md:text-[56px]">
+          <h1 className="page-title">
             My <span className="italic">plans</span>
           </h1>
         </div>

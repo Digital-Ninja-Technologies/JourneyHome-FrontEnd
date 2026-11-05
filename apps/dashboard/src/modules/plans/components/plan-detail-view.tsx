@@ -58,7 +58,7 @@ export function PlanDetailView() {
       planQ.error instanceof ApiError &&
       (planQ.error.status === 404 || planQ.error.status === 400);
     return (
-      <main className="flex flex-col items-start gap-3 p-5 md:p-10">
+      <main className="flex flex-1 flex-col items-start gap-3 max-w-4xl">
         <h1 className="font-serif text-4xl">
           {missing ? "We couldn’t find that plan" : "Something went wrong"}
         </h1>
@@ -99,7 +99,7 @@ export function PlanDetailView() {
   const canPay = canPayNow(plan);
 
   return (
-    <main className="flex max-w-[800px] flex-col gap-6 p-5 md:p-10">
+    <main className="flex flex-1 flex-col gap-6 max-w-4xl">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <div className="text-sm text-muted-foreground">

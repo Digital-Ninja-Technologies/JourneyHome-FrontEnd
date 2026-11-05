@@ -130,7 +130,7 @@ export function PlanDetailSkeleton() {
     <main
       role="status"
       aria-label="Loading plan details..."
-      className="flex flex-col gap-6 p-4 sm:p-6 md:p-10"
+      className="flex flex-1 flex-col gap-6 max-w-4xl"
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-2">
@@ -270,7 +270,7 @@ export function PaymentsViewSkeleton() {
     <main
       role="status"
       aria-label="Loading payments..."
-      className="flex flex-col gap-6 p-4 sm:p-6 md:p-10"
+      className="flex flex-1 flex-col gap-6"
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1.5">
@@ -372,7 +372,7 @@ export function RequestServiceSkeleton() {
     <main
       role="status"
       aria-label="Loading service request form..."
-      className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 sm:p-6 md:p-10"
+      className="flex flex-1 flex-col gap-6 max-w-3xl"
     >
       <div className="flex flex-col gap-2">
         <Skeleton className="h-10 w-56 rounded-xl" />
@@ -462,7 +462,7 @@ export function ProfileSkeleton() {
     <main
       role="status"
       aria-label="Loading profile..."
-      className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-4 sm:p-6 md:p-10"
+      className="flex flex-1 flex-col gap-6 max-w-4xl"
     >
       <div className="flex flex-col gap-1.5">
         <Skeleton className="h-10 w-48 rounded-xl" />
@@ -563,12 +563,14 @@ export function DashboardSkeleton() {
       </div>
 
       {/* Recent Payments Section */}
-      <div className="flex flex-col gap-3 rounded-3xl bg-white p-6 shadow-sm">
+      <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <Skeleton className="h-7 w-40 rounded-lg" />
+          <Skeleton className="h-8 w-40 rounded-lg" />
           <Skeleton className="h-4 w-16 rounded-md" />
         </div>
-        <RecentPaymentsSkeleton />
+        <div className="flex flex-col gap-3 rounded-3xl bg-white p-6 shadow-sm">
+          <RecentPaymentsSkeleton />
+        </div>
       </div>
     </div>
   );
@@ -618,9 +620,9 @@ export function AppLayoutSkeleton() {
           <Skeleton className="size-9 rounded-xl" />
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 md:p-10">
+        <div className="page-wrapper flex flex-1 flex-col min-w-0">
           <DashboardSkeleton />
-        </main>
+        </div>
       </div>
     </div>
   );
