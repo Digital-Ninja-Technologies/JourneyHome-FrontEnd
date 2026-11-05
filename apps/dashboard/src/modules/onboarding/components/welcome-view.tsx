@@ -4,9 +4,11 @@ import { cn } from "@journeyhome/ui/lib/utils";
 import { Link, useSearch } from "@tanstack/react-router";
 import { Bell, Check, Plus } from "lucide-react";
 import { useEffect } from "react";
+import { CardSkeleton } from "@/components/skeletons";
 import { StatusPill } from "@/components/status-pill";
 import { firstName, formatDate, formatMoney } from "@/lib/format";
 import { useSessionUser } from "@/modules/auth/query-options";
+import { clearStoredSelectedPackage } from "@/modules/onboarding/storage";
 import { setOnboardingPlan } from "@/modules/payments/checkout";
 import { relationshipLabel } from "@/modules/plans/plans.utils";
 import { usePlan } from "@/modules/plans/query-options";
@@ -17,12 +19,13 @@ export function WelcomeView() {
   const planQ = usePlan(planId);
   const plan = planQ.data;
 
-  useEffect(() => setOnboardingPlan(null), []);
+  useEffect(() => {
+    setOnboardingPlan(null);
+    clearStoredSelectedPackage();
+  }, []);
 
   const person = plan ? firstName(plan.coveredPerson.fullName) : "";
-  const money = plan
-    ? formatMoney(plan.contributionAmountMinor, plan.currency)
-    : "";
+  const money = plan ? formatMoney(plan.amount, plan.currency) : "";
   const active = plan?.status === "Active";
 
   return (
@@ -40,7 +43,7 @@ export function WelcomeView() {
             </span>
           </h1>
           {plan && (
-            <p className="mx-auto max-w-md text-[15px] leading-relaxed text-muted">
+            <p className="mx-auto max-w-md text-[15px] leading-relaxed text-muted-foreground">
               {active
                 ? `${person}'s plan is active and your first contribution of ${money} has been recorded. We'll let you know before each payment is due.`
                 : plan.status === "Pending"
@@ -51,7 +54,7 @@ export function WelcomeView() {
         </div>
 
         {planQ.isPending && planId && (
-          <p className="text-sm text-muted">Loading your plan…</p>
+          <CardSkeleton className="w-full bg-foreground/10" lines={4} />
         )}
         {plan && (
           <section className="flex w-full flex-col gap-3.5 rounded-[28px] bg-foreground p-7 text-canvas">
@@ -61,8 +64,7 @@ export function WelcomeView() {
                   {plan.coveredPerson.fullName}
                 </div>
                 <div className="text-[13px] text-canvas/70">
-                  {relationshipLabel(plan)} · {plan.packageSnapshot.name}{" "}
-                  package
+                  {relationshipLabel(plan)} · {plan.packageDetails.name} package
                 </div>
               </div>
               <StatusPill
@@ -78,14 +80,18 @@ export function WelcomeView() {
             {active && (
               <div className="flex justify-between text-sm">
                 <span className="text-canvas/70">Next payment</span>
-                <span>{formatDate(plan.nextPaymentDate)}</span>
+                <span>
+                  {plan.nextPaymentDate
+                    ? formatDate(plan.nextPaymentDate)
+                    : "—"}
+                </span>
               </div>
             )}
           </section>
         )}
 
         <section className="flex w-full flex-col gap-2.5">
-          <div className="text-xs font-bold uppercase tracking-wider text-muted">
+          <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             What&rsquo;s next
           </div>
           <Link

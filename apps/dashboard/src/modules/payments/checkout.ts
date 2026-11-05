@@ -1,5 +1,6 @@
+import { checkoutInitializeSchema } from "@journeyhome/schemas";
 import { useMutation } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { api, parseApiResponse } from "@/lib/api";
 
 /** Set while a new customer is onboarding, so the Paystack return page can send them to the welcome screen. */
 export const ONBOARDING_KEY = "jh_onboarding_plan";
@@ -27,11 +28,17 @@ export function useStartCheckout(
   opts: { onboarding?: boolean } = {},
 ) {
   return useMutation({
-    mutationFn: () =>
-      api<{ authorizationUrl: string }>(
+    mutationFn: async () => {
+      const res = await api<unknown>(
         `/payments/plans/${planId}/initialize-initial`,
         { method: "POST" },
-      ),
+      );
+      return parseApiResponse(
+        checkoutInitializeSchema,
+        res,
+        "Invalid payment initialization response from server",
+      );
+    },
     onSuccess: (data) => {
       if (opts.onboarding) setOnboardingPlan(planId);
       window.location.assign(data.authorizationUrl);

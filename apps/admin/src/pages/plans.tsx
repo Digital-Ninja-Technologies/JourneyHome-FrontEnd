@@ -85,7 +85,7 @@ export default function Plans() {
       <div className="overflow-x-auto rounded-2xl sm:rounded-3xl bg-white p-4 sm:p-6">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead>
-            <tr className="text-xs font-semibold uppercase tracking-wider text-muted">
+            <tr className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {[
                 "Covered person",
                 "Owner",
@@ -141,10 +141,10 @@ export default function Plans() {
           </tbody>
         </table>
         {plansQ.isPending && (
-          <p className="py-6 text-center text-sm text-muted">Loading plans…</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">Loading plans…</p>
         )}
         {plansQ.isSuccess && rows.length === 0 && (
-          <p className="py-6 text-center text-sm text-muted">No plans match.</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">No plans match.</p>
         )}
         {rows.length > shown && (
           <div className="border-t border-border pt-4 text-center">

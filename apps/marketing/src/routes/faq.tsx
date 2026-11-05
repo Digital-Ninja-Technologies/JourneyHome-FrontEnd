@@ -64,7 +64,7 @@ function FAQ() {
                 +
               </span>
             </summary>
-            <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-muted">
+            <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
               {a}
             </p>
           </details>

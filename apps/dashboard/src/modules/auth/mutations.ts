@@ -1,7 +1,15 @@
 import type { LoginInput, SignupInput } from "@journeyhome/schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { login, logout, signup, type User, updateUserLocally } from "./api";
+import { sanitizeRedirect } from "@/lib/search-schemas";
+import {
+  deleteAccount,
+  login,
+  logout,
+  signup,
+  type User,
+  updateUserLocally,
+} from "./api";
 import { sessionQueryOptions } from "./query-options";
 
 export function useLoginMutation() {
@@ -13,8 +21,9 @@ export function useLoginMutation() {
       input: LoginInput & { remember?: boolean; redirect?: string },
     ) => login(input),
     onSuccess: (session, variables) => {
+      queryClient.clear();
       queryClient.setQueryData(sessionQueryOptions().queryKey, session);
-      const to = variables.redirect || "/app";
+      const to = sanitizeRedirect(variables.redirect, "/app");
       navigate({ to: to as any, replace: true });
     },
   });
@@ -37,24 +46,29 @@ export function useLogoutMutation() {
 }
 
 export function useSignupMutation() {
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: (input: SignupInput) => signup(input),
+    onSuccess: () => {
+      navigate({
+        to: "/verify-email",
+        replace: true,
+      });
+    },
+  });
+}
+
+export function useDeleteAccountMutation() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: ({
-      selectedPackage: _selectedPackage,
-      ...input
-    }: SignupInput & { phone?: string; selectedPackage?: string }) =>
-      signup(input),
-    onSuccess: (session, variables) => {
-      queryClient.setQueryData(sessionQueryOptions().queryKey, session);
-      navigate({
-        to: "/signup/verify",
-        search: variables.selectedPackage
-          ? { package: variables.selectedPackage }
-          : {},
-        replace: true,
-      });
+    mutationFn: (password: string) => deleteAccount(password),
+    onSuccess: () => {
+      queryClient.setQueryData(sessionQueryOptions().queryKey, null);
+      queryClient.clear();
+      navigate({ to: "/login", replace: true });
     },
   });
 }

@@ -114,7 +114,7 @@ function AdminTeam() {
         >
           <div>
             <div className="font-bold">{a.name}</div>
-            <div className="text-xs text-muted">
+            <div className="text-xs text-muted-foreground">
               {a.email} ·{" "}
               {a.isSuperAdmin || a.role === "super_admin"
                 ? "Super admin"
@@ -247,7 +247,7 @@ function Preferences() {
       <CardTitle className="mb-3">Notification preferences</CardTitle>
       <DemoNotice>changes are saved in this browser only.</DemoNotice>
       {meQ.isError && (
-        <p className="text-sm text-muted">
+        <p className="text-sm text-muted-foreground">
           {isUnsupported(meQ.error)
             ? `${UNSUPPORTED_MESSAGE} Preferences will appear here once it's enabled.`
             : meQ.error.message}
@@ -283,7 +283,7 @@ function Security() {
   return (
     <Card>
       <CardTitle className="mb-1">Security</CardTitle>
-      <p className="mb-3 text-sm text-muted">
+      <p className="mb-3 text-sm text-muted-foreground">
         Sign out of every other browser or device where this admin account is
         signed in.
       </p>
@@ -319,12 +319,12 @@ export default function Settings() {
       <PageHeader title="Settings" />
       <Card>
         <CardTitle className="mb-1">Plan packages &amp; pricing</CardTitle>
-        <p className="mb-5 text-sm text-muted">
+        <p className="mb-5 text-sm text-muted-foreground">
           Price changes apply to new plans only — existing plans keep the price
           they started with.
         </p>
         {packagesQ.isPending && (
-          <p className="text-sm text-muted">Loading packages…</p>
+          <p className="text-sm text-muted-foreground">Loading packages…</p>
         )}
         {packagesQ.isError && (
           <QueryError
@@ -345,7 +345,7 @@ export default function Settings() {
       ) : (
         <Card>
           <CardTitle className="mb-1">Admin team</CardTitle>
-          <p className="text-sm text-muted">
+          <p className="text-sm text-muted-foreground">
             Only super admins can view and manage the admin team.
           </p>
         </Card>

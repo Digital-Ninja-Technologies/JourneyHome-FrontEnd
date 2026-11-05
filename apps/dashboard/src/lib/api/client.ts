@@ -1,6 +1,6 @@
 import { createApiClient } from "@journeyhome/api-client";
 import { env } from "@/env/client";
-import { queryClient } from "@/router";
+import { queryClient } from "@/lib/query";
 
 const STORAGE_KEY = "jh_session";
 
@@ -26,13 +26,16 @@ export const apiClient = createApiClient({
     try {
       localStorage.removeItem(STORAGE_KEY);
       sessionStorage.removeItem(STORAGE_KEY);
-      queryClient.setQueryData(["auth", "session"], null);
-      queryClient.cancelQueries();
-      queryClient.removeQueries();
+      sessionStorage.removeItem("jh_selected_package");
+      localStorage.removeItem("jh_selected_package");
+      sessionStorage.removeItem("jh_pending_verification_email");
+      sessionStorage.removeItem("jh_onboarding_plan");
+      queryClient.clear();
       if (
         typeof window !== "undefined" &&
         !window.location.pathname.startsWith("/login") &&
-        !window.location.pathname.startsWith("/signup")
+        !window.location.pathname.startsWith("/signup") &&
+        !window.location.pathname.startsWith("/verify-email")
       ) {
         window.location.href = `/login?redirect=${encodeURIComponent(
           window.location.pathname + window.location.search,

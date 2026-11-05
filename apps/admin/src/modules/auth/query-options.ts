@@ -1,12 +1,13 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { fetchAdminSession } from "./api";
 
-export const adminSessionQueryOptions = () =>
-  queryOptions({
+export function adminSessionQueryOptions() {
+  return queryOptions({
     queryKey: ["auth", "admin-session"] as const,
     queryFn: () => fetchAdminSession(),
     staleTime: Infinity,
   });
+}
 
 export function useAdminSession() {
   return useQuery(adminSessionQueryOptions());

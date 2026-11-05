@@ -34,7 +34,7 @@ function Stat({
       <div
         className={cn(
           "text-xs font-semibold uppercase tracking-[2px]",
-          tone === "due" ? "text-status-due" : "text-muted",
+          tone === "due" ? "text-status-due" : "text-muted-foreground",
         )}
       >
         {label}
@@ -42,7 +42,7 @@ function Stat({
       <div className="text-[34px] font-bold leading-tight tracking-tight">
         {value}
       </div>
-      <div className="text-[13px] text-muted">{sub}</div>
+      <div className="text-[13px] text-muted-foreground">{sub}</div>
     </div>
   );
 }
@@ -62,7 +62,7 @@ function Panel({
           key={label}
           className="flex items-center justify-between border-t border-border py-3 text-sm"
         >
-          <span className="text-muted">{label}</span>
+          <span className="text-muted-foreground">{label}</span>
           <span className={cn("font-bold", hot && "text-link")}>{value}</span>
         </div>
       ))}
@@ -93,7 +93,7 @@ export default function Dashboard() {
     <main className="flex flex-col gap-6 p-4 sm:p-6 md:p-10">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="text-sm text-muted">{formatToday()}</div>
+          <div className="text-sm text-muted-foreground">{formatToday()}</div>
           <h1 className="font-serif text-[32px] sm:text-[38px] md:text-[44px] font-normal leading-[1.1]">
             Operations overview
           </h1>
@@ -113,7 +113,7 @@ export default function Dashboard() {
           }}
         />
       )}
-      {loading && !error && <p className="text-muted">Loading…</p>}
+      {loading && !error && <p className="text-muted-foreground">Loading…</p>}
 
       {!loading && (
         <>
@@ -217,7 +217,7 @@ export default function Dashboard() {
               </Link>
             </div>
             {queue.length === 0 && (
-              <p className="border-t border-border py-6 text-sm text-muted">
+              <p className="border-t border-border py-6 text-sm text-muted-foreground">
                 Nothing is waiting for review.
               </p>
             )}
@@ -234,7 +234,7 @@ export default function Dashboard() {
                     <div className="font-bold">
                       {r.coveredPersonSnapshot.fullName}&rsquo;s service
                     </div>
-                    <div className="text-xs text-muted">
+                    <div className="text-xs text-muted-foreground">
                       Submitted {formatDay(r.createdAt)} · {r.burialLocation}
                     </div>
                   </div>

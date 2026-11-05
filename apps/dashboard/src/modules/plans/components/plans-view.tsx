@@ -3,6 +3,7 @@ import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
+import { AsyncBoundary, PlansCardsSkeleton } from "@/components/async-boundary";
 import { NoticeBanner } from "@/components/notice-banner";
 import { StatusPill } from "@/components/status-pill";
 import { formatMoney } from "@/lib/format";
@@ -36,7 +37,7 @@ function Stat({
       <div
         className={cn(
           "text-xs font-semibold uppercase tracking-[2px]",
-          dark ? "text-canvas/70" : "text-muted",
+          dark ? "text-canvas/70" : "text-muted-foreground",
         )}
       >
         {label}
@@ -93,7 +94,7 @@ function PlanSection({ plan }: { plan: Plan }) {
     };
   }
 
-  const meta = `${relationshipLabel(plan)} · ${plan.packageSnapshot.name} package · created ${startedLabel(plan)}`;
+  const meta = `${relationshipLabel(plan)} · ${plan.packageDetails.name} package · created ${startedLabel(plan)}`;
 
   return (
     <section
@@ -117,7 +118,10 @@ function PlanSection({ plan }: { plan: Plan }) {
             />
           </div>
           <div
-            className={cn("text-sm", dark ? "text-canvas/70" : "text-muted")}
+            className={cn(
+              "text-sm",
+              dark ? "text-canvas/70" : "text-muted-foreground",
+            )}
           >
             {meta}
           </div>
@@ -159,12 +163,12 @@ function PlanSection({ plan }: { plan: Plan }) {
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
           <Stat
             label="Total saved"
-            value={money(plan.totalContributedMinor)}
+            value={money(plan.totalContributedAmount)}
             dark={dark}
           />
           <Stat
             label="Monthly contribution"
-            value={money(plan.contributionAmountMinor)}
+            value={money(plan.amount)}
             dark={dark}
           />
           <Stat
@@ -211,7 +215,7 @@ export function PlansView() {
     <main className="flex max-w-[1200px] flex-col gap-6 p-5 md:p-10">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="text-sm text-muted">
+          <div className="text-sm text-muted-foreground">
             <Link to="/app" className="hover:underline">
               Dashboard
             </Link>{" "}
@@ -230,27 +234,17 @@ export function PlansView() {
         </Button>
       </header>
 
-      {plansQ.isPending && <p className="text-muted">Loading your plans…</p>}
-      {plansQ.isError && (
-        <div
-          role="alert"
-          className="flex items-center justify-between gap-4 rounded-2xl bg-status-cancelled-bg px-5 py-4 text-sm text-status-cancelled"
-        >
-          <span>We couldn&rsquo;t load your plans. {plansQ.error.message}</span>
-          <Button
-            type="button"
-            variant="link"
-            size="sm"
-            className="h-auto p-0 font-bold underline text-status-cancelled hover:text-status-cancelled"
-            onClick={() => void plansQ.refetch()}
-          >
-            Try again
-          </Button>
-        </div>
-      )}
-      {plans.map((p) => (
-        <PlanSection key={p._id} plan={p} />
-      ))}
+      <AsyncBoundary
+        isLoading={plansQ.isPending}
+        isError={plansQ.isError}
+        error={plansQ.error}
+        onReset={() => void plansQ.refetch()}
+        loadingFallback={<PlansCardsSkeleton count={2} />}
+      >
+        {plans.map((p) => (
+          <PlanSection key={p._id} plan={p} />
+        ))}
+      </AsyncBoundary>
 
       <button
         type="button"
@@ -264,7 +258,7 @@ export function PlansView() {
           <span className="block font-serif text-2xl">
             Start another plan for someone else
           </span>
-          <span className="mt-1 block max-w-md text-sm text-muted">
+          <span className="mt-1 block max-w-md text-sm text-muted-foreground">
             Parents, grandparents, spouse, siblings — save for as many family
             members as you need, all managed from this account.
           </span>

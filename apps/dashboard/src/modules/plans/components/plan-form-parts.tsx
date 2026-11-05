@@ -1,7 +1,19 @@
+import { DatePicker } from "@journeyhome/ui/components/date-picker";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
-import { Select } from "@journeyhome/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@journeyhome/ui/components/select";
 import { cn } from "@journeyhome/ui/lib/utils";
+import { useState } from "react";
+import {
+  AsyncBoundary,
+  PackageChoiceSkeleton,
+} from "@/components/async-boundary";
 import { formatMoney } from "@/lib/format";
 import { usePackages } from "@/modules/packages/query-options";
 
@@ -34,6 +46,10 @@ function Field({
 
 /** "Who is this plan for?" fields. Read them back with `planRequestBody`. */
 export function CoveredPersonFields() {
+  const [relationship, setRelationship] = useState("Mother");
+  const [gender, setGender] = useState("Female");
+  const [dob, setDob] = useState<Date | null>(null);
+
   return (
     <fieldset className="flex flex-col gap-4">
       <legend className="mb-3 text-base font-bold">
@@ -50,32 +66,73 @@ export function CoveredPersonFields() {
           />
         </Field>
         <Field label="Relationship" htmlFor="relationship">
-          <Select id="relationship" name="relationship" defaultValue="Mother">
-            {RELATIONSHIPS.map((r) => (
-              <option key={r}>{r}</option>
-            ))}
+          <Select
+            value={relationship}
+            onValueChange={(val) => {
+              if (val) setRelationship(val);
+            }}
+            name="relationship"
+          >
+            <SelectTrigger id="relationship">
+              <SelectValue placeholder="Select relationship" />
+            </SelectTrigger>
+            <SelectContent>
+              {RELATIONSHIPS.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {r}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
+          <input type="hidden" name="relationship" value={relationship} />
         </Field>
         <Field label="Date of birth" htmlFor="dob">
-          <Input
+          <DatePicker
             id="dob"
+            value={dob}
+            onChange={setDob}
+            placeholder="Select date of birth"
+            fromYear={1920}
+            toYear={new Date().getFullYear()}
+            yearOrder="desc"
+            maxDate={new Date()}
+          />
+          <input
+            type="hidden"
             name="dob"
-            type="date"
+            value={
+              dob
+                ? `${dob.getFullYear()}-${String(dob.getMonth() + 1).padStart(2, "0")}-${String(dob.getDate()).padStart(2, "0")}`
+                : ""
+            }
             required
-            max={new Date().toISOString().slice(0, 10)}
           />
         </Field>
         <Field label="Gender" htmlFor="gender">
-          <Select id="gender" name="gender" defaultValue="Female">
-            <option>Female</option>
-            <option>Male</option>
+          <Select
+            value={gender}
+            onValueChange={(val) => {
+              if (val) setGender(val);
+            }}
+            name="gender"
+          >
+            <SelectTrigger id="gender">
+              <SelectValue placeholder="Select gender" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Female">Female</SelectItem>
+              <SelectItem value="Male">Male</SelectItem>
+            </SelectContent>
           </Select>
+          <input type="hidden" name="gender" value={gender} />
         </Field>
         <Field label="Phone number" htmlFor="phone">
           <Input
             id="phone"
             name="phone"
             type="tel"
+            required
+            minLength={5}
             placeholder="e.g. 0803 123 4567"
           />
         </Field>
@@ -107,43 +164,45 @@ export function PackagePicker({
   return (
     <fieldset className="flex flex-col gap-3">
       <legend className="mb-3 text-base font-bold">Choose a package</legend>
-      {packagesQ.isPending && (
-        <p className="text-sm text-muted">Loading packages…</p>
-      )}
-      {packagesQ.isError && (
-        <p className="text-sm text-status-cancelled">
-          Couldn&rsquo;t load packages. {packagesQ.error.message}
-        </p>
-      )}
-      <div className="grid gap-3 sm:grid-cols-3">
-        {packagesQ.data?.map((p) => (
-          <label
-            key={p._id}
-            className={cn(
-              "flex cursor-pointer flex-col gap-2 rounded-2xl border p-4",
-              value === p._id
-                ? "border-foreground bg-cream/50 ring-1 ring-foreground"
-                : "border-border bg-white",
-            )}
-          >
-            <div className="flex items-center justify-between text-sm font-bold">
-              {p.name}
-              <input
-                type="radio"
-                name="package"
-                value={p._id}
-                required
-                checked={value === p._id}
-                onChange={() => onChange(p._id)}
-              />
-            </div>
-            <div className="text-xl font-bold tracking-tight">
-              {formatMoney(p.amount, p.currency)}
-              <span className="text-xs font-normal text-muted">/mo</span>
-            </div>
-          </label>
-        ))}
-      </div>
+      <AsyncBoundary
+        isLoading={packagesQ.isPending}
+        isError={packagesQ.isError}
+        error={packagesQ.error}
+        onReset={() => void packagesQ.refetch()}
+        loadingFallback={<PackageChoiceSkeleton count={3} />}
+      >
+        <div className="grid gap-3 sm:grid-cols-3">
+          {packagesQ.data?.map((p) => (
+            <label
+              key={p._id}
+              className={cn(
+                "flex cursor-pointer flex-col gap-2 rounded-2xl border p-4",
+                value === p._id
+                  ? "border-foreground bg-cream/50 ring-1 ring-foreground"
+                  : "border-border bg-white",
+              )}
+            >
+              <div className="flex items-center justify-between text-sm font-bold">
+                {p.name}
+                <input
+                  type="radio"
+                  name="package"
+                  value={p._id}
+                  required
+                  checked={value === p._id}
+                  onChange={() => onChange(p._id)}
+                />
+              </div>
+              <div className="text-xl font-bold tracking-tight">
+                {formatMoney(p.amount, p.currency)}
+                <span className="text-xs font-normal text-muted-foreground">
+                  /mo
+                </span>
+              </div>
+            </label>
+          ))}
+        </div>
+      </AsyncBoundary>
     </fieldset>
   );
 }
@@ -153,14 +212,27 @@ export function planRequestBody(form: HTMLFormElement, packageId: string) {
   const d = new FormData(form);
   const text = (k: string) => String(d.get(k) ?? "").trim();
   const location = text("location");
+  const dobText = text("dob");
+  let isoDob: string | undefined;
+  if (dobText) {
+    const parsed = new Date(`${dobText}T00:00:00.000Z`);
+    if (!Number.isNaN(parsed.getTime())) {
+      isoDob = parsed.toISOString();
+    }
+  }
+  const rawGender = text("gender").toLowerCase();
+  const gender =
+    rawGender === "male" || rawGender === "female" ? rawGender : "female";
+  const phone = text("phone");
+
   return {
     packageId,
     coveredPerson: {
       fullName: text("fullName"),
       relationship: text("relationship").toLowerCase(),
-      dateOfBirth: new Date(`${text("dob")}T00:00:00.000Z`).toISOString(),
-      gender: text("gender").toLowerCase(),
-      ...(text("phone") && { phoneNumber: text("phone") }),
+      dateOfBirth: isoDob,
+      gender,
+      phoneNumber: phone || undefined,
       // The backend stores a single address string, so state/location is folded into it.
       address: location ? `${text("address")}, ${location}` : text("address"),
     },

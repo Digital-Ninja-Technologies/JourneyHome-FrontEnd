@@ -4,7 +4,7 @@ import { RefreshCw } from "lucide-react";
 
 export function PackagesUnavailable({ onRetry }: { onRetry?: () => void }) {
   return (
-    <div className="flex flex-col items-center gap-4 rounded-3xl border border-border bg-white p-8 text-muted text-center">
+    <div className="flex flex-col items-center gap-4 rounded-3xl border border-border bg-white p-8 text-muted-foreground text-center">
       <p>
         Package pricing is temporarily unavailable. Please check back shortly or{" "}
         <Link to="/contact" className="font-bold text-link underline">

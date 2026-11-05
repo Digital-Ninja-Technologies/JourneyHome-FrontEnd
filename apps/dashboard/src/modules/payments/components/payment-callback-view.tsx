@@ -1,13 +1,16 @@
-import type { Payment } from "@journeyhome/schemas";
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, Navigate, useSearch } from "@tanstack/react-router";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { useEffect } from "react";
-import { api } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
-import { getOnboardingPlan } from "@/modules/payments/checkout";
+import { clearStoredSelectedPackage } from "@/modules/onboarding/storage";
+import { verifyPayment } from "@/modules/payments/api";
+import {
+  getOnboardingPlan,
+  setOnboardingPlan,
+} from "@/modules/payments/checkout";
 
 export function PaymentCallbackView() {
   const search = useSearch({ from: "/app/payments/callback" });
@@ -17,7 +20,9 @@ export function PaymentCallbackView() {
   const verify = useQuery({
     queryKey: ["verify-payment", reference],
     queryFn: () =>
-      api<Payment>(`/payments/verify/${reference}`, { method: "POST" }),
+      reference
+        ? verifyPayment(reference)
+        : Promise.reject(new Error("No reference")),
     enabled: !!reference,
     retry: false,
     staleTime: Infinity,
@@ -39,6 +44,8 @@ export function PaymentCallbackView() {
     pay.purpose === "initial_contribution" &&
     getOnboardingPlan() === pay.plan
   ) {
+    setOnboardingPlan(null);
+    clearStoredSelectedPackage();
     return <Navigate to="/welcome" search={{ plan: pay.plan }} replace />;
   }
   let icon = <Clock className="size-10 text-status-due" />;
@@ -47,6 +54,8 @@ export function PaymentCallbackView() {
   let action = null as React.ReactNode;
 
   if (!reference) {
+    setOnboardingPlan(null);
+    clearStoredSelectedPackage();
     icon = <XCircle className="size-10 text-status-cancelled" />;
     title = "We couldn’t find that payment";
     body =
@@ -77,9 +86,11 @@ export function PaymentCallbackView() {
       </div>
     );
   } else if (pay?.status === "Successful") {
+    setOnboardingPlan(null);
+    clearStoredSelectedPackage();
     icon = <CheckCircle2 className="size-10 text-status-active" />;
     title = "Payment received";
-    body = `Your ${formatMoney(pay.amountMinor, pay.currency)} contribution is confirmed and your plan is now active.`;
+    body = `Your ${formatMoney(pay.amount, pay.currency)} contribution is confirmed and your plan is now active.`;
     action = (
       <Link
         to="/app/plans/$id"
@@ -93,10 +104,12 @@ export function PaymentCallbackView() {
       </Link>
     );
   } else if (pay && (pay.status === "Failed" || pay.status === "Cancelled")) {
+    setOnboardingPlan(null);
+    clearStoredSelectedPackage();
     icon = <XCircle className="size-10 text-status-cancelled" />;
     title = "That payment didn’t go through";
     body =
-      pay.failureMessage ??
+      (pay as any).failureMessage ??
       "You haven’t been charged. You can try again whenever you’re ready.";
     action = (
       <Link
@@ -130,7 +143,7 @@ export function PaymentCallbackView() {
       <h1 className="font-serif text-[40px] font-normal leading-tight">
         {title}
       </h1>
-      <p className="text-muted">{body}</p>
+      <p className="text-muted-foreground">{body}</p>
       {action}
     </main>
   );

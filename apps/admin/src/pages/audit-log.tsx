@@ -1,6 +1,12 @@
-import { Select } from "@journeyhome/ui/components/select";
-import { useMemo, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@journeyhome/ui/components/select";
 import { Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { DemoNotice } from "@/components/demo-notice";
 import { PageHeader, QueryError, SearchBox } from "@/components/ui";
 import { isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/api";
@@ -74,7 +80,7 @@ export default function AuditLog() {
         <PageHeader title="Audit log" />
         <section className="rounded-3xl border border-dashed border-foreground/30 p-8">
           <div className="font-serif text-2xl">Not available yet</div>
-          <p className="mt-2 text-sm leading-relaxed text-muted">
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             {UNSUPPORTED_MESSAGE} It needs a route that lists audit events (
             <code>GET /audit-logs</code>) — they&rsquo;re recorded already but
             can&rsquo;t be read.
@@ -131,42 +137,68 @@ export default function AuditLog() {
           placeholder="Search by admin, action, or record…"
         />
         <Select
-          aria-label="Filter by admin"
           value={actor}
-          onChange={(e) => {
-            setActor(e.target.value);
-            setShown(PAGE);
+          onValueChange={(val) => {
+            if (val) {
+              setActor(val);
+              setShown(PAGE);
+            }
           }}
-          className="h-11 w-auto min-w-[150px] bg-white"
         >
-          <option value="all">All admins</option>
-          {actors.map((a) => (
-            <option key={a}>{a}</option>
-          ))}
+          <SelectTrigger
+            aria-label="Filter by admin"
+            className="h-11 w-auto min-w-[150px] bg-white"
+          >
+            <SelectValue placeholder="All admins">
+              {actor === "all" ? "All admins" : actor}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All admins</SelectItem>
+            {actors.map((a) => (
+              <SelectItem key={a} value={a}>
+                {a}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
         <Select
-          aria-label="Filter by action"
           value={action}
-          onChange={(e) => {
-            setAction(e.target.value);
-            setShown(PAGE);
+          onValueChange={(val) => {
+            if (val) {
+              setAction(val);
+              setShown(PAGE);
+            }
           }}
-          className="h-11 w-auto min-w-[170px] bg-white"
         >
-          <option value="all">All actions</option>
-          {actions.map((a) => (
-            <option key={a} value={a}>
-              {ACTION_LABEL[a] ?? humanise(a)}
-            </option>
-          ))}
+          <SelectTrigger
+            aria-label="Filter by action"
+            className="h-11 w-auto min-w-[170px] bg-white"
+          >
+            <SelectValue placeholder="All actions">
+              {action === "all"
+                ? "All actions"
+                : (ACTION_LABEL[action] ?? humanise(action))}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All actions</SelectItem>
+            {actions.map((a) => (
+              <SelectItem key={a} value={a}>
+                {ACTION_LABEL[a] ?? humanise(a)}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
       </div>
       <section className="rounded-3xl bg-white px-4 py-2 sm:px-7">
         {q.isPending && (
-          <p className="py-6 text-sm text-muted">Loading activity…</p>
+          <p className="py-6 text-sm text-muted-foreground">
+            Loading activity…
+          </p>
         )}
         {q.isSuccess && rows.length === 0 && (
-          <p className="py-6 text-center text-sm text-muted">
+          <p className="py-6 text-center text-sm text-muted-foreground">
             No activity matches.
           </p>
         )}
@@ -184,7 +216,7 @@ export default function AuditLog() {
               >
                 <time
                   dateTime={e.createdAt}
-                  className="w-32 shrink-0 text-xs text-muted"
+                  className="w-32 shrink-0 text-xs text-muted-foreground"
                 >
                   {formatDateTime(e.createdAt)}
                 </time>

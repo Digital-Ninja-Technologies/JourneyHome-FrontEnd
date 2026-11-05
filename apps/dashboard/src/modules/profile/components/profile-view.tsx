@@ -1,4 +1,3 @@
-import type { SavedCard } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import {
   Dialog,
@@ -12,15 +11,15 @@ import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
 import { Switch } from "@journeyhome/ui/components/switch";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { ChevronRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ChevronRight, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { DemoNotice } from "@/components/demo-notice";
-import { ApiError, api, isUnsupported, UNSUPPORTED_MESSAGE } from "@/lib/api";
+import { ApiError } from "@/lib/api";
 import { formatMonthYearLong, initials } from "@/lib/format";
-import { useLogoutMutation } from "@/modules/auth/mutations";
+import { useDeleteAccountMutation } from "@/modules/auth/mutations";
 import { useSessionUser } from "@/modules/auth/query-options";
-import { useSavedCards } from "@/modules/payments/query-options";
+import { changePassword, updatePreferences } from "@/modules/profile/api";
 import { useMe } from "@/modules/profile/query-options";
 import type { Me } from "@/modules/profile/types";
 
@@ -37,48 +36,11 @@ function explain(e: unknown): string {
 
 function PersonalInfo({ me }: { me?: Me }) {
   const user = useSessionUser();
-  const queryClient = useQueryClient();
-  const [saved, setSaved] = useState(false);
-
-  const save = useMutation({
-    mutationFn: (body: { name?: string; phone?: string; email?: string }) =>
-      api<Me>("/auth/me", { method: "PATCH", body }),
-    onSuccess: (updated) => {
-      setSaved(true);
-      void queryClient.invalidateQueries({ queryKey: ["me"] });
-      void queryClient.invalidateQueries({ queryKey: ["session"] });
-      try {
-        const raw = localStorage.getItem("jh_session");
-        if (raw) {
-          const s = JSON.parse(raw);
-          s.user = {
-            ...s.user,
-            name: updated.name,
-            email: updated.email,
-          };
-          localStorage.setItem("jh_session", JSON.stringify(s));
-        }
-      } catch {
-        /* ignore */
-      }
-      setTimeout(() => setSaved(false), 2500);
-    },
-  });
-
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const d = new FormData(e.currentTarget);
-    save.mutate({
-      name: String(d.get("name") ?? "").trim(),
-      phone: String(d.get("phone") ?? "").trim() || undefined,
-      email: String(d.get("email") ?? "").trim(),
-    });
-  }
-
   const name = me?.name ?? user?.name ?? "";
+  const email = me?.email ?? user?.email ?? "";
 
   return (
-    <form onSubmit={onSubmit} className={card}>
+    <section className={card}>
       <div className="flex items-center gap-4">
         <span className="grid size-14 shrink-0 place-items-center rounded-full bg-[#A9C4B0] text-lg font-bold text-foreground">
           {initials(name)}
@@ -86,7 +48,7 @@ function PersonalInfo({ me }: { me?: Me }) {
         <div>
           <h2 className={h2}>{name}</h2>
           {me && (
-            <div className="text-[13px] text-muted">
+            <div className="text-[13px] text-muted-foreground">
               Member since {formatMonthYearLong(me.createdAt)}
             </div>
           )}
@@ -98,180 +60,71 @@ function PersonalInfo({ me }: { me?: Me }) {
           <Input
             id="name"
             name="name"
-            required
-            minLength={2}
-            defaultValue={name}
-            autoComplete="name"
+            disabled
+            value={name}
+            readOnly
+            className="cursor-not-allowed bg-muted/10 opacity-75"
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="phone">Phone number</Label>
-          <Input
-            id="phone"
-            name="phone"
-            type="tel"
-            defaultValue={me?.phone ?? ""}
-            autoComplete="tel"
-            placeholder="+234 800 000 0000"
-          />
-        </div>
-        <div className="flex flex-col gap-1.5 sm:col-span-2">
           <Label htmlFor="email">Email address</Label>
           <Input
             id="email"
             name="email"
             type="email"
-            required
-            defaultValue={me?.email ?? user?.email ?? ""}
-            autoComplete="email"
+            disabled
+            value={email}
+            readOnly
+            className="cursor-not-allowed bg-muted/10 opacity-75"
           />
         </div>
       </div>
-      {save.isError && (
-        <p role="alert" className={errCls}>
-          {explain(save.error)}
-        </p>
-      )}
-      <div className="flex items-center gap-4">
-        <Button
-          type="submit"
-          size="lg"
-          disabled={save.isPending}
-          className="rounded-xl"
-        >
-          {save.isPending ? "Saving…" : "Save changes"}
-        </Button>
-        {saved && (
-          <span className="text-[13px] font-semibold text-status-active">
-            Saved.
-          </span>
-        )}
-      </div>
-    </form>
+      <p className="text-xs text-muted-foreground">
+        Name and email are fixed to your verified account. To request a legal
+        name change or email update, please contact support.
+      </p>
+    </section>
   );
 }
 
 function PaymentMethod() {
-  const cardsQ = useSavedCards();
-  const queryClient = useQueryClient();
-  const search = useSearch({ from: "/app/profile" });
-  const navigate = useNavigate({ from: "/app/profile" });
-  const justAdded = search.card_added === "1";
-
-  const add = useMutation({
-    mutationFn: () =>
-      api<{ authorizationUrl: string }>("/payments/methods/setup", {
-        method: "POST",
-      }),
-    onSuccess: ({ authorizationUrl }) => {
-      window.location.href = authorizationUrl;
-    },
-  });
-
-  const remove = useMutation({
-    mutationFn: (id: string) =>
-      api(`/payments/methods/${id}`, { method: "DELETE" }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["cards"] });
-    },
-  });
-
-  const unsupported = isUnsupported(cardsQ.error);
   return (
     <section className={card}>
-      <div className="flex items-end justify-between">
+      <div className="flex items-center justify-between">
         <h2 className={h2}>Payment method</h2>
-        {!unsupported && (
-          <Button
-            type="button"
-            variant="link"
-            size="sm"
-            onClick={() => add.mutate()}
-            disabled={add.isPending}
-            className="h-auto p-0 text-sm font-semibold text-link hover:text-link-hover"
-          >
-            {add.isPending ? "Opening…" : "Add new"}
-          </Button>
-        )}
-      </div>
-      {justAdded && (
-        <p className="flex items-center justify-between rounded-xl bg-status-active-bg px-3.5 py-2 text-[13px] text-status-active">
-          <span>Card added.</span>
-          <button
-            type="button"
-            className="font-bold underline cursor-pointer"
-            onClick={() => navigate({ search: {}, replace: true })}
-          >
-            Dismiss
-          </button>
-        </p>
-      )}
-      {cardsQ.isPending && <p className="text-sm text-muted">Loading…</p>}
-      {unsupported && (
-        <p className="rounded-xl bg-cream px-3.5 py-3 text-[13px] text-status-due">
-          {UNSUPPORTED_MESSAGE} Saved cards will appear here once it&rsquo;s
-          enabled.
-        </p>
-      )}
-      {cardsQ.isError && !unsupported && (
-        <p role="alert" className={errCls}>
-          {cardsQ.error.message}
-        </p>
-      )}
-      {cardsQ.isSuccess && cardsQ.data.length === 0 && (
-        <p className="text-sm text-muted">
-          No saved card yet. Your card is saved when you make a payment.
-        </p>
-      )}
-      {cardsQ.data?.map((c: SavedCard) => (
-        <div
-          key={c._id}
-          className="flex items-center justify-between gap-4 rounded-2xl border border-border p-4"
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled
+          className="h-auto px-3 py-1.5 text-xs text-muted-foreground opacity-50 cursor-not-allowed"
         >
-          <div className="flex items-center gap-3.5">
-            <span className="rounded-md bg-foreground px-2.5 py-1.5 text-[10px] font-extrabold tracking-wider text-accent">
-              {c.brand.toUpperCase()}
-            </span>
-            <div>
-              <div className="text-sm font-bold">Card ending in {c.last4}</div>
-              <div className="text-xs text-muted">
-                Expires {String(c.expMonth).padStart(2, "0")}/
-                {String(c.expYear).slice(-2)}
-                {c.isDefault ? " · Default" : ""}
-              </div>
-            </div>
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={remove.isPending}
-            onClick={() =>
-              window.confirm(`Remove the card ending in ${c.last4}?`) &&
-              remove.mutate(c._id)
-            }
-            className="h-auto p-0 text-sm font-semibold text-status-cancelled hover:bg-transparent hover:text-status-cancelled"
-          >
-            Remove
-          </Button>
-        </div>
-      ))}
+          Add new
+        </Button>
+      </div>
+      <div className="flex items-start gap-3 rounded-2xl bg-cream/50 p-4 text-xs leading-relaxed text-muted-foreground">
+        <ShieldCheck className="size-5 shrink-0 text-status-active" />
+        <p>
+          Monthly plan contributions are managed via Paystack recurring
+          subscriptions. Payment authorization is established when you make your
+          first contribution.
+        </p>
+      </div>
     </section>
   );
 }
 
 function NotificationPreferences({ me }: { me?: Me }) {
   const queryClient = useQueryClient();
-  const prefs = me?.preferences ?? {
+  const prefs = me?.notificationPreferences ?? {
     paymentReminders: true,
     deficitAlerts: true,
-    serviceUpdates: true,
-    productNews: false,
+    serviceRequestUpdates: true,
+    productNewsOffers: false,
   };
 
   const update = useMutation({
-    mutationFn: (next: typeof prefs) =>
-      api<Me>("/auth/me/preferences", { method: "PATCH", body: next }),
+    mutationFn: (next: typeof prefs) => updatePreferences(next),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["me"] });
     },
@@ -293,12 +146,12 @@ function NotificationPreferences({ me }: { me?: Me }) {
       "If a monthly charge fails or is missed",
     ],
     [
-      "serviceUpdates",
+      "serviceRequestUpdates",
       "Service updates",
       "When a photographer is assigned or documents are approved",
     ],
     [
-      "productNews",
+      "productNewsOffers",
       "Journey Home news",
       "Occasional product updates and features",
     ],
@@ -315,7 +168,7 @@ function NotificationPreferences({ me }: { me?: Me }) {
           >
             <div>
               <div className="text-sm font-bold">{title}</div>
-              <div className="text-xs text-muted">{desc}</div>
+              <div className="text-xs text-muted-foreground">{desc}</div>
             </div>
             <Switch
               checked={prefs[key]}
@@ -333,8 +186,8 @@ function ChangePassword() {
   const [open, setOpen] = useState(false);
   const [mismatch, setMismatch] = useState(false);
   const change = useMutation({
-    mutationFn: (body: Record<string, string>) =>
-      api("/auth/me/password", { method: "PATCH", body }),
+    mutationFn: (body: { currentPassword?: string; newPassword?: string }) =>
+      changePassword(body),
   });
   return (
     <div className="border-t border-border">
@@ -373,47 +226,46 @@ function ChangePassword() {
           <Input
             name="current"
             type="password"
+            placeholder="Current password"
             required
             autoComplete="current-password"
-            placeholder="Current password"
-            aria-label="Current password"
           />
           <Input
             name="next"
             type="password"
+            placeholder="New password (min 6 characters)"
             required
             minLength={6}
             autoComplete="new-password"
-            placeholder="New password (6+ characters)"
-            aria-label="New password"
           />
           <Input
             name="confirm"
             type="password"
-            required
-            minLength={6}
-            autoComplete="new-password"
             placeholder="Confirm new password"
-            aria-label="Confirm new password"
+            required
+            autoComplete="new-password"
           />
-          {(mismatch || change.isError) && (
+          {mismatch && (
             <p role="alert" className={errCls}>
-              {mismatch
-                ? "Those passwords don't match."
-                : explain(change.error)}
+              New passwords don&rsquo;t match.
+            </p>
+          )}
+          {change.isError && (
+            <p role="alert" className={errCls}>
+              {explain(change.error)}
             </p>
           )}
           {change.isSuccess && (
             <p className="text-[13px] font-semibold text-status-active">
-              Password changed.
+              Password updated.
             </p>
           )}
           <Button
             type="submit"
             disabled={change.isPending}
-            className="self-start rounded-xl"
+            className="w-fit rounded-xl"
           >
-            {change.isPending ? "Saving…" : "Update password"}
+            {change.isPending ? "Updating…" : "Update password"}
           </Button>
         </form>
       )}
@@ -421,99 +273,106 @@ function ChangePassword() {
   );
 }
 
-function CloseAccount() {
-  const logoutMutation = useLogoutMutation();
-  const [open, setOpen] = useState(false);
-  const [typed, setTyped] = useState("");
-  const close = useMutation({
-    mutationFn: () => api("/auth/me", { method: "DELETE" }),
-    onSuccess: () => {
-      logoutMutation.mutate();
-    },
-  });
+function DeleteAccountDialog({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  const [password, setPassword] = useState("");
+  const del = useDeleteAccountMutation();
+
+  function onConfirm() {
+    del.mutate(password);
+  }
+
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="flex w-full items-center justify-between border-t border-border py-4 text-[15px] font-semibold text-status-cancelled underline cursor-pointer"
-      >
-        Close account <ChevronRight className="size-4" />
-      </button>
-      <Dialog
-        open={open}
-        onOpenChange={(o) => {
-          setOpen(o);
-          if (!o) setTyped("");
-        }}
-      >
-        <DialogContent className="max-w-md gap-5 rounded-3xl p-7">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-3xl font-normal">
-              Close your account?
-            </DialogTitle>
-            <DialogDescription className="text-sm leading-relaxed text-muted">
-              Closing your account cancels any running plans and removes your
-              saved payment details. Active services currently in progress will
-              remain on file.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="type-delete">
-              Type <strong className="text-foreground">DELETE</strong> to
-              confirm
-            </Label>
-            <Input
-              id="type-delete"
-              value={typed}
-              onChange={(e) => setTyped(e.target.value)}
-              placeholder="DELETE"
-              autoComplete="off"
-            />
-          </div>
-          {close.isError && (
-            <p role="alert" className={errCls}>
-              {explain(close.error)}
-            </p>
-          )}
-          <DialogFooter className="gap-2 sm:justify-end">
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Never mind
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={typed !== "DELETE" || close.isPending}
-              onClick={() => close.mutate()}
-            >
-              {close.isPending ? "Closing…" : "Close my account"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md rounded-3xl p-7">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-2xl font-normal text-status-cancelled">
+            Delete your account?
+          </DialogTitle>
+          <DialogDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            This will permanently remove your Journey Home profile, cancel any
+            plans that are still pending, and pause automatic contributions.
+            This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-2 py-2">
+          <Label htmlFor="del-password">Confirm your password</Label>
+          <Input
+            id="del-password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Your password"
+            autoComplete="current-password"
+          />
+        </div>
+        {del.isError && (
+          <p role="alert" className={errCls}>
+            {explain(del.error)}
+          </p>
+        )}
+        <DialogFooter className="mt-2 flex gap-2">
+          <Button type="button" variant="outline" onClick={onClose}>
+            Keep account
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={!password || del.isPending}
+            onClick={onConfirm}
+          >
+            {del.isPending ? "Deleting…" : "Delete permanently"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
-function Security() {
+function SecuritySection() {
+  const [showDelete, setShowDelete] = useState(false);
   return (
     <section className={card}>
-      <h2 className={h2}>Security &amp; access</h2>
-      <div>
-        <ChangePassword />
-        <CloseAccount />
+      <h2 className={h2}>Security</h2>
+      <ChangePassword />
+      <div className="flex items-center justify-between border-t border-border pt-4">
+        <div>
+          <div className="text-sm font-bold text-status-cancelled">
+            Delete account
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Permanently remove your profile and cancel pending plans
+          </div>
+        </div>
+        <Button
+          type="button"
+          variant="destructive"
+          size="sm"
+          onClick={() => setShowDelete(true)}
+          className="rounded-xl"
+        >
+          Delete
+        </Button>
       </div>
+      <DeleteAccountDialog
+        open={showDelete}
+        onClose={() => setShowDelete(false)}
+      />
     </section>
   );
 }
 
 export function ProfileView() {
   const meQ = useMe();
-  const me = meQ.data;
-
   return (
-    <main className="flex max-w-[760px] flex-col gap-6 p-5 md:p-10">
-      <header>
-        <div className="text-sm text-muted">
+    <main className="flex max-w-[820px] flex-col gap-6 p-5 md:p-10">
+      <div>
+        <div className="text-sm text-muted-foreground">
           <Link to="/app" className="hover:underline">
             Dashboard
           </Link>{" "}
@@ -522,12 +381,12 @@ export function ProfileView() {
         <h1 className="font-serif text-[36px] font-normal leading-[1.05] sm:text-[44px] md:text-[56px]">
           Profile &amp; <span className="italic">settings</span>
         </h1>
-      </header>
+      </div>
 
-      <PersonalInfo me={me} />
+      <PersonalInfo me={meQ.data} />
       <PaymentMethod />
-      <NotificationPreferences me={me} />
-      <Security />
+      <NotificationPreferences me={meQ.data} />
+      <SecuritySection />
     </main>
   );
 }

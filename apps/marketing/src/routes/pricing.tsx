@@ -70,7 +70,7 @@ function Pricing() {
           <table className="w-full min-w-[640px] border-collapse text-left text-sm">
             <thead>
               <tr>
-                <th className="px-6 py-4.5 font-semibold text-muted">
+                <th className="px-6 py-4.5 font-semibold text-muted-foreground">
                   Feature
                 </th>
                 {COLUMNS.map((c) => (

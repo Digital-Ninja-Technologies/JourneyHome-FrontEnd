@@ -1,27 +1,29 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@journeyhome/ui/components/button";
-import { Input } from "@journeyhome/ui/components/input";
-import { Label } from "@journeyhome/ui/components/label";
+import {
+  FormInput,
+  FormPasswordInput,
+} from "@journeyhome/ui/components/form-fields";
 import { Link, useSearch } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { env } from "#/env/client";
 import { resolveSelectedPackage } from "@/lib/search-schemas";
-import {
-  getStoredSelectedPackage,
-  setStoredSelectedPackage,
-} from "@/modules/onboarding/storage";
+import { setStoredSelectedPackage } from "@/modules/onboarding/storage";
 import { useSignupMutation } from "../mutations";
 
+// Matches the backend/schema rule (min 6 characters).
+const PASSWORD_CRITERIA = [
+  { label: "At least 6 characters", regex: /^.{6,}$/ },
+  { label: "At least one uppercase letter", regex: /[A-Z]/ },
+];
+
 const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
+  name: z.string().trim().min(2, "Name must be at least 2 characters"),
+  email: z.string().trim().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  phone: z.string().optional(),
-  terms: z.boolean().refine((val) => val === true, {
-    message: "You must agree to the terms and privacy policy",
-  }),
 });
 
 type SignupFormValues = z.infer<typeof formSchema>;
@@ -29,27 +31,18 @@ type SignupFormValues = z.infer<typeof formSchema>;
 export function SignupForm() {
   const signupMutation = useSignupMutation();
   const search = useSearch({ from: "/signup/" });
-  const selectedPackage =
-    resolveSelectedPackage(search) ?? getStoredSelectedPackage() ?? undefined;
 
-  // Remember the package picked on the marketing site in case the URL param is lost mid-flow.
   useEffect(() => {
     const fromUrl = resolveSelectedPackage(search);
     if (fromUrl) setStoredSelectedPackage(fromUrl);
   }, [search]);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignupFormValues>({
+  const { control, handleSubmit } = useForm<SignupFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
       password: "",
-      phone: "",
-      terms: false,
     },
   });
 
@@ -59,8 +52,6 @@ export function SignupForm() {
       email: data.email,
       password: data.password,
       role: "customer",
-      phone: data.phone?.trim() || undefined,
-      selectedPackage,
     });
   };
 
@@ -73,101 +64,37 @@ export function SignupForm() {
             account.
           </span>
         </h1>
-        <p className="text-sm leading-relaxed text-muted">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           Takes about two minutes. You'll set up your first plan right after.
         </p>
       </div>
       <div className="flex w-full flex-col gap-6">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
           <section className="flex flex-col gap-4 rounded-[20px] bg-card p-7 shadow-sm">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="name">Full name</Label>
-              <Input
-                id="name"
-                autoComplete="name"
-                placeholder="e.g. Chidi Okafor"
-                {...register("name")}
-              />
-              {errors.name && (
-                <p className="text-xs text-status-cancelled">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">Email address</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                {...register("email")}
-              />
-              {errors.email && (
-                <p className="text-xs text-status-cancelled">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="phone">Phone number (optional)</Label>
-              <Input
-                id="phone"
-                type="tel"
-                autoComplete="tel"
-                placeholder="+234 800 000 0000"
-                {...register("phone")}
-              />
-              {errors.phone && (
-                <p className="text-xs text-status-cancelled">
-                  {errors.phone.message}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                placeholder="At least 6 characters"
-                {...register("password")}
-              />
-              {errors.password && (
-                <p className="text-xs text-status-cancelled">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-            <label className="flex items-start gap-2 text-[13px] text-status-paused">
-              <input
-                type="checkbox"
-                className="mt-0.5"
-                {...register("terms")}
-              />
-              <span>
-                I agree to the{" "}
-                <a
-                  href={`${env.VITE_MARKETING_URL}/terms`}
-                  className="font-bold text-link underline"
-                >
-                  terms &amp; conditions
-                </a>{" "}
-                and{" "}
-                <a
-                  href={`${env.VITE_MARKETING_URL}/privacy`}
-                  className="font-bold text-link underline"
-                >
-                  privacy policy
-                </a>
-                .
-              </span>
-            </label>
-            {errors.terms && (
-              <p className="text-xs text-status-cancelled">
-                {errors.terms.message}
-              </p>
-            )}
+            <FormInput
+              control={control}
+              name="name"
+              label="Full name"
+              autoComplete="name"
+              placeholder="e.g. Chidi Okafor"
+            />
+            <FormInput
+              control={control}
+              name="email"
+              type="email"
+              label="Email address"
+              autoComplete="email"
+              placeholder="you@example.com"
+            />
+            <FormPasswordInput
+              control={control}
+              name="password"
+              label="Password"
+              autoComplete="new-password"
+              placeholder="At least 6 characters"
+              showCriteria
+              criteria={PASSWORD_CRITERIA}
+            />
             {signupMutation.error && (
               <p
                 role="alert"
@@ -185,7 +112,13 @@ export function SignupForm() {
             disabled={signupMutation.isPending}
             className="h-[52px] rounded-[14px]"
           >
-            {signupMutation.isPending ? "Creating account…" : "Continue →"}
+            {signupMutation.isPending ? (
+              "Creating account..."
+            ) : (
+              <span className="inline-flex items-center gap-2">
+                Continue <ArrowRight className="size-4" />
+              </span>
+            )}
           </Button>
           <div className="text-center text-[13px] text-status-paused">
             Already have an account?{" "}
@@ -194,6 +127,27 @@ export function SignupForm() {
             </Link>
           </div>
         </form>
+        <p className="px-6 text-center text-xs leading-relaxed text-muted-foreground">
+          By clicking continue, you agree to our{" "}
+          <a
+            href={`${env.VITE_MARKETING_URL}/terms`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-foreground underline-offset-2 hover:underline"
+          >
+            Terms &amp; Conditions
+          </a>{" "}
+          and{" "}
+          <a
+            href={`${env.VITE_MARKETING_URL}/privacy`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-foreground underline-offset-2 hover:underline"
+          >
+            Privacy Policy
+          </a>
+          .
+        </p>
       </div>
     </div>
   );

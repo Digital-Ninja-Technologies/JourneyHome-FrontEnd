@@ -2,15 +2,20 @@ import type { Plan } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import { Link, Navigate, useSearch } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
+import { CardSkeleton } from "@/components/skeletons";
 import { firstName, formatMoney } from "@/lib/format";
-import { useStartCheckout } from "@/modules/payments/checkout";
+import { clearStoredSelectedPackage } from "@/modules/onboarding/storage";
+import {
+  setOnboardingPlan,
+  useStartCheckout,
+} from "@/modules/payments/checkout";
 import { relationshipLabel } from "@/modules/plans/plans.utils";
 import { usePlan } from "@/modules/plans/query-options";
 
 function Checkout({ plan }: { plan: Plan }) {
   const start = useStartCheckout(plan._id, { onboarding: true });
   const busy = start.isPending || start.isSuccess;
-  const money = formatMoney(plan.contributionAmountMinor, plan.currency);
+  const money = formatMoney(plan.amount, plan.currency);
   return (
     <>
       <section className="flex w-full items-center justify-between gap-4 rounded-[24px] bg-foreground p-6 text-canvas">
@@ -19,7 +24,7 @@ function Checkout({ plan }: { plan: Plan }) {
             {firstName(plan.coveredPerson.fullName)}&rsquo;s plan
           </div>
           <div className="text-[13px] text-canvas/70">
-            {relationshipLabel(plan)} · {plan.packageSnapshot.name} package
+            {relationshipLabel(plan)} · {plan.packageDetails.name} package
           </div>
         </div>
         <div className="text-right">
@@ -31,7 +36,7 @@ function Checkout({ plan }: { plan: Plan }) {
         <ShieldCheck className="mt-0.5 size-5 shrink-0 text-status-active" />
         <div className="leading-relaxed">
           <div className="font-bold">Secure checkout with Paystack</div>
-          <div className="text-muted">
+          <div className="text-muted-foreground">
             You&rsquo;ll enter your card or bank details on the next screen.
             They&rsquo;re encrypted and handled by our payment partner — Journey
             Home never stores your full card number.
@@ -58,7 +63,11 @@ function Checkout({ plan }: { plan: Plan }) {
       </Button>
       <Link
         to="/app"
-        className="text-center text-xs font-semibold text-muted underline"
+        onClick={() => {
+          setOnboardingPlan(null);
+          clearStoredSelectedPackage();
+        }}
+        className="text-center text-xs font-semibold text-muted-foreground underline"
       >
         Skip for now — I&rsquo;ll make my first payment later
       </Link>
@@ -72,8 +81,11 @@ export function OnboardingPaymentView() {
   const plan = planQ.data;
 
   // Already paid: carry on to the welcome screen.
-  if (plan && plan.status !== "Pending")
+  if (plan && plan.status !== "Pending") {
+    setOnboardingPlan(null);
+    clearStoredSelectedPackage();
     return <Navigate to="/welcome" search={{ plan: plan._id }} replace />;
+  }
 
   return (
     <div className="flex w-full max-w-[480px] flex-col items-center gap-8">
@@ -84,13 +96,13 @@ export function OnboardingPaymentView() {
             payment.
           </span>
         </h1>
-        <p className="text-sm leading-relaxed text-muted">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           Your first contribution starts today; after that it's monthly.
         </p>
       </div>
       <div className="flex w-full flex-col gap-6">
         {!planId && (
-          <p className="text-center text-sm text-muted">
+          <p className="text-center text-sm text-muted-foreground">
             No plan selected.{" "}
             <Link to="/signup/plan" className="font-bold text-link underline">
               Set up a plan
@@ -98,7 +110,7 @@ export function OnboardingPaymentView() {
           </p>
         )}
         {planId && planQ.isPending && (
-          <p className="text-center text-sm text-muted">Loading your plan…</p>
+          <CardSkeleton className="w-full" lines={3} />
         )}
         {planQ.isError && (
           <p

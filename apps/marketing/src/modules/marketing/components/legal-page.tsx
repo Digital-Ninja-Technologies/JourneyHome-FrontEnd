@@ -23,7 +23,7 @@ export function LegalPage({
               <h2 className="text-xl font-extrabold tracking-tight">
                 {s.heading}
               </h2>
-              <p className="text-[15px] leading-[1.75] text-muted">{s.body}</p>
+              <p className="text-[15px] leading-[1.75] text-muted-foreground">{s.body}</p>
             </section>
           ))}
         </div>

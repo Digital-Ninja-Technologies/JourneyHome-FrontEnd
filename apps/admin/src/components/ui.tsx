@@ -53,7 +53,7 @@ export const CardTitle = ({ className, ...p }: React.ComponentProps<"h2">) => (
 export const Eyebrow = ({ className, ...p }: React.ComponentProps<"div">) => (
   <div
     className={cn(
-      "text-xs font-semibold uppercase tracking-[2px] text-muted",
+      "text-xs font-semibold uppercase tracking-[2px] text-muted-foreground",
       className,
     )}
     {...p}
@@ -89,7 +89,7 @@ export function PageHeader({
   return (
     <header className="flex flex-wrap items-start justify-between gap-4">
       <div>
-        {crumb && <div className="text-sm text-muted">{crumb}</div>}
+        {crumb && <div className="text-sm text-muted-foreground">{crumb}</div>}
         <h1 className="font-serif text-[32px] font-normal leading-[1.1] sm:text-[38px] md:text-[44px]">
           {title} {accent && <span className="italic">{accent}</span>}
         </h1>

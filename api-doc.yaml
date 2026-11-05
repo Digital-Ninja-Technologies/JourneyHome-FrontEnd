@@ -1,0 +1,2033 @@
+openapi: 3.0.3
+info:
+  title: Journey Home API
+  version: 1.0.0
+  description: |
+    Service request, recurring contribution, and package management API.
+
+    **Conventions**
+    - Successful responses use the envelope `{ success, message, data }`.
+    - Monetary values in responses are in minor currency units (`1000000` = ₦10,000). The only exception is `amount` in package create/update *requests*, which is in major units (`10000` = ₦10,000).
+    - Paginated lists return `data: { items, pagination }`. `GET /packages`, `GET /service-requests` and `GET /auth/admins` return a plain array in `data`.
+    - Authenticated endpoints expect `Authorization: Bearer <token>`, where the token is `data.token` from `POST /auth/login`. Operations that need no token override security with `security: []`.
+    - Documented error status codes are listed per operation. The endpoint documentation does not specify an error response body, so none is modelled.
+servers:
+  - url: https://journey-home.onrender.com/api/v1
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Auth
+  - name: Packages
+  - name: Plans
+  - name: Payments
+  - name: Subscriptions
+  - name: Notifications
+  - name: Service Requests
+  - name: Contact
+  - name: Admin
+
+paths:
+  # ---------------------------------------------------------------- Auth
+  /auth/signup:
+    post:
+      tags: [Auth]
+      operationId: authSignup
+      summary: Register a customer or covered person
+      description: Creates an unverified account and sends a verification link. Login and protected routes require email verification. Signup does not return an access token; the user logs in after verifying. Only `customer` and `covered_person` roles can be selected at signup. Admin roles are created through the super-admin endpoint.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, role]
+              properties:
+                name: { type: string, example: "Ada Okafor" }
+                email: { type: string, format: email, example: "ada@example.com" }
+                password: { type: string, example: "secure123" }
+                role: { type: string, enum: [customer, covered_person], example: "customer" }
+      responses:
+        '201':
+          description: "Signup completed, verification email sent"
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SignupResponse' }
+        '400': { description: Validation error }
+        '409': { description: Email already exists }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      operationId: authLogin
+      summary: User login
+      description: Logs in a verified account. Unverified accounts receive `401` until the email verification link is used.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email, example: "ada@example.com" }
+                password: { type: string, example: "secure123" }
+      responses:
+        '200':
+          description: Authenticated user profile and access token
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '400': { description: Validation error }
+        '401': { description: "Invalid credentials, or email not yet verified" }
+
+  /auth/verify-email:
+    post:
+      tags: [Auth]
+      operationId: authVerifyEmail
+      summary: Verify email
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string, example: "..." }
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+
+  /auth/resend-verification:
+    post:
+      tags: [Auth]
+      operationId: authResendVerification
+      summary: Resend email verification email
+      description: The response is the same whether or not the account needs verification (`data.message` reads "If the account needs verification, a new link has been sent").
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email, example: "ada@example.com" }
+      responses:
+        '200':
+          description: Verification email request processed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      operationId: authForgotPassword
+      summary: Request password reset
+      description: Sends a one-time reset link (one-hour expiry) when the account exists. The response is the same whether or not the account exists.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email, example: "ada@example.com" }
+      responses:
+        '200':
+          description: Password reset request processed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      operationId: authResetPassword
+      summary: Reset password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, newPassword]
+              properties:
+                token: { type: string, example: "..." }
+                newPassword: { type: string, example: "a-longer-password" }
+      responses:
+        '200':
+          description: Password reset successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      operationId: getAuthProfile
+      summary: Get user profile
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProfileResponse' }
+    delete:
+      tags: [Auth]
+      operationId: deleteAccount
+      summary: Delete my account
+      description: Requires the current password. Deletes the authenticated user account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string, example: "current-password" }
+      responses:
+        '200':
+          description: Account deleted successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+
+  /auth/change-password:
+    patch:
+      tags: [Auth]
+      operationId: authChangePassword
+      summary: Change password
+      description: Changes the authenticated user's password when the current password matches. The request body fields are not specified in the endpoint documentation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Request body is not specified in the endpoint documentation.
+              additionalProperties: true
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+
+  /auth/notification-preferences:
+    patch:
+      tags: [Auth]
+      operationId: updateNotificationPreferences
+      summary: Update notification preferences
+      description: All four boolean fields are required. Defaults enable the first three and disable product news and offers. Preferences control notification email delivery.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NotificationPreferences' }
+      responses:
+        '200':
+          description: Notification preferences updated successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationPreferencesResponse' }
+
+  /auth/customers:
+    get:
+      tags: [Auth]
+      operationId: listCustomers
+      summary: Get all customers
+      description: Requires admin or super admin.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, example: 20 }
+        - name: search
+          in: query
+          description: Matches name or email
+          schema: { type: string, example: "ada" }
+        - name: emailVerified
+          in: query
+          schema: { type: boolean, example: true }
+      responses:
+        '200':
+          description: Customers retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CustomerListResponse' }
+
+  /auth/admin:
+    post:
+      tags: [Auth]
+      operationId: createAdmin
+      summary: Create admin
+      description: Requires super admin. The request body fields are not specified in the endpoint documentation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Request body is not specified in the endpoint documentation.
+              additionalProperties: true
+      responses:
+        '201':
+          description: Admin added successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminUserResponse' }
+
+  /auth/admin/{id}:
+    delete:
+      tags: [Auth]
+      operationId: deleteAdmin
+      summary: Delete admin
+      description: Requires super admin.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Admin deleted successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminDeleteResponse' }
+
+  /auth/admins:
+    get:
+      tags: [Auth]
+      operationId: listAdmins
+      summary: List admins
+      description: Requires super admin. Returns a plain array (not paginated).
+      responses:
+        '200':
+          description: Admins retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminUserListResponse' }
+
+  # ------------------------------------------------------------ Packages
+  /packages:
+    get:
+      tags: [Packages]
+      operationId: listActivePackages
+      summary: List active packages
+      description: Returns only active packages that customers may select for new plans. Only packages with a successfully created Paystack monthly plan are listed. Provider plan identifiers are not returned. Amounts are in minor units.
+      security: []
+      responses:
+        '200':
+          description: Packages retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PackageListResponse' }
+    post:
+      tags: [Packages]
+      operationId: createPackage
+      summary: Create package
+      description: |
+        Requires admin or super admin. `amount` is supplied in **major** currency units (`10000` = ₦10,000) and returned in minor units (`1000000`).
+
+        The local package is committed in a database transaction before the Paystack API is called. While provider setup is in progress the package is marked pending; on provider failure it remains locally recorded as failed and is excluded from customer selection until an admin synchronizes it (see `POST /packages/{id}/sync-paystack`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, amount]
+              properties:
+                name: { type: string, example: "Classic Memorial" }
+                description: { type: string, example: "Configured commercial package terms" }
+                features:
+                  type: array
+                  items: { type: string }
+                  example: ["Half-day photography", "Digital gallery", "Dedicated coordinator"]
+                amount:
+                  type: number
+                  description: Major currency units (10000 = ₦10,000)
+                  example: 10000
+                currency: { type: string, example: "NGN" }
+                billingInterval: { type: string, enum: [monthly], example: "monthly" }
+                isActive: { type: boolean, example: true }
+      responses:
+        '201':
+          description: Package created successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminPackageResponse' }
+
+  /packages/admin:
+    get:
+      tags: [Packages]
+      operationId: listAllPackagesAdmin
+      summary: List all packages
+      description: Requires admin or super admin. Returns active and inactive packages.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: isActive
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Packages retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminPackageListResponse' }
+
+  /packages/{id}:
+    get:
+      tags: [Packages]
+      operationId: getPackageById
+      summary: Get package
+      description: Customers can retrieve active packages. Admins can retrieve inactive packages too.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Package retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminPackageResponse' }
+        '400': { description: Invalid id }
+        '404': { description: Package not found }
+    patch:
+      tags: [Packages]
+      operationId: updatePackage
+      summary: Update, activate, or deactivate package
+      description: Requires admin or super admin. Accepts editable package fields, including `isActive` and `billingInterval`. A price, currency, or interval change creates a new Paystack plan version; existing plans keep their package snapshot and contribution amount. `amount` is in major currency units.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                features: { type: array, items: { type: string } }
+                amount: { type: number, description: Major currency units }
+                currency: { type: string }
+                billingInterval: { type: string, enum: [monthly] }
+                isActive: { type: boolean }
+      responses:
+        '200':
+          description: Package updated successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminPackageResponse' }
+        '400': { description: Invalid id or protected field }
+        '404': { description: Package not found }
+
+  /packages/{id}/sync-paystack:
+    post:
+      tags: [Packages]
+      operationId: syncPackagePaystack
+      summary: Create a Paystack plan for an existing package
+      description: Requires admin or super admin. Creates a new Paystack plan using the package's current amount, currency, and interval, then stores the provider identifiers and marks the package ready. A provider failure leaves the local package unchanged.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Package synchronized with Paystack successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminPackageResponse' }
+
+  # --------------------------------------------------------------- Plans
+  /plans/dashboard:
+    get:
+      tags: [Plans]
+      operationId: getPlanDashboardSummary
+      summary: Get my dashboard summary
+      description: Returns the successful contributed amount (minor units), the successful payment count for the current calendar month, the active plan count, and the next future payment date across the authenticated owner's plans.
+      responses:
+        '200':
+          description: Dashboard summary retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardResponse' }
+
+  /plans:
+    post:
+      tags: [Plans]
+      operationId: createPlan
+      summary: Create plan
+      description: Requires customer, admin, or super admin. Creates a pending plan for the authenticated user; the owner is always derived from the JWT. Plan activation requires a verified successful initial payment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [packageId, coveredPerson]
+              properties:
+                packageId: { type: string, example: "66f123456789012345678903" }
+                coveredPerson: { $ref: '#/components/schemas/CoveredPerson' }
+      responses:
+        '201':
+          description: Plan created successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlanResponse' }
+    get:
+      tags: [Plans]
+      operationId: listMyPlans
+      summary: List my plans
+      description: Returns only plans owned by the authenticated user.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: name
+          in: query
+          description: Covered-person name
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/PlanStatus' }
+        - name: from
+          in: query
+          description: Start of creation date range
+          schema: { type: string }
+        - name: to
+          in: query
+          description: End of creation date range
+          schema: { type: string }
+      responses:
+        '200':
+          description: Plans retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlanListResponse' }
+
+  /plans/admin:
+    get:
+      tags: [Plans, Admin]
+      operationId: listAllPlansAdmin
+      summary: List all plans
+      description: Requires admin or super admin. Each plan's `owner` is populated with the owner's `_id`, `name`, and `email`. `totalContributedAmount` is the amount paid to date and supplies the plans-page Balance column.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/PlanStatus' }
+        - name: ownerId
+          in: query
+          schema: { type: string }
+        - name: packageId
+          in: query
+          schema: { type: string }
+        - name: search
+          in: query
+          description: Matches covered-person name and plan owner's name or email
+          schema: { type: string }
+      responses:
+        '200':
+          description: Plans retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminPlanListResponse' }
+
+  /plans/{id}:
+    get:
+      tags: [Plans]
+      operationId: getPlanById
+      summary: Get plan
+      description: Customers can retrieve only their own plans. Admins can retrieve any plan.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Plan retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlanResponse' }
+
+  /plans/{id}/status:
+    patch:
+      tags: [Plans]
+      operationId: updatePlanStatus
+      summary: Admin status transition
+      description: Requires admin or super admin. Only explicit state transitions are allowed. Customers cannot change protected lifecycle states.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { $ref: '#/components/schemas/PlanStatus' }
+            example: { status: "Under_Review" }
+      responses:
+        '200':
+          description: Plan status updated successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlanResponse' }
+
+  # ------------------------------------------------------------ Payments
+  /payments/plans/{planId}/initialize-initial:
+    post:
+      tags: [Payments]
+      operationId: initializeInitialPayment
+      summary: Initialize initial contribution checkout
+      description: Creates or reuses a pending initial payment attempt for a pending owned plan, then starts Paystack checkout (`/transaction/initialize` with the package's Paystack `plan_code`). Amount and currency come from the plan snapshot. The plan remains pending until server-side verification or a verified webhook confirms the first payment.
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '201':
+          description: Checkout initialized successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InitializeCheckoutResponse' }
+        '400': { description: "Plan is not pending, or package is not Paystack-ready" }
+        '404': { description: Plan not found or not owned by the caller }
+        '409': { description: Another pending checkout for the same customer and package must be completed first }
+
+  /payments/verify/{reference}:
+    post:
+      tags: [Payments]
+      operationId: verifyPaymentReference
+      summary: Verify payment
+      description: Calls Paystack `/transaction/verify/:reference` and verifies status, reference, amount, currency, and internal association before applying the result. Successful initial payments activate the plan and count one contribution exactly once.
+      parameters:
+        - name: reference
+          in: path
+          required: true
+          schema: { type: string, example: "jh_init_example-reference" }
+      responses:
+        '200':
+          description: Payment verified successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaymentResponse' }
+
+  /payments/webhooks/paystack:
+    post:
+      tags: [Payments]
+      operationId: paystackWebhook
+      summary: Paystack webhook
+      description: |
+        Verifies `x-paystack-signature` against the raw request body using HMAC SHA512. Re-verifies `charge.success` transactions server-side, links `subscription.create` to the pending local subscription, and applies successful recurring charges once. Invoice events synchronize a provider-reported next payment date where present.
+
+        Events are deduplicated by event name plus provider transaction reference/id, so duplicate deliveries do not double-count contributions. For an event already processed or ignored, `data.status` is `"duplicate"`.
+      security: []
+      parameters:
+        - name: x-paystack-signature
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Paystack event payload (verified against the raw body).
+              properties:
+                event: { type: string, example: "charge.success" }
+                data: { type: object, additionalProperties: true }
+              additionalProperties: true
+      responses:
+        '200':
+          description: Webhook processed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WebhookResponse' }
+
+  /payments:
+    get:
+      tags: [Payments]
+      operationId: listMyPayments
+      summary: List my payment history
+      description: Returns only payment records owned by the authenticated user. Authorization codes and provider secrets are not exposed.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/PaymentStatus' }
+        - name: purpose
+          in: query
+          schema: { type: string, example: "recurring_contribution" }
+        - name: planId
+          in: query
+          schema: { type: string }
+        - name: from
+          in: query
+          schema: { type: string }
+        - name: to
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Payments retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaymentListResponse' }
+
+  /payments/admin:
+    get:
+      tags: [Payments, Admin]
+      operationId: listPaymentsAdmin
+      summary: Admin payment transactions
+      description: Requires admin or super admin. Returns paginated transactions plus status totals (`summary`) for the selected date range. The business does not issue refunds.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: search
+          in: query
+          description: Matches customer name/email, payment reference, or covered-person name
+          schema: { type: string, example: "jh_init_82300" }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/PaymentStatus' }
+        - name: purpose
+          in: query
+          schema: { type: string, example: "recurring_contribution" }
+        - name: from
+          in: query
+          schema: { type: string, format: date, example: "2026-10-01" }
+        - name: to
+          in: query
+          schema: { type: string, format: date, example: "2026-10-26" }
+      responses:
+        '200':
+          description: Payments retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminPaymentListResponse' }
+
+  /payments/{id}:
+    get:
+      tags: [Payments]
+      operationId: getPaymentById
+      summary: Get payment detail
+      description: Returns one owned payment record.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Payment retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaymentResponse' }
+
+  # ------------------------------------------------------- Subscriptions
+  /subscriptions:
+    get:
+      tags: [Subscriptions]
+      operationId: listMySubscriptions
+      summary: List my subscriptions
+      description: Returns the authenticated owner's local subscription records, including local status and expected next payment date. Provider subscription/plan identifiers are retained for reconciliation. The documentation gives no example response for this endpoint, so the shape is only loosely modelled.
+      responses:
+        '200':
+          description: Local subscription records
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubscriptionListResponse' }
+
+  /subscriptions/{id}:
+    get:
+      tags: [Subscriptions]
+      operationId: getSubscriptionById
+      summary: Get subscription
+      description: Returns one subscription owned by the authenticated user.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Subscription record
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubscriptionResponse' }
+        '404': { description: "Not found, or owned by another user" }
+
+  # ------------------------------------------------------- Notifications
+  /notifications:
+    get:
+      tags: [Notifications]
+      operationId: listNotifications
+      summary: List my notifications
+      description: Returns the authenticated user's in-app notifications, newest first. `counts` are the user's overall totals; pagination `total` is the number matching the filters.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: title
+          in: query
+          description: Case-insensitive contains match
+          schema: { type: string, example: "payment" }
+        - name: isRead
+          in: query
+          schema: { type: boolean, example: false }
+        - name: from
+          in: query
+          schema: { type: string, format: date-time, example: "2026-10-01T00:00:00.000Z" }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Notifications retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationListResponse' }
+
+  /notifications/{id}/read:
+    patch:
+      tags: [Notifications]
+      operationId: markNotificationRead
+      summary: Mark notification as read
+      description: Marks one notification owned by the authenticated user as read.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Notification marked as read
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationResponse' }
+
+  /notifications/{id}:
+    delete:
+      tags: [Notifications]
+      operationId: deleteNotification
+      summary: Delete notification
+      description: Deletes one notification owned by the authenticated user.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Notification deleted successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationResponse' }
+
+  # ---------------------------------------------------- Service Requests
+  /service-requests:
+    post:
+      tags: [Service Requests]
+      operationId: submitServiceRequest
+      summary: Submit service request
+      description: Creates a service request for one of the authenticated user's plans. The plan must belong to the user and be `Active`, `Payment_Due`, or `Overdue`. Covered-person details are snapshotted from the plan. Submitting moves the plan into `Service_Request`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [planId, dateOfDeath, serviceLocation, expectedServiceDate, contactPerson, contactPhone]
+              properties:
+                planId: { type: string, example: "66f123456789012345678903" }
+                dateOfDeath: { type: string, format: date-time, example: "2026-10-01T00:00:00.000Z" }
+                serviceLocation: { type: string, example: "Nsukka, Enugu State" }
+                expectedServiceDate: { type: string, format: date-time, example: "2026-10-20T10:00:00.000Z" }
+                contactPerson: { type: string, example: "Ada Okafor" }
+                contactPhone: { type: string, example: "08030000000" }
+                additionalInformation: { type: string, example: "Family contact is available at the location." }
+      responses:
+        '201':
+          description: Service request submitted successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceRequestResponse' }
+    get:
+      tags: [Service Requests]
+      operationId: listMyServiceRequests
+      summary: List my service requests
+      description: Returns only service requests owned by the authenticated user, as a plain array (not paginated). Each request includes its `documents` array; each document includes a temporary `url` (valid for 900 seconds).
+      responses:
+        '200':
+          description: Service requests retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceRequestListResponse' }
+
+  /service-requests/admin:
+    get:
+      tags: [Service Requests, Admin]
+      operationId: listServiceRequestsAdmin
+      summary: Admin service request queue
+      description: Requires admin or super admin. Each request includes its `documents` array; each document includes a temporary `url` (valid for 900 seconds). `from`/`to` filter request creation time.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: search
+          in: query
+          description: Matches covered-person name, location, or owner's name/email
+          schema: { type: string, example: "Ikoyi" }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/ServiceRequestStatus' }
+        - name: ownerId
+          in: query
+          schema: { type: string }
+        - name: planId
+          in: query
+          schema: { type: string }
+        - name: from
+          in: query
+          schema: { type: string, format: date, example: "2026-10-01" }
+        - name: to
+          in: query
+          schema: { type: string, format: date, example: "2026-10-26" }
+      responses:
+        '200':
+          description: Service requests retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminServiceRequestListResponse' }
+
+  /service-requests/{id}:
+    get:
+      tags: [Service Requests]
+      operationId: getServiceRequestById
+      summary: Get service request detail
+      description: Customers can retrieve only their own requests. Admins can retrieve any request. Documents appear both in `data.request.documents` and in the top-level `data.documents`; each includes a temporary `url` (valid for 900 seconds).
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Service request retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceRequestDetailResponse' }
+
+  /service-requests/{id}/documents/upload-url:
+    post:
+      tags: [Service Requests]
+      operationId: getDocumentUploadUrl
+      summary: Request private document upload URL
+      description: Creates a pending private file record and returns a presigned Tigris PUT URL. Supported MIME types are `application/pdf`, `image/jpeg`, and `image/png`; max size is 10 MB. The frontend uploads the binary directly to `uploadUrl`, then calls the complete endpoint.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [documentType, fileName, contentType, size]
+              properties:
+                documentType: { type: string, example: "Death_Certificate" }
+                fileName: { type: string, example: "death-certificate.pdf" }
+                contentType: { type: string, enum: [application/pdf, image/jpeg, image/png], example: "application/pdf" }
+                size: { type: integer, maximum: 10485760, description: "File size in bytes (max 10 MB)", example: 420000 }
+      responses:
+        '201':
+          description: Service document upload URL generated successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UploadUrlResponse' }
+
+  /service-requests/{id}/documents/complete:
+    post:
+      tags: [Service Requests]
+      operationId: completeDocumentUpload
+      summary: Complete document upload
+      description: Verifies the uploaded Tigris object with `HeadObject`, marks the file uploaded, creates a service document record, and returns it with `verificationStatus` `Pending`.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fileId, uploadToken, documentType]
+              properties:
+                fileId: { type: string, example: "66f123456789012345678906" }
+                uploadToken: { type: string, example: "token" }
+                documentType: { type: string, example: "Death_Certificate" }
+                replacesDocumentId:
+                  type: string
+                  description: Optional. Used for resubmission after a document was marked `Requires_Resubmission`.
+                  example: "66f123456789012345678905"
+      responses:
+        '201':
+          description: Service document upload completed successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceDocumentResponse' }
+
+  /service-requests/{id}/documents/{documentId}/download-url:
+    get:
+      tags: [Service Requests]
+      operationId: getDocumentDownloadUrl
+      summary: Get private document URL
+      description: Returns a short-lived signed Tigris download URL. Customers can access only their own service request documents. Admin access is audited.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+        - $ref: '#/components/parameters/DocumentIdPath'
+      responses:
+        '200':
+          description: Service document download URL generated successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DownloadUrlResponse' }
+
+  /service-requests/{id}/documents/{documentId}/verify:
+    patch:
+      tags: [Service Requests]
+      operationId: verifyServiceDocument
+      summary: Verify document
+      description: Requires admin or super admin. Approves a document or requests resubmission. When all current documents are approved, the request moves to `Docs_Verified` automatically. If resubmission is required, the request moves to `More_Info_Required` and the customer can upload a replacement document.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+        - $ref: '#/components/parameters/DocumentIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [verificationStatus]
+              properties:
+                verificationStatus:
+                  type: string
+                  enum: [Requires_Resubmission, Pending, Approved]
+                  example: "Requires_Resubmission"
+                reason:
+                  type: string
+                  description: Required when `verificationStatus` is `Requires_Resubmission`.
+                  example: "The uploaded document is unreadable."
+      responses:
+        '200':
+          description: Service document verification updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceDocumentResponse' }
+
+  /service-requests/{id}/status:
+    patch:
+      tags: [Service Requests]
+      operationId: updateServiceRequestStatus
+      summary: Update service request status
+      description: |
+        Requires admin or super admin. All administrative request status changes use this endpoint.
+
+        - `Docs_Verified` requires at least one current document and all current documents approved.
+        - `reason` is optional for every status; include it when rejecting or requesting more information so the customer receives useful context.
+        - `Closed` is not a manual option; it is set by `PATCH /service-requests/{id}/assign-photographer`.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [Under_Review, Docs_Verified, Approved, Rejected, More_Info_Required, Cancelled]
+                  example: "Approved"
+                reason:
+                  type: string
+                  example: "Please upload a clearer death certificate and valid ID."
+      responses:
+        '200':
+          description: Service request status updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceRequestResponse' }
+
+  /service-requests/{id}/assign-photographer:
+    patch:
+      tags: [Service Requests]
+      operationId: assignPhotographer
+      summary: Assign photographer and close request
+      description: Requires admin or super admin. May be used after a request is approved. Records the assigned photographer and assignment time, changes the request status to `Closed`, and notifies the customer.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [photographerName]
+              properties:
+                photographerName: { type: string, example: "Adebayo Johnson" }
+      responses:
+        '200':
+          description: Photographer assigned and service request closed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceRequestResponse' }
+
+  # ------------------------------------------------------------- Contact
+  /contact:
+    post:
+      tags: [Contact]
+      operationId: submitContactMessage
+      summary: Submit a contact message
+      description: Stores a message from the website contact form. All fields are required.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, phone, email, topic, message]
+              properties:
+                name: { type: string, example: "Adebayo Okafor" }
+                phone: { type: string, example: "+2348012345678" }
+                email: { type: string, format: email, example: "adebayo@example.com" }
+                topic: { $ref: '#/components/schemas/ContactTopic' }
+                message: { type: string, example: "I have a question about my monthly contribution." }
+      responses:
+        '201':
+          description: Your message has been sent successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ContactResponse' }
+
+  /contact/admin:
+    get:
+      tags: [Contact, Admin]
+      operationId: listContactMessagesAdmin
+      summary: List contact messages
+      description: Requires admin or super admin. Returns contact submissions newest first.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: search
+          in: query
+          description: Case-insensitive match on the submitter's name or email
+          schema: { type: string, example: "adebayo" }
+      responses:
+        '200':
+          description: Contact messages retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ContactListResponse' }
+
+  /contact/admin/{id}:
+    get:
+      tags: [Contact, Admin]
+      operationId: getContactMessageById
+      summary: Get one contact message
+      description: Requires admin or super admin.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Contact message retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ContactResponse' }
+        '400': { description: Invalid ID }
+        '404': { description: No matching submission }
+
+  # --------------------------------------------------------------- Admin
+  /admin/overview:
+    get:
+      tags: [Admin]
+      operationId: getAdminOverview
+      summary: Operations dashboard overview
+      description: Requires admin or super admin. Returns aggregate user, plan, contribution, and service-request totals plus up to five recent service requests needing staff review. `startDate`/`endDate` scope the selected-period contributions only; new-users-this-month and monthly commitment figures stay calendar-month values.
+      parameters:
+        - name: startDate
+          in: query
+          schema: { type: string, format: date, example: "2026-10-01" }
+        - name: endDate
+          in: query
+          schema: { type: string, format: date, example: "2026-10-26" }
+      responses:
+        '200':
+          description: Admin dashboard overview retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminOverviewResponse' }
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      operationId: listAdminUsers
+      summary: Admin users list
+      description: Requires admin or super admin. Lists customer accounts with plan count, total saved, active plan count, and derived status. `Request_Pending` takes precedence when the customer has a submitted, under-review, or documents-verified service request.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: search
+          in: query
+          schema: { type: string, example: "Chidi" }
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminUsersListResponse' }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, example: 1 }
+    Limit:
+      name: limit
+      in: query
+      description: Maximum 100.
+      schema: { type: integer, minimum: 1, maximum: 100, example: 20 }
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, example: "66f123456789012345678901" }
+    DocumentIdPath:
+      name: documentId
+      in: path
+      required: true
+      schema: { type: string, example: "66f123456789012345678905" }
+
+  schemas:
+    # ------------------------------------------------------ shared pieces
+    Envelope:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string }
+
+    Pagination:
+      type: object
+      properties:
+        page: { type: integer, example: 1 }
+        limit: { type: integer, example: 20 }
+        total: { type: integer, example: 1 }
+        totalPages: { type: integer, example: 1 }
+        hasNextPage: { type: boolean, example: false }
+        hasPreviousPage: { type: boolean, example: false }
+
+    UserSummary:
+      type: object
+      description: Populated owner reference used in admin responses.
+      properties:
+        _id: { type: string, example: "66f123456789012345678902" }
+        name: { type: string, example: "Ada Okafor" }
+        email: { type: string, format: email, example: "ada@example.com" }
+
+    NotificationPreferences:
+      type: object
+      required: [paymentReminders, deficitAlerts, serviceRequestUpdates, productNewsOffers]
+      properties:
+        paymentReminders: { type: boolean, default: true, example: true }
+        deficitAlerts: { type: boolean, default: true, example: true }
+        serviceRequestUpdates: { type: boolean, default: true, example: true }
+        productNewsOffers: { type: boolean, default: false, example: false }
+
+    # ---------------------------------------------------------- user types
+    AuthUser:
+      type: object
+      description: User object returned by login.
+      properties:
+        id: { type: string, example: "674a1b2c3d4e5f6789012345" }
+        email: { type: string, format: email, example: "ada@example.com" }
+        name: { type: string, example: "Ada Okafor" }
+        role: { type: string, description: "`customer`, `covered_person` or `admin`. Super admins are flagged with `isSuperAdmin`.", example: "customer" }
+        isSuperAdmin: { type: boolean, example: false }
+
+    UserProfile:
+      type: object
+      description: Profile returned by `GET /auth/me`.
+      properties:
+        id: { type: string, example: "674a1b2c3d4e5f6789012345" }
+        email: { type: string, format: email, example: "ada@example.com" }
+        name: { type: string, example: "Ada Okafor" }
+        role: { type: string, example: "customer" }
+        isSuperAdmin: { type: boolean, example: false }
+        isEmailVerified: { type: boolean, example: true }
+        createdAt: { type: string, format: date-time, example: "2026-10-01T12:00:00.000Z" }
+        updatedAt: { type: string, format: date-time, example: "2026-10-01T12:00:00.000Z" }
+        notificationPreferences: { $ref: '#/components/schemas/NotificationPreferences' }
+
+    CustomerListItem:
+      type: object
+      description: Customer item returned by `GET /auth/customers`. Note this uses `_id`, whereas login/profile use `id`.
+      properties:
+        _id: { type: string, example: "674a1b2c3d4e5f6789012345" }
+        email: { type: string, format: email, example: "ada@example.com" }
+        name: { type: string, example: "Ada Okafor" }
+        role: { type: string, example: "customer" }
+        isSuperAdmin: { type: boolean, example: false }
+        isEmailVerified: { type: boolean, example: true }
+        createdAt: { type: string, format: date-time, example: "2026-10-01T12:00:00.000Z" }
+        updatedAt: { type: string, format: date-time, example: "2026-10-01T12:00:00.000Z" }
+        notificationPreferences: { $ref: '#/components/schemas/NotificationPreferences' }
+
+    AdminUser:
+      type: object
+      properties:
+        id: { type: string, example: "674a1b2c3d4e5f6789012345" }
+        email: { type: string, format: email, example: "admin@example.com" }
+        name: { type: string, example: "Admin" }
+        role: { type: string, example: "admin" }
+        isSuperAdmin: { type: boolean, example: false }
+        createdAt: { type: string, format: date-time, example: "2026-10-01T12:00:00.000Z" }
+
+    # ------------------------------------------------------------ packages
+    Package:
+      type: object
+      description: Public package shape (returned by `GET /packages`).
+      properties:
+        _id: { type: string, example: "66f123456789012345678901" }
+        name: { type: string, example: "Classic Memorial" }
+        description: { type: string, example: "Sample test fixture package" }
+        features:
+          type: array
+          items: { type: string }
+          example: ["Half-day photography", "Digital gallery"]
+        amount: { type: integer, description: "Minor currency units (1000000 = ₦10,000)", example: 1000000 }
+        currency: { type: string, example: "NGN" }
+        billingInterval: { type: string, enum: [monthly], example: "monthly" }
+        isActive: { type: boolean, example: true }
+
+    AdminPackage:
+      description: Full package shape (admin list, get, create, update, sync).
+      allOf:
+        - $ref: '#/components/schemas/Package'
+        - type: object
+          properties:
+            createdBy: { type: string, example: "66f123456789012345678902" }
+            updatedBy: { type: string, example: "66f123456789012345678902" }
+            createdAt: { type: string, format: date-time, example: "2026-10-01T12:00:00.000Z" }
+            updatedAt: { type: string, format: date-time, example: "2026-10-01T12:00:00.000Z" }
+            __v: { type: integer, example: 0 }
+
+    # --------------------------------------------------------------- plans
+    CoveredPerson:
+      type: object
+      required: [fullName, dateOfBirth, gender, relationship, address, phoneNumber]
+      properties:
+        fullName: { type: string, example: "Chinedu Okafor" }
+        dateOfBirth: { type: string, format: date-time, example: "1958-04-10T00:00:00.000Z" }
+        gender: { type: string, example: "male" }
+        relationship: { type: string, example: "father" }
+        address: { type: string, example: "12 Market Road, Enugu" }
+        phoneNumber: { type: string, example: "08030000000" }
+
+    PackageDetails:
+      type: object
+      description: Snapshot of the package taken when the plan was created.
+      properties:
+        packageId: { type: string, example: "66f123456789012345678903" }
+        name: { type: string, example: "Classic Memorial" }
+        description: { type: string, example: "Configured commercial package terms" }
+        features:
+          type: array
+          items: { type: string }
+          example: ["Half-day photography", "Digital gallery"]
+        amount: { type: integer, description: Minor currency units, example: 1000000 }
+        currency: { type: string, example: "NGN" }
+
+    PlanStatus:
+      type: string
+      enum:
+        - Pending
+        - Active
+        - Payment_Due
+        - Overdue
+        - Paused
+        - Service_Request
+        - Under_Review
+        - Approved
+        - Service_Scheduled
+        - Completed
+        - Cancelled
+        - Expired
+
+    PlanBase:
+      type: object
+      properties:
+        _id: { type: string, example: "66f123456789012345678901" }
+        package: { type: string, description: Package id, example: "66f123456789012345678903" }
+        packageDetails: { $ref: '#/components/schemas/PackageDetails' }
+        coveredPerson: { $ref: '#/components/schemas/CoveredPerson' }
+        amount: { type: integer, description: Monthly contribution in minor units, example: 1000000 }
+        currency: { type: string, example: "NGN" }
+        billingInterval: { type: string, example: "monthly" }
+        startDate: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
+        totalContributedAmount: { type: integer, description: Amount paid to date in minor units, example: 0 }
+        status: { $ref: '#/components/schemas/PlanStatus' }
+        coverageStatus: { type: string, example: "Pending" }
+        createdAt: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
+        updatedAt: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
+        __v: { type: integer, example: 0 }
+
+    Plan:
+      description: Plan with `owner` as an id string.
+      allOf:
+        - $ref: '#/components/schemas/PlanBase'
+        - type: object
+          properties:
+            owner: { type: string, example: "66f123456789012345678902" }
+
+    AdminPlan:
+      description: Plan with `owner` populated (admin list only).
+      allOf:
+        - $ref: '#/components/schemas/PlanBase'
+        - type: object
+          properties:
+            owner: { $ref: '#/components/schemas/UserSummary' }
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalContributed: { type: integer, description: Successful contributed amount in minor units, example: 1000000 }
+        paymentCount: { type: integer, description: Successful payments in the current calendar month, example: 2 }
+        activePlans: { type: integer, example: 1 }
+        nextPaymentDate: { type: string, format: date-time, nullable: true, example: "2026-12-01T00:00:00.000Z" }
+
+    # ------------------------------------------------------------ payments
+    PaymentStatus:
+      type: string
+      enum: [Successful, Pending, Processing, Failed, Cancelled]
+
+    Payment:
+      type: object
+      properties:
+        _id: { type: string, example: "66f123456789012345678904" }
+        owner: { type: string, example: "66f123456789012345678902" }
+        plan: { type: string, example: "66f123456789012345678901" }
+        amount: { type: integer, description: Minor currency units, example: 1000000 }
+        currency: { type: string, example: "NGN" }
+        reference: { type: string, example: "jh_init_example-reference" }
+        providerReference: { type: string, example: "jh_init_example-reference" }
+        provider: { type: string, example: "paystack" }
+        purpose: { type: string, description: "e.g. `initial_contribution`, `recurring_contribution`", example: "initial_contribution" }
+        status: { $ref: '#/components/schemas/PaymentStatus' }
+        providerTransactionId: { type: string, description: "Present on verify and detail responses", example: "123456789" }
+        processedAt: { type: string, format: date-time, description: "Present on verify and detail responses", example: "2026-11-04T12:05:00.000Z" }
+        metadata:
+          type: object
+          description: Present on verify and detail responses.
+          properties:
+            providerStatus: { type: string, example: "success" }
+        createdAt: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
+        updatedAt: { type: string, format: date-time, example: "2026-11-04T12:05:00.000Z" }
+        __v: { type: integer, example: 0 }
+
+    AdminPayment:
+      type: object
+      properties:
+        _id: { type: string, example: "66f123456789012345678904" }
+        owner: { $ref: '#/components/schemas/UserSummary' }
+        plan:
+          type: object
+          properties:
+            _id: { type: string, example: "66f123456789012345678903" }
+            coveredPerson:
+              type: object
+              properties:
+                fullName: { type: string, example: "Chinedu Okafor" }
+                relationship: { type: string, example: "father" }
+            packageDetails:
+              type: object
+              properties:
+                name: { type: string, example: "Classic Memorial" }
+                amount: { type: integer, example: 1000000 }
+                currency: { type: string, example: "NGN" }
+        reference: { type: string, example: "jh_init_example-reference" }
+        amount: { type: integer, description: Minor currency units, example: 1000000 }
+        currency: { type: string, example: "NGN" }
+        purpose: { type: string, example: "initial_contribution" }
+        status: { $ref: '#/components/schemas/PaymentStatus' }
+        createdAt: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
+
+    PaymentStatusTotal:
+      type: object
+      properties:
+        amount: { type: integer, description: Minor currency units, example: 1000000 }
+        count: { type: integer, example: 1 }
+
+    # ------------------------------------------------------- subscriptions
+    Subscription:
+      type: object
+      description: Local subscription record (local status, expected next payment date, retained provider identifiers). The documentation provides no example, so field names are not enumerated.
+      additionalProperties: true
+
+    # -------------------------------------------------------- notifications
+    Notification:
+      type: object
+      properties:
+        _id: { type: string, example: "66f123456789012345678901" }
+        userId: { type: string, example: "66f123456789012345678902" }
+        title: { type: string, example: "Contribution received" }
+        message: { type: string, example: "Your scheduled plan contribution was received successfully." }
+        event: { type: string, example: "RecurringPaymentSuccess" }
+        dedupeKey: { type: string, example: "66f123456789012345678904:RecurringPaymentSuccess" }
+        channel: { type: string, example: "in_app" }
+        isRead: { type: boolean, example: false }
+        createdAt: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
+        __v: { type: integer, example: 0 }
+
+    # ---------------------------------------------------- service requests
+    ServiceRequestStatus:
+      type: string
+      enum: [Submitted, Under_Review, More_Info_Required, Docs_Verified, Approved, Rejected, Cancelled, Closed]
+
+    ServiceDocument:
+      type: object
+      properties:
+        _id: { type: string, example: "66f123456789012345678905" }
+        serviceRequest: { type: string, example: "66f123456789012345678901" }
+        owner: { type: string, example: "66f123456789012345678902" }
+        plan: { type: string, example: "66f123456789012345678903" }
+        file: { type: string, example: "66f123456789012345678906" }
+        documentType: { type: string, example: "Death_Certificate" }
+        verificationStatus:
+          type: string
+          enum: [Pending, Approved, Requires_Resubmission]
+          example: "Pending"
+        uploadedAt: { type: string, format: date-time, example: "2026-11-04T12:05:00.000Z" }
+        verifiedAt: { type: string, format: date-time, description: "Set once an admin has reviewed the document", example: "2026-11-04T12:10:00.000Z" }
+        verifiedBy: { type: string, description: Admin user id, example: "66f123456789012345678907" }
+        url:
+          type: string
+          format: uri
+          description: Temporary signed download URL (valid for 900 seconds). Included on documents inside service-request responses.
+          example: "https://..."
+        createdAt: { type: string, format: date-time, example: "2026-11-04T12:05:00.000Z" }
+        updatedAt: { type: string, format: date-time, example: "2026-11-04T12:05:00.000Z" }
+        __v: { type: integer, example: 0 }
+
+    ServiceRequestBase:
+      type: object
+      properties:
+        _id: { type: string, example: "66f123456789012345678901" }
+        coveredPersonSnapshot: { $ref: '#/components/schemas/CoveredPerson' }
+        dateOfDeath: { type: string, format: date-time, example: "2026-10-01T00:00:00.000Z" }
+        serviceLocation: { type: string, example: "Nsukka, Enugu State" }
+        expectedServiceDate: { type: string, format: date-time, example: "2026-10-20T10:00:00.000Z" }
+        contactPerson: { type: string, example: "Ada Okafor" }
+        contactPhone: { type: string, example: "08030000000" }
+        additionalInformation: { type: string, example: "Family contact is available at the location." }
+        status: { $ref: '#/components/schemas/ServiceRequestStatus' }
+        documents:
+          type: array
+          description: Included on list and detail responses.
+          items: { $ref: '#/components/schemas/ServiceDocument' }
+        reviewedBy: { type: string, description: "Admin user id; set after an admin action", example: "66f123456789012345678907" }
+        approvedAt: { type: string, format: date-time, description: Set when approved, example: "2026-11-04T12:10:00.000Z" }
+        photographerName: { type: string, description: Set when a photographer is assigned, example: "Adebayo Johnson" }
+        photographerAssignedAt: { type: string, format: date-time, description: Set when a photographer is assigned, example: "2026-11-04T12:10:00.000Z" }
+        createdAt: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
+        updatedAt: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
+        __v: { type: integer, example: 0 }
+
+    ServiceRequest:
+      description: Service request with `owner` and `plan` as id strings.
+      allOf:
+        - $ref: '#/components/schemas/ServiceRequestBase'
+        - type: object
+          properties:
+            owner: { type: string, example: "66f123456789012345678902" }
+            plan: { type: string, example: "66f123456789012345678903" }
+
+    AdminServiceRequest:
+      description: Service request with `owner` and `plan` populated (admin queue only).
+      allOf:
+        - $ref: '#/components/schemas/ServiceRequestBase'
+        - type: object
+          properties:
+            owner: { $ref: '#/components/schemas/UserSummary' }
+            plan:
+              type: object
+              properties:
+                _id: { type: string, example: "66f123456789012345678903" }
+                packageDetails:
+                  type: object
+                  properties:
+                    name: { type: string, example: "Classic Memorial" }
+
+    # ------------------------------------------------------------- contact
+    ContactTopic:
+      type: string
+      enum: ["Starting a plan", "An existing plan", "Photographer network", "Something else"]
+      example: "An existing plan"
+
+    ContactSubmission:
+      type: object
+      properties:
+        _id: { type: string, example: "66f123456789012345678901" }
+        name: { type: string, example: "Adebayo Okafor" }
+        phone: { type: string, example: "+2348012345678" }
+        email: { type: string, format: email, example: "adebayo@example.com" }
+        topic: { $ref: '#/components/schemas/ContactTopic' }
+        message: { type: string, example: "I have a question about my monthly contribution." }
+        createdAt: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
+        updatedAt: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
+        __v: { type: integer, example: 0 }
+
+    # --------------------------------------------------------------- admin
+    AdminOverview:
+      type: object
+      properties:
+        users:
+          type: object
+          properties:
+            total: { type: integer, example: 120 }
+            newThisMonth: { type: integer, example: 8 }
+        plans:
+          type: object
+          properties:
+            active: { type: integer, example: 45 }
+            overdue: { type: integer, example: 3 }
+            pendingFirstPayment: { type: integer, example: 6 }
+            completed: { type: integer, example: 12 }
+        contributions:
+          type: object
+          description: All amounts in minor units. Total contributed counts successful payments only.
+          properties:
+            totalContributed: { type: integer, example: 150000000 }
+            selectedPeriodContributed: { type: integer, description: Successful contributions in the selected startDate/endDate period, example: 12000000 }
+            monthlyContributed: { type: integer, example: 22000000 }
+            monthlyCommitments: { type: integer, description: "Sum of active plans' monthly amounts (calendar month)", example: 45000000 }
+            averagePerActivePlan: { type: integer, description: "Total contributed divided by active plans (0 when there are none)", example: 3333333 }
+            activePlanCount: { type: integer, example: 45 }
+        serviceRequests:
+          type: object
+          properties:
+            new: { type: integer, example: 2 }
+            inReview: { type: integer, example: 4 }
+            awaitingCustomer: { type: integer, example: 1 }
+            approved: { type: integer, example: 3 }
+            closed: { type: integer, example: 5 }
+            pendingVerification: { type: integer, description: "Count of submitted, under-review, and documents-verified requests", example: 6 }
+        needsReview:
+          type: array
+          maxItems: 5
+          description: Up to five most recent service requests needing staff review.
+          items: { $ref: '#/components/schemas/ServiceRequest' }
+        period:
+          type: object
+          properties:
+            startDate: { type: string, format: date-time, example: "2026-10-01T00:00:00.000Z" }
+            endDate: { type: string, format: date-time, example: "2026-10-26T23:59:59.999Z" }
+
+    AdminUserListItem:
+      type: object
+      properties:
+        _id: { type: string, example: "66f123456789012345678901" }
+        name: { type: string, example: "Ada Okafor" }
+        email: { type: string, format: email, example: "ada@example.com" }
+        createdAt: { type: string, format: date-time, example: "2026-10-01T12:00:00.000Z" }
+        planCount: { type: integer, example: 2 }
+        totalSaved: { type: integer, description: Minor currency units, example: 1500000 }
+        activePlanCount: { type: integer, example: 1 }
+        status: { type: string, enum: [Request_Pending, Active_Plan, No_Active_Plan], example: "Active_Plan" }
+
+    # ---------------------------------------------------- response wrappers
+    MessageResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                message: { type: string }
+
+    SignupResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                message: { type: string, example: "Signup completed. Check your email to verify the account before logging in." }
+                email: { type: string, format: email, example: "ada@example.com" }
+
+    LoginResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                user: { $ref: '#/components/schemas/AuthUser' }
+                token: { type: string, description: Access token, example: "<access-token>" }
+
+    ProfileResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/UserProfile' }
+
+    NotificationPreferencesResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/NotificationPreferences' }
+
+    CustomerListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items: { $ref: '#/components/schemas/CustomerListItem' }
+                pagination: { $ref: '#/components/schemas/Pagination' }
+
+    AdminUserResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/AdminUser' }
+
+    AdminDeleteResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id: { type: string, example: "674a1b2c3d4e5f6789012345" }
+                email: { type: string, format: email, example: "admin@example.com" }
+
+    AdminUserListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: array
+              items: { $ref: '#/components/schemas/AdminUser' }
+
+    PackageListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: array
+              items: { $ref: '#/components/schemas/Package' }
+
+    AdminPackageResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/AdminPackage' }
+
+    AdminPackageListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items: { $ref: '#/components/schemas/AdminPackage' }
+                pagination: { $ref: '#/components/schemas/Pagination' }
+
+    DashboardResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/DashboardSummary' }
+
+    PlanResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Plan' }
+
+    PlanListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items: { $ref: '#/components/schemas/Plan' }
+                pagination: { $ref: '#/components/schemas/Pagination' }
+
+    AdminPlanListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items: { $ref: '#/components/schemas/AdminPlan' }
+                pagination: { $ref: '#/components/schemas/Pagination' }
+
+    InitializeCheckoutResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                paymentId: { type: string, example: "66f123456789012345678904" }
+                reference: { type: string, example: "jh_init_..." }
+                authorizationUrl: { type: string, format: uri, example: "https://checkout.paystack.com/..." }
+                accessCode: { type: string, example: "access_code" }
+
+    PaymentResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Payment' }
+
+    PaymentListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items: { $ref: '#/components/schemas/Payment' }
+                pagination: { $ref: '#/components/schemas/Pagination' }
+
+    AdminPaymentListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items: { $ref: '#/components/schemas/AdminPayment' }
+                pagination: { $ref: '#/components/schemas/Pagination' }
+                summary:
+                  type: object
+                  description: Totals keyed by payment status for the selected date range (minor units).
+                  additionalProperties: { $ref: '#/components/schemas/PaymentStatusTotal' }
+                  example:
+                    Successful: { amount: 1000000, count: 1 }
+                    Failed: { amount: 0, count: 0 }
+
+    WebhookResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                status: { type: string, description: "`Processed`, or `duplicate` for an event already processed or ignored.", example: "Processed" }
+
+    SubscriptionListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: array
+              items: { $ref: '#/components/schemas/Subscription' }
+
+    SubscriptionResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Subscription' }
+
+    NotificationListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items: { $ref: '#/components/schemas/Notification' }
+                pagination: { $ref: '#/components/schemas/Pagination' }
+                counts:
+                  type: object
+                  properties:
+                    totalNotifications: { type: integer, example: 5 }
+                    totalUnreadNotifications: { type: integer, example: 2 }
+
+    NotificationResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Notification' }
+
+    ServiceRequestResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/ServiceRequest' }
+
+    ServiceRequestListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: array
+              items: { $ref: '#/components/schemas/ServiceRequest' }
+
+    AdminServiceRequestListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items: { $ref: '#/components/schemas/AdminServiceRequest' }
+                pagination: { $ref: '#/components/schemas/Pagination' }
+
+    ServiceRequestDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                request: { $ref: '#/components/schemas/ServiceRequest' }
+                documents:
+                  type: array
+                  items: { $ref: '#/components/schemas/ServiceDocument' }
+
+    UploadUrlResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                fileId: { type: string, example: "66f123456789012345678906" }
+                uploadUrl: { type: string, format: uri, description: Presigned PUT URL, example: "https://..." }
+                uploadToken: { type: string, example: "token" }
+                storageKey: { type: string, example: "service-requests/documents/uuid.pdf" }
+                expiresIn: { type: integer, description: Seconds, example: 3600 }
+
+    ServiceDocumentResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/ServiceDocument' }
+
+    DownloadUrlResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                document:
+                  type: object
+                  properties:
+                    _id: { type: string, example: "66f123456789012345678905" }
+                    documentType: { type: string, example: "Death_Certificate" }
+                    verificationStatus: { type: string, enum: [Pending, Approved, Requires_Resubmission], example: "Pending" }
+                url: { type: string, format: uri, example: "https://..." }
+                expiresIn: { type: integer, description: Seconds, example: 900 }
+
+    ContactResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/ContactSubmission' }
+
+    ContactListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items: { $ref: '#/components/schemas/ContactSubmission' }
+                pagination: { $ref: '#/components/schemas/Pagination' }
+
+    AdminOverviewResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/AdminOverview' }
+
+    AdminUsersListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items: { $ref: '#/components/schemas/AdminUserListItem' }
+                pagination: { $ref: '#/components/schemas/Pagination' }

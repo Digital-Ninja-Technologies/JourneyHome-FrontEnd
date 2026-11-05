@@ -51,7 +51,7 @@ export function PackageCards({
               <div
                 className={cn(
                   "mt-1 text-sm",
-                  featured ? "text-canvas/70" : "text-muted",
+                  featured ? "text-canvas/70" : "text-muted-foreground",
                 )}
               >
                 {packageSubtitle(p)}
@@ -67,7 +67,7 @@ export function PackageCards({
               <span
                 className={cn(
                   "text-sm font-medium",
-                  featured ? "text-canvas/70" : "text-muted",
+                  featured ? "text-canvas/70" : "text-muted-foreground",
                 )}
               >
                 /{" "}

@@ -76,6 +76,6 @@ export const PAYMENT_TEXT: Record<PaymentStatus, string> = {
   Processing: "text-status-due",
   Successful: "text-status-active",
   Failed: "text-status-cancelled",
-  Refunded: "text-muted",
-  Cancelled: "text-muted",
+  Refunded: "text-muted-foreground",
+  Cancelled: "text-muted-foreground",
 };

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { paginationQuerySchema } from "./pagination";
 
 export const redirectSearchSchema = z.object({
   redirect: z
@@ -8,7 +9,10 @@ export const redirectSearchSchema = z.object({
       (val) => {
         if (!val) return true;
         return (
-          val.startsWith("/") && !val.startsWith("//") && !val.includes("://")
+          val.startsWith("/") &&
+          !val.startsWith("//") &&
+          !val.includes("://") &&
+          !val.includes("\\")
         );
       },
       { message: "Redirect URL must be a valid path" },
@@ -16,16 +20,23 @@ export const redirectSearchSchema = z.object({
 });
 export type RedirectSearch = z.infer<typeof redirectSearchSchema>;
 
-/** Search params for the signup flow; `package` (or legacy `packageId`) carries the package picked on marketing. */
-export const signupSearchSchema = z.object({
-  package: z.coerce.string().optional(),
-  packageId: z.coerce.string().optional(),
+export const verifyEmailSearchSchema = redirectSearchSchema.extend({
+  token: z.string().optional(),
+});
+export type VerifyEmailSearch = z.infer<typeof verifyEmailSearchSchema>;
+
+export const signupSearchSchema = redirectSearchSchema.extend({
+  package: z.string().optional(),
 });
 export type SignupSearch = z.infer<typeof signupSearchSchema>;
 
-export const resolveSelectedPackage = (
-  search: Partial<SignupSearch> | undefined,
-): string | undefined => search?.package || search?.packageId || undefined;
+export function resolveSelectedPackage(
+  search: { package?: string } | undefined | null,
+): string | undefined {
+  if (!search?.package) return undefined;
+  const p = search.package.trim();
+  return p ? p : undefined;
+}
 
 export const sanitizeRedirect = (
   rawRedirect: string | undefined | null,
@@ -35,8 +46,20 @@ export const sanitizeRedirect = (
   if (
     rawRedirect.startsWith("/") &&
     !rawRedirect.startsWith("//") &&
-    !rawRedirect.includes("://")
+    !rawRedirect.includes("://") &&
+    !rawRedirect.includes("\\")
   ) {
+    // Prevent self-referencing auth redirects that can trigger infinite loops
+    if (
+      rawRedirect === "/login" ||
+      rawRedirect === "/login/" ||
+      rawRedirect.startsWith("/login?") ||
+      rawRedirect === "/signup" ||
+      rawRedirect === "/signup/" ||
+      rawRedirect.startsWith("/signup?")
+    ) {
+      return fallback;
+    }
     return rawRedirect;
   }
   return fallback;
@@ -48,10 +71,7 @@ export const querySearchSchema = z.object({
 });
 export type QuerySearch = z.infer<typeof querySearchSchema>;
 
-export const paginationSearchSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().positive().optional().default(20),
-});
+export const paginationSearchSchema = paginationQuerySchema;
 export type PaginationSearch = z.infer<typeof paginationSearchSchema>;
 
 export const planFilterSearchSchema = z.object({

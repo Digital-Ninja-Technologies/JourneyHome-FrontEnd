@@ -115,13 +115,13 @@ function About() {
             A befitting burial is rarely a shock on cost. It&rsquo;s a shock on
             timing.
           </h2>
-          <p className="max-w-xl text-base leading-relaxed text-muted">
+          <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
             Families who fully intended to prepare well in advance often find
             themselves negotiating with a photographer at the worst possible
             moment, in the worst possible state of mind — days after a loss,
             with no energy left to vet a stranger or compare quotes.
           </p>
-          <p className="max-w-xl text-base leading-relaxed text-muted">
+          <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
             Journey Home started with one honest observation: the money and the
             memories shouldn&rsquo;t be figured out in the same week as the
             loss. So we built plans that save a little each month, earmarked
@@ -176,7 +176,7 @@ function About() {
                   {title}
                 </div>
               </div>
-              <p className="text-base leading-relaxed text-muted md:max-w-md">
+              <p className="text-base leading-relaxed text-muted-foreground md:max-w-md">
                 {body}
               </p>
             </div>
@@ -195,7 +195,7 @@ function About() {
               <div className="text-lg font-bold">
                 Are you a photographer or videographer?
               </div>
-              <div className="text-base text-muted">
+              <div className="text-base text-muted-foreground">
                 Join our verified network across 24 states and be the one a
                 grieving family can count on.
               </div>
@@ -245,7 +245,7 @@ function About() {
               <div className="text-[32px] font-extrabold tracking-tight md:text-[44px]">
                 {n}
               </div>
-              <div className="text-sm text-muted">{label}</div>
+              <div className="text-sm text-muted-foreground">{label}</div>
             </div>
           ))}
         </div>

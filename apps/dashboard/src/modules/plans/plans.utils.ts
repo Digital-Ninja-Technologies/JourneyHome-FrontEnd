@@ -11,7 +11,7 @@ export const MARKETING_URL = env.VITE_MARKETING_URL;
 
 export const fullName = (p: Plan) => p.coveredPerson.fullName;
 export const contributionCount = (p: Plan) =>
-  Math.round(p.totalContributedMinor / p.contributionAmountMinor);
+  p.amount > 0 ? Math.round(p.totalContributedAmount / p.amount) : 0;
 export const relationshipLabel = (p: Plan) =>
   capitalise(p.coveredPerson.relationship);
 export const startedLabel = (p: Plan) => formatMonthYear(p.startDate);
@@ -25,7 +25,7 @@ export const LIVE = new Set<Plan["status"]>([
 export const isDue = (p: Plan) =>
   p.status === "Payment_Due" ||
   p.status === "Overdue" ||
-  daysUntil(p.nextPaymentDate) <= 0;
+  (p.nextPaymentDate ? daysUntil(p.nextPaymentDate) <= 0 : false);
 
 /**
  * The backend only lets a customer start a checkout for a plan's first contribution (Pending plans).
@@ -47,7 +47,7 @@ export function planNotice(p: Plan): Notice | null {
       return {
         tone: "due",
         policy: true,
-        text: `This contribution is ${daysUntil(p.nextPaymentDate) === 0 ? "due today" : "due"}. If it's missed, it's recorded as a deficit and cleared at your next payment — no penalty.`,
+        text: `This contribution is ${p.nextPaymentDate && daysUntil(p.nextPaymentDate) === 0 ? "due today" : "due"}. If it's missed, it's recorded as a deficit and cleared at your next payment — no penalty.`,
       };
     case "Overdue":
       return {
@@ -86,7 +86,7 @@ export function nextCell(p: Plan): {
   value: string;
   due: boolean;
 } {
-  if (p.status === "Pending")
+  if (p.status === "Pending" || !p.nextPaymentDate)
     return { label: "Next payment", value: "—", due: false };
   if (p.status === "Payment_Due" || p.status === "Overdue") {
     const d = daysUntil(p.nextPaymentDate);
@@ -104,4 +104,4 @@ export function nextCell(p: Plan): {
 }
 
 export const lastPaymentLabel = (p: Plan) =>
-  p.lastPaymentAt ? formatDay(p.lastPaymentAt) : "—";
+  (p as any).lastPaymentAt ? formatDay((p as any).lastPaymentAt) : "—";

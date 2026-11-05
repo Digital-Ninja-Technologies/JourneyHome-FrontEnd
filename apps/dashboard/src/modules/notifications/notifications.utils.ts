@@ -20,9 +20,7 @@ export function describeNotification(
   const who = plan
     ? `${firstName(plan.coveredPerson.fullName)}'s plan`
     : "your plan";
-  const amount = plan
-    ? formatMoney(plan.contributionAmountMinor, plan.currency)
-    : "your";
+  const amount = plan ? formatMoney(plan.amount, plan.currency) : "your";
   const planLink = plan
     ? { to: `/app/plans/${plan._id}`, label: "View plan" }
     : undefined;
@@ -153,9 +151,8 @@ export function describeNotification(
         link: requests,
       };
     default: {
-      const title = (n.subject ?? n.event)
-        .replace(/([a-z])([A-Z])/g, "$1 $2")
-        .replace(/_/g, " ");
+      const raw = n.title || (n as any).subject || n.event || "Notification";
+      const title = raw.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ");
       return {
         title,
         tone: "info",
@@ -189,8 +186,24 @@ export function formatNotificationTime(iso: string, now = new Date()) {
     : `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}, ${time}`;
 }
 
-// "Read" state is kept on this device only; the backend has no read/unread tracking.
 const seenKey = (userId: string) => `jh_notifications_seen_${userId}`;
+
+export function clearSeenStorage(userId?: string) {
+  try {
+    if (userId) {
+      localStorage.removeItem(seenKey(userId));
+    } else {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key?.startsWith("jh_notifications_seen_")) {
+          localStorage.removeItem(key);
+        }
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+}
 
 export function readSeen(userId: string): string | null {
   try {

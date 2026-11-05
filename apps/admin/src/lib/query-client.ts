@@ -44,3 +44,5 @@ export function makeQueryClient(options: MakeQueryClientOptions = {}) {
     },
   });
 }
+
+export const queryClient = makeQueryClient();

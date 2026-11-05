@@ -29,7 +29,7 @@ function Step({
     <div className="flex flex-col gap-3">
       <div className="text-sm font-extrabold text-link">{n}</div>
       <h3 className="text-3xl font-extrabold tracking-tight">{title}</h3>
-      <p className="max-w-md text-base leading-relaxed text-muted">
+      <p className="max-w-md text-base leading-relaxed text-muted-foreground">
         {children}
       </p>
     </div>
@@ -131,7 +131,7 @@ function HowItWorks() {
                 />
               ))}
             </div>
-            <div className="text-xs text-muted">
+            <div className="text-xs text-muted-foreground">
               Received → Verified → Approved →{" "}
               <strong className="text-foreground">Assigned</strong> → Completed
             </div>

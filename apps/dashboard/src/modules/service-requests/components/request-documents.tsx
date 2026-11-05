@@ -2,6 +2,7 @@ import type { DocumentType, ServiceDocument } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
+import { ServiceDocumentsSkeleton } from "@/components/skeletons";
 import { Pill } from "@/components/status-pill";
 import { formatDay } from "@/lib/format";
 import { useServiceRequest } from "@/modules/service-requests/query-options";
@@ -63,8 +64,7 @@ export function RequestDocuments({
     onError: (e: Error) => setError(e.message),
   });
 
-  if (q.isPending)
-    return <p className="text-sm text-muted">Loading documents…</p>;
+  if (q.isPending) return <ServiceDocumentsSkeleton />;
   if (q.isError)
     return (
       <p className="text-sm text-status-cancelled">
@@ -117,7 +117,7 @@ export function RequestDocuments({
           >
             <div>
               <div className="text-sm font-semibold">{DOC_LABEL[type]}</div>
-              <div className="text-xs text-muted">
+              <div className="text-xs text-muted-foreground">
                 {doc
                   ? `Uploaded ${formatDay(doc.uploadedAt)}`
                   : "Not uploaded yet"}

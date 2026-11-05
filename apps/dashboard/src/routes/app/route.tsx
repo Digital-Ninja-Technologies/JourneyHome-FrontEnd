@@ -6,10 +6,13 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CatchBoundary } from "@/components/catch-boundary";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { setPendingVerificationEmail } from "@/modules/auth/api";
 import { sessionQueryOptions } from "@/modules/auth/query-options";
+import { clearStoredSelectedPackage } from "@/modules/onboarding/storage";
+import { setOnboardingPlan } from "@/modules/payments/checkout";
 
 const COLLAPSE_KEY = "jh_nav_collapsed";
 
@@ -39,6 +42,12 @@ export const Route = createFileRoute("/app")({
 function AppLayout() {
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    clearStoredSelectedPackage();
+    setOnboardingPlan(null);
+    setPendingVerificationEmail(null);
+  }, []);
 
   function toggle() {
     setCollapsed((c) => {

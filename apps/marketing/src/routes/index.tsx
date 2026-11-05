@@ -100,7 +100,7 @@ function Home() {
             Prepare with{" "}
             <Accent className="whitespace-nowrap text-[1.1em]">dignity.</Accent>
           </h1>
-          <p className="max-w-[480px] text-lg leading-relaxed text-muted">
+          <p className="max-w-[480px] text-lg leading-relaxed text-muted-foreground">
             Journey Home is where families save a little each month toward
             professional photography and videography for a loved one&rsquo;s
             burial — so when the time comes, you can be present, not scrambling.
@@ -138,7 +138,7 @@ function Home() {
                 <Check className="size-5" />
               </div>
               <div>
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Total saved
                 </div>
                 <div className="text-2xl font-extrabold tracking-tight">
@@ -147,7 +147,7 @@ function Home() {
               </div>
             </div>
             <div className="text-right">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Saving since
               </div>
               <div className="text-sm font-bold text-status-active">
@@ -241,7 +241,7 @@ function Home() {
           <h2 className="max-w-xl text-[32px] font-extrabold leading-[1.1] tracking-tight md:text-[44px]">
             Everything you need, in one place.
           </h2>
-          <p className="max-w-lg text-base leading-relaxed text-muted">
+          <p className="max-w-lg text-base leading-relaxed text-muted-foreground">
             From the first contribution to the final keepsake, Journey Home
             handles the logistics so your family doesn&rsquo;t have to.
           </p>
@@ -259,7 +259,7 @@ function Home() {
               </div>
               <div>
                 <div className="text-[17px] font-bold">{title}</div>
-                <div className="mt-1.5 text-sm leading-relaxed text-muted">
+                <div className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
                   {body}
                 </div>
               </div>

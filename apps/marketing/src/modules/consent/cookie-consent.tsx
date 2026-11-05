@@ -78,13 +78,13 @@ export function CookieConsent() {
                 type="button"
                 onClick={dismissCookieBanner}
                 aria-label="Close cookie consent banner"
-                className="-mr-2 -mt-2 rounded-full p-2 text-muted transition-colors hover:bg-black/5 hover:text-foreground cursor-pointer"
+                className="-mr-2 -mt-2 rounded-full p-2 text-muted-foreground transition-colors hover:bg-black/5 hover:text-foreground cursor-pointer"
               >
                 <X className="size-4" />
               </button>
             </div>
 
-            <p className="text-sm leading-relaxed text-muted">
+            <p className="text-sm leading-relaxed text-muted-foreground">
               We use cookies to keep you signed in, remember your preferences,
               and improve your experience. Read our{" "}
               <Link
@@ -124,7 +124,7 @@ export function CookieConsent() {
                 <button
                   type="button"
                   onClick={openCookieBanner}
-                  className="-ml-2 mb-2 flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted transition-colors hover:bg-black/5 hover:text-foreground cursor-pointer"
+                  className="-ml-2 mb-2 flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-black/5 hover:text-foreground cursor-pointer"
                 >
                   <ArrowLeft className="size-3.5" />
                   Back
@@ -137,13 +137,13 @@ export function CookieConsent() {
                 type="button"
                 onClick={dismissCookieBanner}
                 aria-label="Close cookie consent banner"
-                className="-mr-2 -mt-2 rounded-full p-2 text-muted transition-colors hover:bg-black/5 hover:text-foreground cursor-pointer"
+                className="-mr-2 -mt-2 rounded-full p-2 text-muted-foreground transition-colors hover:bg-black/5 hover:text-foreground cursor-pointer"
               >
                 <X className="size-4" />
               </button>
             </div>
 
-            <p className="text-xs leading-relaxed text-muted">
+            <p className="text-xs leading-relaxed text-muted-foreground">
               Essential cookies are required for basic security and site
               functionality. Optional cookies help us improve our services and
               communications.
@@ -156,7 +156,7 @@ export function CookieConsent() {
                   <div className="text-sm font-semibold text-foreground">
                     Strictly necessary
                   </div>
-                  <p className="text-xs leading-relaxed text-muted">
+                  <p className="text-xs leading-relaxed text-muted-foreground">
                     Required for core navigation, security, and storing your
                     cookie preferences.
                   </p>
@@ -175,7 +175,7 @@ export function CookieConsent() {
                   >
                     Analytics &amp; Performance
                   </label>
-                  <p className="text-xs leading-relaxed text-muted">
+                  <p className="text-xs leading-relaxed text-muted-foreground">
                     Allows us to aggregate anonymous visitor metrics and improve
                     our services.
                   </p>
@@ -197,7 +197,7 @@ export function CookieConsent() {
                   >
                     Marketing &amp; Experience
                   </label>
-                  <p className="text-xs leading-relaxed text-muted">
+                  <p className="text-xs leading-relaxed text-muted-foreground">
                     Helps us deliver relevant service updates and personalize
                     your experience.
                   </p>

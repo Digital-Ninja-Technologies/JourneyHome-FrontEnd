@@ -1,16 +1,24 @@
-import type { DocumentType, Plan, ServiceRequest } from "@journeyhome/schemas";
+import type { DocumentType, Plan } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
+import { DatePicker } from "@journeyhome/ui/components/date-picker";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
-import { Select } from "@journeyhome/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@journeyhome/ui/components/select";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Info, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { api } from "@/lib/api";
+import { RequestServiceSkeleton } from "@/components/skeletons";
 import { formatMoney } from "@/lib/format";
 import { usePlans } from "@/modules/plans/query-options";
+import { createServiceRequest } from "@/modules/service-requests/api";
 import {
   DOC_LABEL,
   ELIGIBLE_PLAN,
@@ -24,21 +32,33 @@ export const BYPASS_PLAN_REQUIREMENT = true;
 
 const PREVIEW_FALLBACK_PLAN: Plan = {
   _id: "preview-plan-id",
+  owner: "demo-cust-1",
+  package: "pkg_tier_1",
+  packageDetails: {
+    packageId: "pkg_tier_1",
+    name: "Standard",
+    amount: 500000,
+    currency: "NGN",
+    description: "Standard package",
+    features: [],
+  },
   status: "Active",
   currency: "NGN",
-  contributionAmountMinor: 500000,
-  targetAmountMinor: 10000000,
-  totalContributedMinor: 1500000,
+  amount: 500000,
+  totalContributedAmount: 1500000,
+  billingInterval: "monthly",
+  coverageStatus: "Active",
   startDate: new Date().toISOString(),
   nextPaymentDate: new Date().toISOString(),
   createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
   coveredPerson: {
     fullName: "Preview Beneficiary",
+    dateOfBirth: "1960-01-01",
+    gender: "male",
     relationship: "father",
     address: "12 Marina, Lagos",
-  },
-  packageSnapshot: {
-    name: "Standard",
+    phoneNumber: "08012345678",
   },
 };
 
@@ -140,7 +160,7 @@ function DocPicker({
         />
         <Upload className="size-4 text-link" />
         <div className="text-sm font-bold">{DOC_LABEL[type]}</div>
-        <div className="max-w-full truncate text-xs text-muted">
+        <div className="max-w-full truncate text-xs text-muted-foreground">
           {file ? file.name : "JPG, PNG, or PDF — up to 10MB"}
         </div>
       </div>
@@ -181,6 +201,9 @@ export function RequestServiceView() {
     ELIGIBLE_PLAN.has(p.status),
   );
   const [planId, setPlanId] = useState(paramPlan ?? "");
+  const [dod, setDod] = useState<Date | null>(null);
+  const [serviceDate, setServiceDate] = useState<Date | null>(null);
+  const [selectedState, setSelectedState] = useState<string>("Lagos");
   const plan =
     eligible.find((p) => p._id === planId) ??
     eligible[0] ??
@@ -189,7 +212,7 @@ export function RequestServiceView() {
   const submit = useMutation({
     mutationFn: async (body: Record<string, unknown>) => {
       if (!created.current) {
-        const req = await api<ServiceRequest>("/service-requests", { body });
+        const req = await createServiceRequest(body);
         created.current = { id: req._id, done: new Set() };
       }
       const { id, done } = created.current;
@@ -215,28 +238,35 @@ export function RequestServiceView() {
     if (!plan) return;
     const d = new FormData(e.currentTarget);
     const text = (k: string) => String(d.get(k) ?? "").trim();
-    const day = (k: string) =>
-      new Date(`${text(k)}T00:00:00.000Z`).toISOString();
+    const day = (k: string) => {
+      const v = text(k);
+      if (!v) return undefined;
+      const parsed = new Date(`${v}T00:00:00.000Z`);
+      return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
+    };
     const extra = text("info");
+    const location = `${text("venue")}, ${text("state")}`;
+    const serviceDate = day("service");
     submit.mutate({
       planId: plan._id,
       dateOfDeath: day("dod"),
-      expectedBurialDate: day("service"),
-      // The backend stores one location string, so the state is folded into it.
-      burialLocation: `${text("venue")}, ${text("state")}`,
+      serviceLocation: location,
+      burialLocation: location,
+      expectedServiceDate: serviceDate,
+      expectedBurialDate: serviceDate,
       contactPerson: text("contact"),
       contactPhone: text("phone"),
       ...(extra && { additionalInformation: extra }),
     });
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const _today = new Date().toISOString().slice(0, 10);
   const partial = !!created.current && submit.isError;
 
   return (
     <main className="flex max-w-[660px] flex-col gap-6 p-5 md:p-10">
       <header className="flex flex-col gap-2">
-        <div className="text-sm text-muted">
+        <div className="text-sm text-muted-foreground">
           <Link to="/app/service-requests" className="hover:underline">
             Service requests
           </Link>{" "}
@@ -245,13 +275,13 @@ export function RequestServiceView() {
         <h1 className="font-serif text-[52px] font-normal leading-[1.05]">
           Request the <span className="italic">service</span>
         </h1>
-        <p className="text-sm text-muted">
+        <p className="text-sm text-muted-foreground">
           We&rsquo;ll verify your documents and review your request.
           You&rsquo;ll be notified at every step.
         </p>
       </header>
 
-      {plansQ.isPending && <p className="text-muted">Loading your plans…</p>}
+      {plansQ.isPending && <RequestServiceSkeleton />}
       {plansQ.isSuccess &&
         eligible.length === 0 &&
         !BYPASS_PLAN_REQUIREMENT && (
@@ -278,46 +308,93 @@ export function RequestServiceView() {
           <section className="flex flex-col gap-5 rounded-[28px] bg-white p-7">
             <Field label="Which plan is this for?" id="plan">
               <Select
-                id="plan"
                 value={plan._id}
-                onChange={(e) => setPlanId(e.target.value)}
+                onValueChange={(val) => {
+                  if (val) setPlanId(val);
+                }}
                 disabled={
                   partial || (BYPASS_PLAN_REQUIREMENT && eligible.length === 0)
                 }
               >
-                {eligible.length > 0 ? (
-                  eligible.map((p) => (
-                    <option key={p._id} value={p._id}>
-                      {p.coveredPerson.fullName} — {p.packageSnapshot.name} ·{" "}
-                      {formatMoney(p.totalContributedMinor, p.currency)} saved
-                    </option>
-                  ))
-                ) : (
-                  <option value={PREVIEW_FALLBACK_PLAN._id}>
-                    Preview Plan (Bypassed plan requirement)
-                  </option>
-                )}
+                <SelectTrigger id="plan">
+                  <SelectValue placeholder="Choose a plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {eligible.length > 0 ? (
+                    eligible.map((p) => (
+                      <SelectItem key={p._id} value={p._id}>
+                        {p.coveredPerson.fullName} — {p.packageDetails.name} ·{" "}
+                        {formatMoney(p.totalContributedAmount, p.currency)}{" "}
+                        saved
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value={PREVIEW_FALLBACK_PLAN._id}>
+                      Preview Plan (Bypassed plan requirement)
+                    </SelectItem>
+                  )}
+                </SelectContent>
               </Select>
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Date of death" id="dod">
-                <Input id="dod" name="dod" type="date" required max={today} />
+                <DatePicker
+                  id="dod"
+                  value={dod}
+                  onChange={setDod}
+                  placeholder="Select date of death"
+                  maxDate={new Date()}
+                />
+                <input
+                  type="hidden"
+                  name="dod"
+                  value={
+                    dod
+                      ? `${dod.getFullYear()}-${String(dod.getMonth() + 1).padStart(2, "0")}-${String(dod.getDate()).padStart(2, "0")}`
+                      : ""
+                  }
+                  required
+                />
               </Field>
               <Field label="Expected date of service" id="service">
-                <Input
+                <DatePicker
                   id="service"
+                  value={serviceDate}
+                  onChange={setServiceDate}
+                  placeholder="Select date of service"
+                  minDate={new Date()}
+                />
+                <input
+                  type="hidden"
                   name="service"
-                  type="date"
+                  value={
+                    serviceDate
+                      ? `${serviceDate.getFullYear()}-${String(serviceDate.getMonth() + 1).padStart(2, "0")}-${String(serviceDate.getDate()).padStart(2, "0")}`
+                      : ""
+                  }
                   required
-                  min={today}
                 />
               </Field>
               <Field label="State" id="state">
-                <Select id="state" name="state" defaultValue="Lagos">
-                  {STATES.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
+                <Select
+                  value={selectedState}
+                  onValueChange={(val) => {
+                    if (val) setSelectedState(val);
+                  }}
+                  name="state"
+                >
+                  <SelectTrigger id="state">
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATES.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
+                <input type="hidden" name="state" value={selectedState} />
               </Field>
               <Field label="Venue / burial location" id="venue">
                 <Input
@@ -330,7 +407,7 @@ export function RequestServiceView() {
               </Field>
             </div>
             <hr className="border-border" />
-            <div className="text-xs font-bold uppercase tracking-wider text-muted">
+            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Contact person on the day
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -365,7 +442,7 @@ export function RequestServiceView() {
             </Field>
             <hr className="border-border" />
             <div className="flex flex-col gap-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-muted">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 Supporting documents
               </span>
               <div className="grid gap-4 sm:grid-cols-2">

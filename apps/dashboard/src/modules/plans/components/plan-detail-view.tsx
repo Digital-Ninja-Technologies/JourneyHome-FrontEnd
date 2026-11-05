@@ -2,6 +2,11 @@ import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link, useParams } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
+import {
+  AsyncBoundary,
+  PlanDetailSkeleton,
+  RecentPaymentsSkeleton,
+} from "@/components/async-boundary";
 import { NoticeBanner } from "@/components/notice-banner";
 import { PAYMENT_TEXT, StatusPill } from "@/components/status-pill";
 import { ApiError } from "@/lib/api";
@@ -33,7 +38,7 @@ function Detail({
 }) {
   return (
     <div className={wide ? "sm:col-span-3" : undefined}>
-      <div className="text-xs font-semibold uppercase tracking-[2px] text-muted">
+      <div className="text-xs font-semibold uppercase tracking-[2px] text-muted-foreground">
         {label}
       </div>
       <div className="mt-1 text-[15px] font-medium">{value || "—"}</div>
@@ -47,8 +52,7 @@ export function PlanDetailView() {
   const paymentsQ = usePayments();
   const plan = planQ.data;
 
-  if (planQ.isPending)
-    return <main className="p-5 md:p-10 text-muted">Loading plan…</main>;
+  if (planQ.isPending) return <PlanDetailSkeleton />;
   if (planQ.isError || !plan) {
     const missing =
       planQ.error instanceof ApiError &&
@@ -58,7 +62,7 @@ export function PlanDetailView() {
         <h1 className="font-serif text-4xl">
           {missing ? "We couldn’t find that plan" : "Something went wrong"}
         </h1>
-        <p className="text-muted">
+        <p className="text-muted-foreground">
           {missing
             ? "It may have been removed, or it belongs to a different account."
             : planQ.error?.message}
@@ -98,7 +102,7 @@ export function PlanDetailView() {
     <main className="flex max-w-[800px] flex-col gap-6 p-5 md:p-10">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <div className="text-sm text-muted">
+          <div className="text-sm text-muted-foreground">
             <Link to="/app" className="hover:underline">
               Dashboard
             </Link>{" "}
@@ -140,9 +144,9 @@ export function PlanDetailView() {
       >
         <div className="grid gap-6 sm:grid-cols-4">
           {[
-            ["Total saved", money(plan.totalContributedMinor)],
-            ["Monthly contribution", money(plan.contributionAmountMinor)],
-            ["Package", plan.packageSnapshot.name],
+            ["Total saved", money(plan.totalContributedAmount)],
+            ["Monthly contribution", money(plan.amount)],
+            ["Package", plan.packageDetails.name],
             [next.label, next.value],
           ].map(([label, value]) => (
             <div key={label}>
@@ -185,7 +189,10 @@ export function PlanDetailView() {
             }
           />
           <Detail label="Gender" value={capitalise(person.gender ?? "")} />
-          <Detail label="Phone number" value={person.phoneNumber} />
+          <Detail
+            label="Phone number"
+            value={person.phoneNumber || undefined}
+          />
           <Detail label="Started" value={formatMonthYear(plan.startDate)} />
           <Detail label="Home address" value={person.address} wide />
         </div>
@@ -210,25 +217,25 @@ export function PlanDetailView() {
             See all payments
           </Link>
         </div>
-        {paymentsQ.isPending && (
-          <p className="py-4 text-sm text-muted">Loading…</p>
-        )}
-        {paymentsQ.isError && (
-          <p className="py-4 text-sm text-status-cancelled">
-            Couldn&rsquo;t load payments. {paymentsQ.error.message}
-          </p>
-        )}
-        {paymentsQ.isSuccess && history.length === 0 && (
-          <p className="py-4 text-sm text-muted">
-            No payments on this plan yet.
-          </p>
-        )}
+        <AsyncBoundary
+          isLoading={paymentsQ.isPending}
+          isError={paymentsQ.isError}
+          error={paymentsQ.error}
+          onReset={() => void paymentsQ.refetch()}
+          loadingFallback={<RecentPaymentsSkeleton />}
+        >
+          {paymentsQ.isSuccess && history.length === 0 && (
+            <p className="py-4 text-sm text-muted-foreground">
+              No payments on this plan yet.
+            </p>
+          )}
+        </AsyncBoundary>
         {history.slice(0, 3).map((pay) => (
           <div
             key={pay._id}
             className="flex items-center justify-between border-t border-border py-4"
           >
-            <div className="text-sm text-muted">
+            <div className="text-sm text-muted-foreground">
               {formatDay(pay.processedAt ?? pay.createdAt)}{" "}
               {new Date(pay.processedAt ?? pay.createdAt).getFullYear()} ·{" "}
               {pay.purpose === "initial_contribution"
@@ -237,7 +244,7 @@ export function PlanDetailView() {
             </div>
             <div className="text-right">
               <div className="text-sm font-bold">
-                {formatMoney(pay.amountMinor, pay.currency)}
+                {formatMoney(pay.amount, pay.currency)}
               </div>
               <div
                 className={cn(
@@ -269,7 +276,7 @@ export function PlanDetailView() {
       <div className="flex items-start gap-3 rounded-2xl bg-cream px-5 py-4 text-[13px] leading-relaxed text-status-due">
         <AlertCircle className="mt-0.5 size-4 shrink-0" />
         <div>
-          The {plan.packageSnapshot.name} package is fixed for the life of this
+          The {plan.packageDetails.name} package is fixed for the life of this
           plan and can&rsquo;t be changed once started.{" "}
           <a href={`${MARKETING_URL}/terms`} className="underline">
             Read the policy

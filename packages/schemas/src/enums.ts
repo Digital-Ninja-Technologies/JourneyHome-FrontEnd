@@ -34,6 +34,7 @@ export const ServiceRequestStatusEnum = z.enum([
   "Approved",
   "Rejected",
   "Cancelled",
+  "Closed",
 ]);
 export type ServiceRequestStatus = z.infer<typeof ServiceRequestStatusEnum>;
 
@@ -53,7 +54,12 @@ export type DocumentVerificationStatus = z.infer<
   typeof DocumentVerificationStatusEnum
 >;
 
-export const UserRoleEnum = z.enum(["customer", "admin", "super_admin"]);
+export const UserRoleEnum = z.enum([
+  "customer",
+  "covered_person",
+  "admin",
+  "super_admin",
+]);
 export type UserRole = z.infer<typeof UserRoleEnum>;
 
 export const PaymentPurposeEnum = z.enum([
