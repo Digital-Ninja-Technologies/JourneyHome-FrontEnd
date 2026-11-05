@@ -1,11 +1,15 @@
+import type { ServiceRequestQueryInput } from "@journeyhome/schemas";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useSessionUser } from "@/modules/auth/query-options";
 import { fetchServiceRequest, fetchServiceRequests } from "./api";
 
-export const serviceRequestsQueryOptions = (userId?: string) =>
+export const serviceRequestsQueryOptions = (
+  params?: ServiceRequestQueryInput,
+  userId?: string,
+) =>
   queryOptions({
-    queryKey: ["service-requests", userId] as const,
-    queryFn: () => fetchServiceRequests(),
+    queryKey: ["service-requests", userId, params] as const,
+    queryFn: () => fetchServiceRequests(params),
     staleTime: 30_000,
   });
 
@@ -19,9 +23,9 @@ export const serviceRequestQueryOptions = (id?: string, userId?: string) =>
     enabled: Boolean(id),
   });
 
-export function useServiceRequests() {
+export function useServiceRequests(params?: ServiceRequestQueryInput) {
   const user = useSessionUser();
-  return useQuery(serviceRequestsQueryOptions(user?.id));
+  return useQuery(serviceRequestsQueryOptions(params, user?.id));
 }
 
 export function useServiceRequest(id: string) {

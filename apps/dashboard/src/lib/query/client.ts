@@ -1,26 +1,8 @@
 import { ApiError } from "@journeyhome/api-client";
-import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 
-export interface MakeQueryClientOptions {
-  onUnauthorized?: () => void;
-}
-
-export function makeQueryClient(options: MakeQueryClientOptions = {}) {
+export function makeQueryClient() {
   return new QueryClient({
-    queryCache: new QueryCache({
-      onError: (error) => {
-        if (error instanceof ApiError && error.status === 401) {
-          options.onUnauthorized?.();
-        }
-      },
-    }),
-    mutationCache: new MutationCache({
-      onError: (error) => {
-        if (error instanceof ApiError && error.status === 401) {
-          options.onUnauthorized?.();
-        }
-      },
-    }),
     defaultOptions: {
       queries: {
         staleTime: 1000 * 60 * 5,
@@ -30,7 +12,9 @@ export function makeQueryClient(options: MakeQueryClientOptions = {}) {
             error instanceof ApiError &&
             typeof error.status === "number" &&
             error.status >= 400 &&
-            error.status < 500
+            error.status < 500 &&
+            error.status !== 408 &&
+            error.status !== 429
           ) {
             return false;
           }
@@ -44,3 +28,5 @@ export function makeQueryClient(options: MakeQueryClientOptions = {}) {
     },
   });
 }
+
+export const queryClient = makeQueryClient();

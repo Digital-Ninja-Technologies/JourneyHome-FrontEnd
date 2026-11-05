@@ -10,6 +10,10 @@ import {
 } from "@journeyhome/ui/components/select";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useState } from "react";
+import {
+  AsyncBoundary,
+  PackageChoiceSkeleton,
+} from "@/components/async-boundary";
 import { formatMoney } from "@/lib/format";
 import { usePackages } from "@/modules/packages/query-options";
 
@@ -127,6 +131,8 @@ export function CoveredPersonFields() {
             id="phone"
             name="phone"
             type="tel"
+            required
+            minLength={5}
             placeholder="e.g. 0803 123 4567"
           />
         </Field>
@@ -158,43 +164,45 @@ export function PackagePicker({
   return (
     <fieldset className="flex flex-col gap-3">
       <legend className="mb-3 text-base font-bold">Choose a package</legend>
-      {packagesQ.isPending && (
-        <p className="text-sm text-muted">Loading packages…</p>
-      )}
-      {packagesQ.isError && (
-        <p className="text-sm text-status-cancelled">
-          Couldn&rsquo;t load packages. {packagesQ.error.message}
-        </p>
-      )}
-      <div className="grid gap-3 sm:grid-cols-3">
-        {packagesQ.data?.map((p) => (
-          <label
-            key={p._id}
-            className={cn(
-              "flex cursor-pointer flex-col gap-2 rounded-2xl border p-4",
-              value === p._id
-                ? "border-foreground bg-cream/50 ring-1 ring-foreground"
-                : "border-border bg-white",
-            )}
-          >
-            <div className="flex items-center justify-between text-sm font-bold">
-              {p.name}
-              <input
-                type="radio"
-                name="package"
-                value={p._id}
-                required
-                checked={value === p._id}
-                onChange={() => onChange(p._id)}
-              />
-            </div>
-            <div className="text-xl font-bold tracking-tight">
-              {formatMoney(p.amount, p.currency)}
-              <span className="text-xs font-normal text-muted">/mo</span>
-            </div>
-          </label>
-        ))}
-      </div>
+      <AsyncBoundary
+        isLoading={packagesQ.isPending}
+        isError={packagesQ.isError}
+        error={packagesQ.error}
+        onReset={() => void packagesQ.refetch()}
+        loadingFallback={<PackageChoiceSkeleton count={3} />}
+      >
+        <div className="grid gap-3 sm:grid-cols-3">
+          {packagesQ.data?.map((p) => (
+            <label
+              key={p._id}
+              className={cn(
+                "flex cursor-pointer flex-col gap-2 rounded-2xl border p-4",
+                value === p._id
+                  ? "border-foreground bg-cream/50 ring-1 ring-foreground"
+                  : "border-border bg-white",
+              )}
+            >
+              <div className="flex items-center justify-between text-sm font-bold">
+                {p.name}
+                <input
+                  type="radio"
+                  name="package"
+                  value={p._id}
+                  required
+                  checked={value === p._id}
+                  onChange={() => onChange(p._id)}
+                />
+              </div>
+              <div className="text-xl font-bold tracking-tight">
+                {formatMoney(p.amount, p.currency)}
+                <span className="text-xs font-normal text-muted-foreground">
+                  /mo
+                </span>
+              </div>
+            </label>
+          ))}
+        </div>
+      </AsyncBoundary>
     </fieldset>
   );
 }

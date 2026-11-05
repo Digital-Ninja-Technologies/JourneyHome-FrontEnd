@@ -1,8 +1,11 @@
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
+import { Skeleton } from "@journeyhome/ui/components/skeleton";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Component, type ReactNode, Suspense } from "react";
+
+export * from "./skeletons";
 
 export interface FallbackProps {
   error: unknown;
@@ -121,10 +124,18 @@ export function DefaultLoadingFallback() {
   return (
     <div
       role="status"
-      className="flex min-h-[140px] items-center justify-center p-8"
       aria-label="Loading..."
+      className="flex w-full flex-col gap-4 rounded-3xl border border-border bg-white p-6 shadow-sm"
     >
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-link border-t-transparent" />
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-6 w-1/3 rounded-lg" />
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </div>
+      <div className="flex flex-col gap-2.5 pt-2">
+        <Skeleton className="h-4 w-full rounded-md" />
+        <Skeleton className="h-4 w-5/6 rounded-md" />
+        <Skeleton className="h-4 w-2/3 rounded-md" />
+      </div>
     </div>
   );
 }
@@ -134,6 +145,9 @@ export interface AsyncBoundaryProps {
   loadingFallback?: ReactNode;
   errorFallback?: ReactNode | ((props: FallbackProps) => ReactNode);
   onReset?: () => void;
+  isLoading?: boolean;
+  isError?: boolean;
+  error?: unknown;
 }
 
 export function AsyncBoundary({
@@ -141,6 +155,9 @@ export function AsyncBoundary({
   loadingFallback = <DefaultLoadingFallback />,
   errorFallback,
   onReset,
+  isLoading,
+  isError,
+  error,
 }: AsyncBoundaryProps) {
   const { reset } = useQueryErrorResetBoundary();
 
@@ -148,6 +165,20 @@ export function AsyncBoundary({
     reset();
     onReset?.();
   };
+
+  if (isLoading) {
+    return <>{loadingFallback}</>;
+  }
+
+  if (isError) {
+    if (typeof errorFallback === "function") {
+      return <>{errorFallback({ error, resetErrorBoundary: handleReset })}</>;
+    }
+    if (errorFallback) {
+      return <>{errorFallback}</>;
+    }
+    return <ComponentErrorState error={error} onRetry={handleReset} />;
+  }
 
   return (
     <ErrorBoundary

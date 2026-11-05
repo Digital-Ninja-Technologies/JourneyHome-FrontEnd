@@ -64,7 +64,7 @@ export function SignupForm() {
             account.
           </span>
         </h1>
-        <p className="text-sm leading-relaxed text-muted">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           Takes about two minutes. You'll set up your first plan right after.
         </p>
       </div>
@@ -127,7 +127,7 @@ export function SignupForm() {
             </Link>
           </div>
         </form>
-        <p className="px-6 text-center text-xs leading-relaxed text-muted">
+        <p className="px-6 text-center text-xs leading-relaxed text-muted-foreground">
           By clicking continue, you agree to our{" "}
           <a
             href={`${env.VITE_MARKETING_URL}/terms`}

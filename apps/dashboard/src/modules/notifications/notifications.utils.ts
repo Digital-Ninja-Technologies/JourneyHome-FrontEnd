@@ -20,9 +20,7 @@ export function describeNotification(
   const who = plan
     ? `${firstName(plan.coveredPerson.fullName)}'s plan`
     : "your plan";
-  const amount = plan
-    ? formatMoney(plan.contributionAmountMinor, plan.currency)
-    : "your";
+  const amount = plan ? formatMoney(plan.amount, plan.currency) : "your";
   const planLink = plan
     ? { to: `/app/plans/${plan._id}`, label: "View plan" }
     : undefined;
@@ -153,7 +151,7 @@ export function describeNotification(
         link: requests,
       };
     default: {
-      const raw = n.title || n.subject || n.event || "Notification";
+      const raw = n.title || (n as any).subject || n.event || "Notification";
       const title = raw.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ");
       return {
         title,

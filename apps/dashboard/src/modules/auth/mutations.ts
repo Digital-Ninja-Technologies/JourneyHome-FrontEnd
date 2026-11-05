@@ -21,6 +21,7 @@ export function useLoginMutation() {
       input: LoginInput & { remember?: boolean; redirect?: string },
     ) => login(input),
     onSuccess: (session, variables) => {
+      queryClient.clear();
       queryClient.setQueryData(sessionQueryOptions().queryKey, session);
       const to = sanitizeRedirect(variables.redirect, "/app");
       navigate({ to: to as any, replace: true });

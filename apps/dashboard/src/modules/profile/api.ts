@@ -1,6 +1,7 @@
 import {
   customerMeSchema,
   customerPreferencesSchema,
+  type NotificationPreferences,
 } from "@journeyhome/schemas";
 import { api, parseApiResponse } from "@/lib/api";
 import type { Me } from "./types";
@@ -42,8 +43,8 @@ export async function changePassword(body: {
 }
 
 export async function updatePreferences(
-  body: Partial<Me["preferences"]>,
-): Promise<Me["preferences"]> {
+  body: NotificationPreferences,
+): Promise<NotificationPreferences> {
   const res = await api<unknown>("/auth/notification-preferences", {
     method: "PATCH",
     body,

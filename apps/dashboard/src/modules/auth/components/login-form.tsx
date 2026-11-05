@@ -79,10 +79,11 @@ export function LoginForm() {
               control={control}
               name="remember"
               label="Remember me"
+              className={"gap-0 items-center"}
             />
             <Link
               to="/forgot-password"
-              className="text-[13px] font-bold text-link underline"
+              className="text-[12px] shrink-0 font-bold text-link underline"
             >
               Forgot password?
             </Link>

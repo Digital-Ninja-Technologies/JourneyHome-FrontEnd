@@ -71,7 +71,7 @@ export function CreatePlanDialog({
         <form onSubmit={onSubmit} className="flex flex-col gap-6">
           <CoveredPersonFields />
           <PackagePicker value={packageId} onChange={setPackageId} />
-          <p className="-mt-3 text-xs text-muted">
+          <p className="-mt-3 text-xs text-muted-foreground">
             The package is fixed for the life of a plan and can&rsquo;t be
             changed once started.
           </p>

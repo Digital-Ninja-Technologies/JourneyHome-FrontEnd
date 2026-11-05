@@ -12,6 +12,10 @@ import {
   Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import {
+  AsyncBoundary,
+  NotificationsListSkeleton,
+} from "@/components/async-boundary";
 import { useSessionUser } from "@/modules/auth/query-options";
 import {
   deleteNotification,
@@ -89,7 +93,7 @@ export function NotificationsView() {
     <main className="flex flex-col gap-6 p-5 md:p-10">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="text-sm text-muted">
+          <div className="text-sm text-muted-foreground">
             <Link to="/app" className="hover:underline">
               Dashboard
             </Link>{" "}
@@ -113,136 +117,121 @@ export function NotificationsView() {
         )}
       </header>
 
-      {notesQ.isPending && (
-        <p className="text-muted">Loading your notifications…</p>
-      )}
-      {notesQ.isError && (
-        <div
-          role="alert"
-          className="flex items-center justify-between gap-4 rounded-2xl bg-status-cancelled-bg px-5 py-4 text-sm text-status-cancelled"
-        >
-          <span>
-            We couldn&rsquo;t load your notifications. {notesQ.error.message}
-          </span>
-          <Button
-            type="button"
-            variant="link"
-            size="sm"
-            className="h-auto p-0 font-bold underline text-status-cancelled hover:text-status-cancelled"
-            onClick={() => void notesQ.refetch()}
-          >
-            Try again
-          </Button>
-        </div>
-      )}
-      {notesQ.isSuccess && notes.length === 0 && (
-        <div className="rounded-3xl border border-dashed border-foreground/30 p-8">
-          <div className="font-serif text-2xl">Nothing yet</div>
-          <p className="mt-1 text-sm text-muted">
-            We&rsquo;ll keep you posted here about payments and service updates.
-          </p>
-        </div>
-      )}
-
-      {notes.length > 0 && (
-        <ul className="rounded-3xl bg-white px-7 py-2">
-          {notes.map((n) => {
-            const view = describeNotification(
-              n,
-              n.plan ? plans.get(n.plan) : undefined,
-            );
-            const { icon: Icon, box } = TONE[view.tone];
-            const unreadNow = isUnread(n);
-            return (
-              <li
-                key={n._id}
-                className="flex items-start justify-between gap-4 border-b border-border py-5 last:border-0"
-              >
-                <div className="flex items-start gap-4 min-w-0">
-                  <span
-                    className={cn(
-                      "mt-5 size-2 shrink-0 rounded-full",
-                      unreadNow ? "bg-accent" : "bg-transparent",
-                    )}
-                    aria-label={unreadNow ? "Unread" : undefined}
-                  />
-                  <span
-                    className={cn(
-                      "grid size-10 shrink-0 place-items-center rounded-xl",
-                      box,
-                    )}
-                  >
-                    <Icon className="size-[18px]" />
-                  </span>
-                  <div className="min-w-0">
-                    <div
+      <AsyncBoundary
+        isLoading={notesQ.isPending}
+        isError={notesQ.isError}
+        error={notesQ.error}
+        onReset={() => void notesQ.refetch()}
+        loadingFallback={<NotificationsListSkeleton count={4} />}
+      >
+        {notes.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-foreground/30 p-8">
+            <div className="font-serif text-2xl">Nothing yet</div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              We&rsquo;ll keep you posted here about payments and service
+              updates.
+            </p>
+          </div>
+        ) : (
+          <ul className="rounded-3xl bg-white px-7 py-2">
+            {notes.map((n) => {
+              const view = describeNotification(
+                n,
+                (n as any).plan ? plans.get((n as any).plan) : undefined,
+              );
+              const { icon: Icon, box } = TONE[view.tone];
+              const unreadNow = isUnread(n);
+              return (
+                <li
+                  key={n._id}
+                  className="flex items-start justify-between gap-4 border-b border-border py-5 last:border-0"
+                >
+                  <div className="flex items-start gap-4 min-w-0">
+                    <span
                       className={cn(
-                        "text-[15px]",
-                        unreadNow ? "font-bold" : "font-semibold",
+                        "mt-5 size-2 shrink-0 rounded-full",
+                        unreadNow ? "bg-accent" : "bg-transparent",
+                      )}
+                      aria-label={unreadNow ? "Unread" : undefined}
+                    />
+                    <span
+                      className={cn(
+                        "grid size-10 shrink-0 place-items-center rounded-xl",
+                        box,
                       )}
                     >
-                      {view.title}
-                    </div>
-                    <div className="text-sm leading-relaxed text-ink-soft">
-                      {view.body}{" "}
-                      {view.link && (
-                        <Link
-                          to={view.link.to as any}
-                          onClick={() => {
-                            if (unreadNow) markReadMutation.mutate(n._id);
-                          }}
-                          className="font-semibold text-link underline"
-                        >
-                          {view.link.label}
-                        </Link>
-                      )}
-                      {view.policy && (
-                        <>
-                          {" "}
-                          <a
-                            href={`${MARKETING_URL}/terms`}
+                      <Icon className="size-[18px]" />
+                    </span>
+                    <div className="min-w-0">
+                      <div
+                        className={cn(
+                          "text-[15px]",
+                          unreadNow ? "font-bold" : "font-semibold",
+                        )}
+                      >
+                        {view.title}
+                      </div>
+                      <div className="text-sm leading-relaxed text-ink-soft">
+                        {view.body}{" "}
+                        {view.link && (
+                          <Link
+                            to={view.link.to as any}
+                            onClick={() => {
+                              if (unreadNow) markReadMutation.mutate(n._id);
+                            }}
                             className="font-semibold text-link underline"
                           >
-                            Read the policy
-                          </a>
-                        </>
-                      )}
-                    </div>
-                    <div className="mt-1 text-xs text-muted">
-                      {formatNotificationTime(n.createdAt)}
+                            {view.link.label}
+                          </Link>
+                        )}
+                        {view.policy && (
+                          <>
+                            {" "}
+                            <a
+                              href={`${MARKETING_URL}/terms`}
+                              className="font-semibold text-link underline"
+                            >
+                              Read the policy
+                            </a>
+                          </>
+                        )}
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        {formatNotificationTime(n.createdAt)}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {unreadNow && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    {unreadNow && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="xs"
+                        onClick={() => markReadMutation.mutate(n._id)}
+                        disabled={markReadMutation.isPending}
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Mark read
+                      </Button>
+                    )}
                     <Button
                       type="button"
                       variant="ghost"
-                      size="xs"
-                      onClick={() => markReadMutation.mutate(n._id)}
-                      disabled={markReadMutation.isPending}
-                      className="text-xs text-muted hover:text-foreground"
+                      size="icon"
+                      aria-label="Delete notification"
+                      onClick={() => deleteMutation.mutate(n._id)}
+                      disabled={deleteMutation.isPending}
+                      className="size-8 text-muted-foreground hover:text-destructive"
                     >
-                      Mark read
+                      <Trash2 className="size-4" />
                     </Button>
-                  )}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Delete notification"
-                    onClick={() => deleteMutation.mutate(n._id)}
-                    disabled={deleteMutation.isPending}
-                    className="size-8 text-muted hover:text-destructive"
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </AsyncBoundary>
     </main>
   );
 }

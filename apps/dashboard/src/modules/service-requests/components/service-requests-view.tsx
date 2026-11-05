@@ -1,7 +1,11 @@
 import type { Plan, ServiceRequest } from "@journeyhome/schemas";
-import { Button, buttonVariants } from "@journeyhome/ui/components/button";
+import { buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
+import {
+  AsyncBoundary,
+  ServiceRequestsListSkeleton,
+} from "@/components/async-boundary";
 import { Pill } from "@/components/status-pill";
 import { formatDay } from "@/lib/format";
 import { usePlans } from "@/modules/plans/query-options";
@@ -49,7 +53,7 @@ function ActiveRequest({ req, plan }: { req: ServiceRequest; plan?: Plan }) {
               {req.coveredPersonSnapshot.fullName}&rsquo;s service
             </h2>
             <div className="text-sm text-canvas/70">
-              Requested {formatDay(req.createdAt)} · {req.burialLocation}
+              Requested {formatDay(req.createdAt)} · {req.serviceLocation}
             </div>
           </div>
           <Pill
@@ -132,8 +136,8 @@ function PastRequest({ req, plan }: { req: ServiceRequest; plan?: Plan }) {
           </div>
           <Pill label={state.label} tone={state.tone} />
         </div>
-        <div className="mt-1 text-sm text-muted">
-          Requested {formatDay(req.createdAt)} · {req.burialLocation}
+        <div className="mt-1 text-sm text-muted-foreground">
+          Requested {formatDay(req.createdAt)} · {req.serviceLocation}
           {req.status === "Rejected" && req.rejectionReason
             ? ` · ${req.rejectionReason}`
             : ""}
@@ -162,7 +166,7 @@ export function ServiceRequestsView() {
     <main className="flex max-w-[1200px] flex-col gap-8 p-5 md:p-10">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="text-sm text-muted">
+          <div className="text-sm text-muted-foreground">
             <Link to="/app" className="hover:underline">
               Dashboard
             </Link>{" "}
@@ -185,39 +189,28 @@ export function ServiceRequestsView() {
         )}
       </header>
 
-      {reqQ.isPending && <p className="text-muted">Loading your requests…</p>}
-      {reqQ.isError && (
-        <div
-          role="alert"
-          className="flex items-center justify-between gap-4 rounded-2xl bg-status-cancelled-bg px-5 py-4 text-sm text-status-cancelled"
-        >
-          <span>
-            We couldn&rsquo;t load your service requests. {reqQ.error.message}
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="font-bold underline text-status-cancelled hover:bg-transparent"
-            onClick={() => void reqQ.refetch()}
-          >
-            Try again
-          </Button>
-        </div>
-      )}
-      {reqQ.isSuccess && requests.length === 0 && (
-        <div className="rounded-3xl border border-dashed border-foreground/30 p-8">
-          <div className="font-serif text-2xl">No service requests yet</div>
-          <p className="mt-1 max-w-lg text-sm text-muted">
-            {canRequest || BYPASS_PLAN_REQUIREMENT
-              ? "When the time comes, submit a request and we'll take care of the rest."
-              : "A service can be requested once you have an active plan."}
-          </p>
-        </div>
-      )}
-
-      {active.map((r) => (
-        <ActiveRequest key={r._id} req={r} plan={plans.get(r.plan)} />
-      ))}
+      <AsyncBoundary
+        isLoading={reqQ.isPending}
+        isError={reqQ.isError}
+        error={reqQ.error}
+        onReset={() => void reqQ.refetch()}
+        loadingFallback={<ServiceRequestsListSkeleton count={3} />}
+      >
+        {requests.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-foreground/30 p-8">
+            <div className="font-serif text-2xl">No service requests yet</div>
+            <p className="mt-1 max-w-lg text-sm text-muted-foreground">
+              {canRequest || BYPASS_PLAN_REQUIREMENT
+                ? "When the time comes, submit a request and we'll take care of the rest."
+                : "A service can be requested once you have an active plan."}
+            </p>
+          </div>
+        ) : (
+          active.map((r) => (
+            <ActiveRequest key={r._id} req={r} plan={plans.get(r.plan)} />
+          ))
+        )}
+      </AsyncBoundary>
 
       <section className="flex flex-col gap-4">
         <h2 className="font-serif text-[28px] font-normal">
@@ -233,7 +226,9 @@ export function ServiceRequestsView() {
                 {i + 1}
               </div>
               <div className="text-[17px] font-bold">{title}</div>
-              <div className="text-sm leading-relaxed text-muted">{body}</div>
+              <div className="text-sm leading-relaxed text-muted-foreground">
+                {body}
+              </div>
             </div>
           ))}
         </div>

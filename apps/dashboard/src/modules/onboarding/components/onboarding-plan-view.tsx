@@ -64,7 +64,7 @@ export function OnboardingPlanView() {
           Set up your first{" "}
           <span className="font-serif font-normal italic text-link">plan.</span>
         </h1>
-        <p className="text-sm leading-relaxed text-muted">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           Who are you saving for? You can add more plans later, any time.
         </p>
         <div className="mt-2">
@@ -74,7 +74,7 @@ export function OnboardingPlanView() {
               clearStoredSelectedPackage();
               setOnboardingPlan(null);
             }}
-            className="text-xs font-semibold text-muted underline hover:text-foreground"
+            className="text-xs font-semibold text-muted-foreground underline hover:text-foreground"
           >
             Skip for now — I&rsquo;ll set up a plan later
           </Link>

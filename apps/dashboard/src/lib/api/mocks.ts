@@ -201,42 +201,74 @@ export async function mockRequest(
       },
     ],
     "GET /plans": () => {
-      return read<Plan[]>("jh_mock:plans", [
-        {
-          _id: "plan_demo_1",
-          status: "Active",
+      const defaultPlan: Plan = {
+        _id: "plan_demo_1",
+        owner: "demo-cust-1",
+        package: "pkg_tier_1",
+        packageDetails: {
+          packageId: "pkg_tier_1",
+          name: "Standard",
+          description: "Standard package",
+          features: ["Photography", "Live Stream"],
+          amount: 500000,
           currency: "NGN",
-          contributionAmountMinor: 500000,
-          targetAmountMinor: 10000000,
-          totalContributedMinor: 1500000,
-          startDate: new Date().toISOString(),
-          coveredPerson: {
-            fullName: "Adebayo Johnson",
-            relationship: "father",
-            address: "12 Marina, Lagos",
-          },
-          packageSnapshot: {
-            name: "Standard",
-          },
-          nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
-          createdAt: new Date().toISOString(),
         },
-      ]);
+        coveredPerson: {
+          fullName: "Adebayo Johnson",
+          dateOfBirth: "1960-01-01",
+          gender: "male",
+          relationship: "father",
+          address: "12 Marina, Lagos",
+          phoneNumber: "08012345678",
+        },
+        amount: 500000,
+        currency: "NGN",
+        billingInterval: "monthly",
+        startDate: new Date().toISOString(),
+        totalContributedAmount: 1500000,
+        status: "Active",
+        coverageStatus: "Active",
+        nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      const plans = read<Plan[]>("jh_mock:plans", [defaultPlan]);
+      return {
+        items: plans,
+        pagination: {
+          page: 1,
+          limit: 20,
+          total: plans.length,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
     },
     "POST /plans": () => {
-      const newPlan = {
+      const newPlan: Plan = {
         _id: `plan_${Date.now()}`,
-        status: "Pending",
-        currency: "NGN",
-        contributionAmountMinor: Number(b.contributionAmountMinor) || 500000,
-        targetAmountMinor: 10000000,
-        totalContributedMinor: 0,
-        startDate: new Date().toISOString(),
+        owner: "demo-cust-1",
+        package: b.packageId || "pkg_tier_1",
+        packageDetails: {
+          packageId: b.packageId || "pkg_tier_1",
+          name: "Standard",
+          description: "Standard package",
+          features: ["Photography", "Live Stream"],
+          amount: 500000,
+          currency: "NGN",
+        },
         coveredPerson: {
           fullName:
             b.coveredPerson?.fullName ||
             b["coveredPerson.fullName"] ||
             "Beneficiary",
+          dateOfBirth:
+            b.coveredPerson?.dateOfBirth ||
+            b["coveredPerson.dateOfBirth"] ||
+            "1960-01-01",
+          gender:
+            b.coveredPerson?.gender || b["coveredPerson.gender"] || "male",
           relationship:
             b.coveredPerson?.relationship ||
             b["coveredPerson.relationship"] ||
@@ -245,71 +277,160 @@ export async function mockRequest(
             b.coveredPerson?.address ||
             b["coveredPerson.address"] ||
             "Lagos, Nigeria",
+          phoneNumber:
+            b.coveredPerson?.phoneNumber ||
+            b["coveredPerson.phoneNumber"] ||
+            "08012345678",
         },
-        packageSnapshot: {
-          name: b.packageName || "Standard",
-        },
+        amount: 500000,
+        currency: "NGN",
+        billingInterval: "monthly",
+        startDate: new Date().toISOString(),
+        totalContributedAmount: 0,
+        status: "Pending",
+        coverageStatus: "Pending",
         nextPaymentDate: new Date().toISOString(),
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
-      const current = read<any[]>("jh_mock:plans", []);
+      const defaultPlan: Plan = {
+        _id: "plan_demo_1",
+        owner: "demo-cust-1",
+        package: "pkg_tier_1",
+        packageDetails: {
+          packageId: "pkg_tier_1",
+          name: "Standard",
+          description: "Standard package",
+          features: ["Photography", "Live Stream"],
+          amount: 500000,
+          currency: "NGN",
+        },
+        coveredPerson: {
+          fullName: "Adebayo Johnson",
+          dateOfBirth: "1960-01-01",
+          gender: "male",
+          relationship: "father",
+          address: "12 Marina, Lagos",
+          phoneNumber: "08012345678",
+        },
+        amount: 500000,
+        currency: "NGN",
+        billingInterval: "monthly",
+        startDate: new Date().toISOString(),
+        totalContributedAmount: 1500000,
+        status: "Active",
+        coverageStatus: "Active",
+        nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      const current = read<Plan[]>("jh_mock:plans", [defaultPlan]);
       write("jh_mock:plans", [newPlan, ...current]);
       return newPlan;
     },
-    "GET /payments": () => [
-      {
-        _id: "pay_1",
-        plan: "plan_demo_1",
-        amountMinor: 500000,
-        currency: "NGN",
-        purpose: "recurring_contribution",
-        status: "Successful",
-        createdAt: new Date().toISOString(),
-        processedAt: new Date().toISOString(),
-      },
-    ],
-    "POST /payments/initialize": () => ({
-      authorizationUrl: `${window.location.origin}/app/payments/callback?reference=ref_demo_${Date.now()}&trxref=ref_demo_${Date.now()}`,
-      reference: `ref_demo_${Date.now()}`,
-    }),
-    "GET /payments/methods": () => {
-      const u = sessionUser();
-      return read<Card[]>(`jh_mock:cards:${u.id}`, [
-        {
-          _id: "card_demo_1",
-          brand: "Visa",
-          last4: "4821",
-          expMonth: 9,
-          expYear: 2029,
-          isDefault: true,
-        },
-      ]);
-    },
-    "POST /payments/methods/initialize": () => {
-      const u = sessionUser();
-      const cards = read<Card[]>(`jh_mock:cards:${u.id}`, []);
-      write(`jh_mock:cards:${u.id}`, [
-        ...cards,
-        {
-          _id: `card_demo_${Date.now()}`,
-          brand: "Mastercard",
-          last4: "1234",
-          expMonth: 12,
-          expYear: 2030,
-          isDefault: cards.length === 0,
-        },
-      ]);
+    "GET /plans/dashboard": () => {
+      const plans = read<Plan[]>("jh_mock:plans", []);
+      const active = plans.filter((p) => p.status === "Active");
+      const totalContributed = plans.reduce(
+        (sum, p) => sum + (p.totalContributedAmount ?? p.amount ?? 0),
+        0,
+      );
       return {
-        authorizationUrl: `${window.location.origin}/app/profile?card_added=1`,
+        totalContributed,
+        paymentCount: 1,
+        activePlans: active.length,
+        nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
       };
     },
+    "GET /subscriptions": () => ({
+      items: [
+        {
+          _id: "sub_demo_1",
+          plan: "plan_demo_1",
+          status: "active",
+          nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
+        },
+      ],
+      pagination: {
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    }),
+    "GET /payments": () => ({
+      items: [
+        {
+          _id: "pay_1",
+          owner: "demo-cust-1",
+          plan: "plan_demo_1",
+          amount: 500000,
+          currency: "NGN",
+          reference: "jh_init_demo_1",
+          providerReference: "jh_init_demo_1",
+          provider: "paystack",
+          purpose: "recurring_contribution",
+          status: "Successful",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          processedAt: new Date().toISOString(),
+        },
+      ],
+      pagination: {
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    }),
+    "POST /payments/initialize": () => ({
+      paymentId: `pay_${Date.now()}`,
+      reference: `ref_demo_${Date.now()}`,
+      authorizationUrl: `${window.location.origin}/app/payments/callback?reference=ref_demo_${Date.now()}&trxref=ref_demo_${Date.now()}`,
+      accessCode: "access_code_mock",
+    }),
     "GET /service-requests": () => [],
     "POST /service-requests": () => ({
       _id: `req_${Date.now()}`,
+      owner: "demo-cust-1",
+      plan: "plan_demo_1",
       status: "Submitted",
+      dateOfDeath: new Date().toISOString(),
+      serviceLocation: "Ikoyi Cemetery, Lagos",
+      expectedServiceDate: new Date(Date.now() + 86400000 * 7).toISOString(),
+      contactPerson: "Demo Customer",
+      contactPhone: "+2348012345678",
+      coveredPersonSnapshot: {
+        fullName: "Adebayo Johnson",
+        dateOfBirth: "1960-01-01",
+        gender: "male",
+        relationship: "father",
+        address: "12 Marina, Lagos",
+        phoneNumber: "+2348012345678",
+      },
+      documents: [],
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     }),
-    "GET /notifications": () => [],
+    "GET /notifications": () => ({
+      items: [],
+      pagination: {
+        page: 1,
+        limit: 20,
+        total: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+      counts: {
+        totalNotifications: 0,
+        totalUnreadNotifications: 0,
+      },
+    }),
   };
 
   let handler = handlers[route];
@@ -324,22 +445,34 @@ export async function mockRequest(
       if (found) return found;
       return {
         _id: planId || "plan_demo_1",
-        status: planId === "plan_pending_1" ? "Pending" : "Active",
-        currency: "NGN",
-        contributionAmountMinor: 500000,
-        targetAmountMinor: 10000000,
-        totalContributedMinor: 1500000,
-        startDate: new Date().toISOString(),
+        owner: "demo-cust-1",
+        package: "pkg_tier_1",
+        packageDetails: {
+          packageId: "pkg_tier_1",
+          name: "Standard",
+          description: "Standard package",
+          features: ["Photography", "Live Stream"],
+          amount: 500000,
+          currency: "NGN",
+        },
         coveredPerson: {
           fullName: "Adebayo Johnson",
+          dateOfBirth: "1960-01-01",
+          gender: "male",
           relationship: "father",
           address: "12 Marina, Lagos",
+          phoneNumber: "08012345678",
         },
-        packageSnapshot: {
-          name: "Standard",
-        },
+        amount: 500000,
+        currency: "NGN",
+        billingInterval: "monthly",
+        startDate: new Date().toISOString(),
+        totalContributedAmount: 1500000,
+        status: planId === "plan_pending_1" ? "Pending" : "Active",
+        coverageStatus: "Active",
         nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
     };
   }
@@ -349,22 +482,51 @@ export async function mockRequest(
     handler = () => ({
       request: {
         _id: reqMatch[1],
+        owner: "demo-cust-1",
         plan: "plan_demo_1",
         status: "Submitted",
         dateOfDeath: new Date().toISOString(),
-        burialLocation: "Ikoyi Cemetery, Lagos",
-        expectedBurialDate: new Date(Date.now() + 86400000 * 7).toISOString(),
+        serviceLocation: "Ikoyi Cemetery, Lagos",
+        expectedServiceDate: new Date(Date.now() + 86400000 * 7).toISOString(),
         contactPerson: "Demo Customer",
         contactPhone: "+2348012345678",
         coveredPersonSnapshot: {
           fullName: "Adebayo Johnson",
+          dateOfBirth: "1960-01-01",
+          gender: "male",
           relationship: "father",
           address: "12 Marina, Lagos",
+          phoneNumber: "+2348012345678",
         },
+        documents: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
       documents: [],
+    });
+  }
+
+  const initPaymentMatch =
+    /^POST \/payments\/plans\/(.+)\/initialize-initial$/.exec(route);
+  if (!handler && initPaymentMatch) {
+    handler = () => ({
+      paymentId: `pay_${Date.now()}`,
+      reference: `ref_demo_${Date.now()}`,
+      authorizationUrl: `${window.location.origin}/app/payments/callback?reference=ref_demo_${Date.now()}&trxref=ref_demo_${Date.now()}`,
+      accessCode: "access_code_mock",
+    });
+  }
+
+  const subMatch = /^GET \/subscriptions\/(.+)$/.exec(route);
+  if (!handler && subMatch) {
+    handler = () => ({
+      _id: subMatch[1],
+      plan: "plan_demo_1",
+      status: "active",
+      amount: 500000,
+      currency: "NGN",
+      nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
+      createdAt: new Date().toISOString(),
     });
   }
 

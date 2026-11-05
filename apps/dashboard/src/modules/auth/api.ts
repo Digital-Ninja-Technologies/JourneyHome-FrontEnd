@@ -77,7 +77,7 @@ const userProfileSchema = z
   .object({
     id: z.string().optional(),
     _id: z.string().optional(),
-    email: z.string().email(),
+    email: z.email(),
     name: z.string(),
     role: z.string().optional(),
     isSuperAdmin: z.boolean().optional(),

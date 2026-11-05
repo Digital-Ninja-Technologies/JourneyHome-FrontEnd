@@ -110,7 +110,7 @@ export function VerifyEmailView() {
       <>
         <div className="flex flex-col gap-2 text-center">
           <Heading lead="Check your" accent="email." />
-          <p className="text-sm leading-relaxed text-muted">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             We sent a verification link to{" "}
             <strong className="text-foreground">
               {pendingEmail || "your email address"}
@@ -119,7 +119,7 @@ export function VerifyEmailView() {
           </p>
         </div>
         <section className="flex flex-col gap-4 rounded-[28px] bg-white p-7 shadow-sm">
-          <p className="text-[13px] text-muted">
+          <p className="text-[13px] text-muted-foreground">
             Didn&rsquo;t get it? Check your spam folder or send another link.
           </p>
           <ResendBox initialEmail={pendingEmail} />
@@ -143,7 +143,7 @@ export function VerifyEmailView() {
       <>
         <div className="flex flex-col gap-2 text-center">
           <Heading lead="Email" accent="verified." />
-          <p className="text-sm leading-relaxed text-muted">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             Your account is active. Log in to set up your first plan.
           </p>
         </div>
@@ -172,7 +172,7 @@ export function VerifyEmailView() {
           >
             {verify.error.message}
           </p>
-          <p className="text-sm text-muted">
+          <p className="text-sm text-muted-foreground">
             It may have expired or already been used. Request a new one below.
           </p>
         </div>
@@ -191,7 +191,7 @@ export function VerifyEmailView() {
   return (
     <div className="flex flex-col gap-2 text-center">
       <Heading lead="Verifying your" accent="email…" />
-      <p className="text-sm text-muted">This only takes a moment.</p>
+      <p className="text-sm text-muted-foreground">This only takes a moment.</p>
     </div>
   );
 }

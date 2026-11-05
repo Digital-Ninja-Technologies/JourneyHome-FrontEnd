@@ -1,5 +1,5 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { fetchPackages } from "./api";
+import { fetchPackage, fetchPackages } from "./api";
 
 export const packagesQueryOptions = () =>
   queryOptions({
@@ -8,6 +8,18 @@ export const packagesQueryOptions = () =>
     staleTime: 5 * 60_000,
   });
 
+export const packageQueryOptions = (id: string) =>
+  queryOptions({
+    queryKey: ["package", id] as const,
+    queryFn: () => fetchPackage(id),
+    enabled: Boolean(id),
+    staleTime: 5 * 60_000,
+  });
+
 export function usePackages() {
   return useQuery(packagesQueryOptions());
+}
+
+export function usePackage(id: string) {
+  return useQuery(packageQueryOptions(id));
 }

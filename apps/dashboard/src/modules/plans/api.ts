@@ -2,18 +2,28 @@ import {
   type DashboardSummary,
   dashboardSummarySchema,
   type Plan,
+  type PlanQueryInput,
+  paginatedPlansSchema,
   planSchema,
-  plansListResponseSchema,
 } from "@journeyhome/schemas";
 import { api, parseApiResponse } from "@/lib/api";
 
-export async function fetchPlans(): Promise<Plan[]> {
-  const res = await api<unknown>("/plans");
-  return parseApiResponse(
-    plansListResponseSchema,
+export async function fetchPlans(params?: PlanQueryInput): Promise<Plan[]> {
+  const query = new URLSearchParams();
+  if (params) {
+    if (params.name) query.set("name", params.name);
+    if (params.status) query.set("status", params.status);
+    if (params.page) query.set("page", String(params.page));
+    if (params.limit) query.set("limit", String(params.limit));
+  }
+  const qs = query.toString() ? `?${query.toString()}` : "";
+  const res = await api<unknown>(`/plans${qs}`);
+  const parsed = parseApiResponse(
+    paginatedPlansSchema,
     res,
     "Invalid plans response from server",
   );
+  return parsed.items;
 }
 
 export async function fetchPlan(id: string): Promise<Plan> {

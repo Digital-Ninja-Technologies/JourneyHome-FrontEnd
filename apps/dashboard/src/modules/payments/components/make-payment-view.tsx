@@ -2,6 +2,7 @@ import type { Plan } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
+import { MakePaymentSkeleton } from "@/components/skeletons";
 import { firstName, formatDay, formatMoney } from "@/lib/format";
 import { useStartCheckout } from "@/modules/payments/checkout";
 import {
@@ -16,7 +17,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main className="flex max-w-[620px] flex-col gap-6 p-5 md:p-10">
       <div>
-        <div className="text-sm text-muted">
+        <div className="text-sm text-muted-foreground">
           <Link to="/app" className="hover:underline">
             Dashboard
           </Link>{" "}
@@ -37,7 +38,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function Note({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-[24px] border border-border bg-white p-6 text-sm leading-relaxed text-muted">
+    <div className="rounded-[24px] border border-border bg-white p-6 text-sm leading-relaxed text-muted-foreground">
       {children}
     </div>
   );
@@ -47,7 +48,7 @@ function Checkout({ plan }: { plan: Plan }) {
   const navigate = useNavigate();
   const start = useStartCheckout(plan._id);
   const busy = start.isPending || start.isSuccess;
-  const money = formatMoney(plan.contributionAmountMinor, plan.currency);
+  const money = formatMoney(plan.amount, plan.currency);
   const isFirst = plan.status === "Pending";
 
   return (
@@ -58,7 +59,7 @@ function Checkout({ plan }: { plan: Plan }) {
             {firstName(plan.coveredPerson.fullName)}&rsquo;s plan
           </div>
           <div className="text-[13px] text-canvas/70">
-            {relationshipLabel(plan)} · {plan.packageSnapshot.name} package
+            {relationshipLabel(plan)} · {plan.packageDetails.name} package
           </div>
         </div>
         <div className="text-right">
@@ -73,7 +74,7 @@ function Checkout({ plan }: { plan: Plan }) {
         <ShieldCheck className="mt-0.5 size-5 shrink-0 text-status-active" />
         <div className="leading-relaxed">
           <div className="font-bold">Secured by Paystack</div>
-          <div className="text-muted">
+          <div className="text-muted-foreground">
             You&rsquo;ll complete your payment on Paystack&rsquo;s encrypted
             checkout using a debit card or bank transfer. Journey Home never
             stores your card details.
@@ -111,7 +112,7 @@ function Checkout({ plan }: { plan: Plan }) {
           {busy ? "Taking you to Paystack…" : `Confirm payment — ${money}`}
         </Button>
       </div>
-      <p className="text-center text-xs text-muted">
+      <p className="text-center text-xs text-muted-foreground">
         A missed payment is never forfeited — it&rsquo;s recorded as a deficit.{" "}
         <a href={`${MARKETING_URL}/terms`} className="text-link underline">
           Read the policy
@@ -125,12 +126,7 @@ export function MakePaymentView() {
   const plansQ = usePlans();
   const { plan: planId } = useSearch({ from: "/app/payments/new" });
 
-  if (plansQ.isPending)
-    return (
-      <Shell>
-        <p className="text-muted">Loading…</p>
-      </Shell>
-    );
+  if (plansQ.isPending) return <MakePaymentSkeleton />;
   if (plansQ.isError)
     return (
       <Shell>
@@ -200,7 +196,7 @@ export function MakePaymentView() {
         </Note>
       ) : (
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-muted">
+          <p className="text-sm text-muted-foreground">
             Choose the plan you&rsquo;d like to start:
           </p>
           {waiting.map((p) => (
@@ -212,12 +208,12 @@ export function MakePaymentView() {
             >
               <div>
                 <div className="font-serif text-xl">{fullName(p)}</div>
-                <div className="text-xs text-muted">
-                  {relationshipLabel(p)} · {p.packageSnapshot.name}
+                <div className="text-xs text-muted-foreground">
+                  {relationshipLabel(p)} · {p.packageDetails.name}
                 </div>
               </div>
               <div className="text-sm font-bold">
-                {formatMoney(p.contributionAmountMinor, p.currency)}
+                {formatMoney(p.amount, p.currency)}
               </div>
             </Link>
           ))}

@@ -8,6 +8,7 @@ import { DemoNotice } from "@/components/demo-notice";
 import { isUnsupported, UNSUPPORTED_MESSAGE, USE_MOCKS } from "@/lib/api";
 import { DEMO_RESET_TOKEN } from "@/lib/api/mocks";
 import { forgotPassword } from "@/modules/auth/api";
+import { Field } from "@journeyhome/ui";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -19,7 +20,7 @@ export function ForgotPasswordForm() {
   if (send.isSuccess) {
     return (
       <>
-        <div className="flex flex-col gap-2 text-center">
+        <div className="flex flex-col gap-4 text-center">
           <h1 className="font-sans text-4xl font-extrabold leading-[1.1] tracking-tight">
             Check your{" "}
             <span className="font-serif font-normal italic text-link">
@@ -43,7 +44,7 @@ export function ForgotPasswordForm() {
             </Link>
           )}
         </DemoNotice>
-        <div className="flex flex-col items-center gap-3 text-[13px] text-muted">
+        <div className="flex flex-col items-center mt-4 gap-3 text-[13px] text-muted-foreground">
           <p>
             It can take a few minutes to arrive. Check your spam folder too.
           </p>
@@ -73,7 +74,7 @@ export function ForgotPasswordForm() {
             password?
           </span>
         </h1>
-        <p className="text-sm leading-relaxed text-muted">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           Enter your email and we&rsquo;ll send a link to reset it.
         </p>
       </div>
@@ -100,9 +101,9 @@ export function ForgotPasswordForm() {
           setEmail(val);
           send.mutate(val);
         }}
-        className="flex flex-col gap-5"
+        className="flex flex-col gap-6"
       >
-        <div className="flex flex-col gap-1.5">
+        <Field className="gap-3">
           <Label htmlFor="email">Email address</Label>
           <Input
             id="email"
@@ -112,7 +113,7 @@ export function ForgotPasswordForm() {
             autoComplete="email"
             placeholder="e.g. adunni@example.com"
           />
-        </div>
+        </Field>
 
         {send.isError && !unsupported && (
           <p
@@ -133,7 +134,7 @@ export function ForgotPasswordForm() {
         </Button>
       </form>
 
-      <div className="text-center text-xs text-muted">
+      <div className="text-center text-xs text-muted-foreground">
         Remembered your password?{" "}
         <Link to="/login" className="font-bold text-link underline">
           Log in

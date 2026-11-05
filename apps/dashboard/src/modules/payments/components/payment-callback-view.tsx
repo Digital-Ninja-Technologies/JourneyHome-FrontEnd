@@ -19,7 +19,10 @@ export function PaymentCallbackView() {
 
   const verify = useQuery({
     queryKey: ["verify-payment", reference],
-    queryFn: () => (reference ? verifyPayment(reference) : Promise.reject(new Error("No reference"))),
+    queryFn: () =>
+      reference
+        ? verifyPayment(reference)
+        : Promise.reject(new Error("No reference")),
     enabled: !!reference,
     retry: false,
     staleTime: Infinity,
@@ -87,7 +90,7 @@ export function PaymentCallbackView() {
     clearStoredSelectedPackage();
     icon = <CheckCircle2 className="size-10 text-status-active" />;
     title = "Payment received";
-    body = `Your ${formatMoney(pay.amountMinor, pay.currency)} contribution is confirmed and your plan is now active.`;
+    body = `Your ${formatMoney(pay.amount, pay.currency)} contribution is confirmed and your plan is now active.`;
     action = (
       <Link
         to="/app/plans/$id"
@@ -106,7 +109,7 @@ export function PaymentCallbackView() {
     icon = <XCircle className="size-10 text-status-cancelled" />;
     title = "That payment didn’t go through";
     body =
-      pay.failureMessage ??
+      (pay as any).failureMessage ??
       "You haven’t been charged. You can try again whenever you’re ready.";
     action = (
       <Link
@@ -140,7 +143,7 @@ export function PaymentCallbackView() {
       <h1 className="font-serif text-[40px] font-normal leading-tight">
         {title}
       </h1>
-      <p className="text-muted">{body}</p>
+      <p className="text-muted-foreground">{body}</p>
       {action}
     </main>
   );

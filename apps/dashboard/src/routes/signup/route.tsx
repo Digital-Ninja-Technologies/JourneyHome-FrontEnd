@@ -31,7 +31,7 @@ function Stepper({ current }: { current: number }) {
                   "grid size-[30px] place-items-center rounded-full text-xs font-bold",
                   done || active
                     ? "bg-foreground text-accent"
-                    : "bg-sand text-muted",
+                    : "bg-sand text-muted-foreground",
                 )}
               >
                 {done ? <Check className="size-3.5" /> : n}
@@ -39,7 +39,7 @@ function Stepper({ current }: { current: number }) {
               <span
                 className={cn(
                   "text-[11px] font-semibold",
-                  n > current && "text-muted",
+                  n > current && "text-muted-foreground",
                 )}
               >
                 {label}
@@ -83,13 +83,13 @@ function SignupLayout() {
           <Logo />
         </a>
         {exitTo ? (
-          <Link to={exitTo} className="text-[13px] font-semibold text-muted">
+          <Link to={exitTo} className="text-[13px] font-semibold text-muted-foreground">
             Exit setup
           </Link>
         ) : (
           <a
             href={MARKETING_URL}
-            className="text-[13px] font-semibold text-muted"
+            className="text-[13px] font-semibold text-muted-foreground"
           >
             Exit setup
           </a>

@@ -15,6 +15,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Info, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { RequestServiceSkeleton } from "@/components/skeletons";
 import { formatMoney } from "@/lib/format";
 import { usePlans } from "@/modules/plans/query-options";
 import { createServiceRequest } from "@/modules/service-requests/api";
@@ -31,21 +32,33 @@ export const BYPASS_PLAN_REQUIREMENT = true;
 
 const PREVIEW_FALLBACK_PLAN: Plan = {
   _id: "preview-plan-id",
+  owner: "demo-cust-1",
+  package: "pkg_tier_1",
+  packageDetails: {
+    packageId: "pkg_tier_1",
+    name: "Standard",
+    amount: 500000,
+    currency: "NGN",
+    description: "Standard package",
+    features: [],
+  },
   status: "Active",
   currency: "NGN",
-  contributionAmountMinor: 500000,
-  targetAmountMinor: 10000000,
-  totalContributedMinor: 1500000,
+  amount: 500000,
+  totalContributedAmount: 1500000,
+  billingInterval: "monthly",
+  coverageStatus: "Active",
   startDate: new Date().toISOString(),
   nextPaymentDate: new Date().toISOString(),
   createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
   coveredPerson: {
     fullName: "Preview Beneficiary",
+    dateOfBirth: "1960-01-01",
+    gender: "male",
     relationship: "father",
     address: "12 Marina, Lagos",
-  },
-  packageSnapshot: {
-    name: "Standard",
+    phoneNumber: "08012345678",
   },
 };
 
@@ -147,7 +160,7 @@ function DocPicker({
         />
         <Upload className="size-4 text-link" />
         <div className="text-sm font-bold">{DOC_LABEL[type]}</div>
-        <div className="max-w-full truncate text-xs text-muted">
+        <div className="max-w-full truncate text-xs text-muted-foreground">
           {file ? file.name : "JPG, PNG, or PDF — up to 10MB"}
         </div>
       </div>
@@ -232,12 +245,15 @@ export function RequestServiceView() {
       return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
     };
     const extra = text("info");
+    const location = `${text("venue")}, ${text("state")}`;
+    const serviceDate = day("service");
     submit.mutate({
       planId: plan._id,
       dateOfDeath: day("dod"),
-      expectedBurialDate: day("service"),
-      // The backend stores one location string, so the state is folded into it.
-      burialLocation: `${text("venue")}, ${text("state")}`,
+      serviceLocation: location,
+      burialLocation: location,
+      expectedServiceDate: serviceDate,
+      expectedBurialDate: serviceDate,
       contactPerson: text("contact"),
       contactPhone: text("phone"),
       ...(extra && { additionalInformation: extra }),
@@ -250,7 +266,7 @@ export function RequestServiceView() {
   return (
     <main className="flex max-w-[660px] flex-col gap-6 p-5 md:p-10">
       <header className="flex flex-col gap-2">
-        <div className="text-sm text-muted">
+        <div className="text-sm text-muted-foreground">
           <Link to="/app/service-requests" className="hover:underline">
             Service requests
           </Link>{" "}
@@ -259,13 +275,13 @@ export function RequestServiceView() {
         <h1 className="font-serif text-[52px] font-normal leading-[1.05]">
           Request the <span className="italic">service</span>
         </h1>
-        <p className="text-sm text-muted">
+        <p className="text-sm text-muted-foreground">
           We&rsquo;ll verify your documents and review your request.
           You&rsquo;ll be notified at every step.
         </p>
       </header>
 
-      {plansQ.isPending && <p className="text-muted">Loading your plans…</p>}
+      {plansQ.isPending && <RequestServiceSkeleton />}
       {plansQ.isSuccess &&
         eligible.length === 0 &&
         !BYPASS_PLAN_REQUIREMENT && (
@@ -307,8 +323,9 @@ export function RequestServiceView() {
                   {eligible.length > 0 ? (
                     eligible.map((p) => (
                       <SelectItem key={p._id} value={p._id}>
-                        {p.coveredPerson.fullName} — {p.packageSnapshot.name} ·{" "}
-                        {formatMoney(p.totalContributedMinor, p.currency)} saved
+                        {p.coveredPerson.fullName} — {p.packageDetails.name} ·{" "}
+                        {formatMoney(p.totalContributedAmount, p.currency)}{" "}
+                        saved
                       </SelectItem>
                     ))
                   ) : (
@@ -390,7 +407,7 @@ export function RequestServiceView() {
               </Field>
             </div>
             <hr className="border-border" />
-            <div className="text-xs font-bold uppercase tracking-wider text-muted">
+            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Contact person on the day
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -425,7 +442,7 @@ export function RequestServiceView() {
             </Field>
             <hr className="border-border" />
             <div className="flex flex-col gap-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-muted">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 Supporting documents
               </span>
               <div className="grid gap-4 sm:grid-cols-2">

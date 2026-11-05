@@ -1,22 +1,41 @@
 import {
   type Payment,
+  paginatedPaymentsSchema,
+  paginatedSubscriptionsSchema,
   paymentSchema,
-  paymentsListResponseSchema,
   type Subscription,
   subscriptionSchema,
-  subscriptionsListResponseSchema,
 } from "@journeyhome/schemas";
 import { api, parseApiResponse } from "@/lib/api";
-import type { Card } from "@/lib/api/mocks";
 
-export async function fetchPayments(planId?: string): Promise<Payment[]> {
-  const query = planId ? `?planId=${encodeURIComponent(planId)}` : "";
-  const res = await api<unknown>(`/payments${query}`);
-  return parseApiResponse(
-    paymentsListResponseSchema,
+export interface FetchPaymentsParams {
+  planId?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+}
+
+export async function fetchPayments(
+  params?: FetchPaymentsParams | string,
+): Promise<Payment[]> {
+  const query = new URLSearchParams();
+  if (typeof params === "string") {
+    if (params) query.set("plan", params);
+  } else if (params) {
+    if (params.planId) query.set("plan", params.planId);
+    if (params.status) query.set("status", params.status);
+    if (params.page) query.set("page", String(params.page));
+    if (params.limit) query.set("limit", String(params.limit));
+  }
+
+  const qs = query.toString() ? `?${query.toString()}` : "";
+  const res = await api<unknown>(`/payments${qs}`);
+  const parsed = parseApiResponse(
+    paginatedPaymentsSchema,
     res,
     "Invalid payments response from server",
   );
+  return parsed.items;
 }
 
 export async function fetchPayment(id: string): Promise<Payment> {
@@ -42,40 +61,31 @@ export async function verifyPayment(reference: string): Promise<Payment> {
   );
 }
 
-export async function fetchSavedCards(): Promise<Card[]> {
-  return api<Card[]>("/payments/methods");
+export interface FetchSubscriptionsParams {
+  planId?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
 }
 
-export async function initializePayment(
-  data: unknown,
-): Promise<{ authorizationUrl: string; reference: string }> {
-  return api<{ authorizationUrl: string; reference: string }>(
-    "/payments/initialize",
-    {
-      body: data,
-    },
-  );
-}
-
-export async function initializeCard(): Promise<{ authorizationUrl: string }> {
-  return api<{ authorizationUrl: string }>("/payments/methods/initialize", {
-    method: "POST",
-  });
-}
-
-export async function deleteCard(id: string): Promise<{ removed: boolean }> {
-  return api<{ removed: boolean }>(`/payments/methods/${id}`, {
-    method: "DELETE",
-  });
-}
-
-export async function fetchSubscriptions(): Promise<Subscription[]> {
-  const res = await api<unknown>("/subscriptions");
-  return parseApiResponse(
-    subscriptionsListResponseSchema,
+export async function fetchSubscriptions(
+  params?: FetchSubscriptionsParams,
+): Promise<Subscription[]> {
+  const query = new URLSearchParams();
+  if (params) {
+    if (params.planId) query.set("planId", params.planId);
+    if (params.status) query.set("status", params.status);
+    if (params.page) query.set("page", String(params.page));
+    if (params.limit) query.set("limit", String(params.limit));
+  }
+  const qs = query.toString() ? `?${query.toString()}` : "";
+  const res = await api<unknown>(`/subscriptions${qs}`);
+  const parsed = parseApiResponse(
+    paginatedSubscriptionsSchema,
     res,
     "Invalid subscriptions response from server",
   );
+  return parsed.items;
 }
 
 export async function fetchSubscription(id: string): Promise<Subscription> {
