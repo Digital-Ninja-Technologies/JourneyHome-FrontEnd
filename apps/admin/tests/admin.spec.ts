@@ -59,6 +59,16 @@ test.describe("auth & guards", () => {
     }
   });
 
+  test("a failed sign-in shows a toast, not stale inline text", async ({ page }) => {
+    await page.goto("/login");
+    await page.fill('input[name="email"]', "nobody@example.com");
+    await page.fill('input[name="password"]', "wrong-password");
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await expect(page.getByText("Sign in failed")).toBeVisible();
+    await expect(page.getByText("Invalid email or password.")).toBeVisible();
+    await expect(page).toHaveURL(/\/login/);
+  });
+
   test("signing in follows the redirect", async ({ page }) => {
     await page.goto("/login?redirect=/plans");
     await page.fill('input[name="email"]', "admin@journeyhome.test");
@@ -73,7 +83,7 @@ test.describe("auth & guards", () => {
     await page.fill('input[name="email"]', "admin@journeyhome.test");
     await page.fill('input[name="password"]', "Admin123!");
     await page.getByRole("button", { name: /sign in/i }).click();
-    await expect(page).toHaveURL(/localhost:5174\/$/);
+    await expect(page).toHaveURL(/^http:\/\/localhost:\d+\/$/);
   });
 
   test("signed-in admins are bounced away from /login", async ({ page }) => {
@@ -107,7 +117,7 @@ test.describe("navigation", () => {
   test("unknown routes go home", async ({ page }) => {
     await signIn(page);
     await page.goto("/not-a-real-page");
-    await expect(page).toHaveURL(/localhost:5174\/$/);
+    await expect(page).toHaveURL(/^http:\/\/localhost:\d+\/$/);
   });
 });
 
