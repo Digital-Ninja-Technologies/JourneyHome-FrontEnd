@@ -19,7 +19,8 @@ export function ResetPasswordForm() {
       toast.add({
         type: "success",
         title: "Password reset",
-        description: "Your password has been reset successfully. You can now log in.",
+        description:
+          "Your password has been reset successfully. You can now log in.",
       });
     },
     onError: (error: Error) => {
@@ -136,16 +137,12 @@ export function ResetPasswordForm() {
               placeholder="Re-enter your new password"
             />
           </div>
-          {(mismatch || reset.isError) && (
+          {mismatch && (
             <p
               role="alert"
               className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-[13px] text-status-cancelled"
             >
-              {mismatch
-                ? "Those passwords don't match."
-                : isUnsupported(reset.error)
-                  ? `${UNSUPPORTED_MESSAGE} Password reset isn't enabled yet.`
-                  : reset.error?.message}
+              Those passwords don't match.
             </p>
           )}
         </section>

@@ -280,11 +280,6 @@ function ChangePassword() {
               New passwords don&rsquo;t match.
             </p>
           )}
-          {change.isError && (
-            <p role="alert" className={errCls}>
-              {explain(change.error)}
-            </p>
-          )}
           {change.isSuccess && (
             <p className="text-[13px] font-semibold text-status-active">
               Password updated.
@@ -341,11 +336,6 @@ function DeleteAccountDialog({
             autoComplete="current-password"
           />
         </div>
-        {del.isError && (
-          <p role="alert" className={errCls}>
-            {explain(del.error)}
-          </p>
-        )}
         <DialogFooter className="mt-2 flex gap-2">
           <Button type="button" variant="outline" onClick={onClose}>
             Keep account

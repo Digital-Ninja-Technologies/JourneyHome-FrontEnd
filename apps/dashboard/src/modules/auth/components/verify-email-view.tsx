@@ -77,11 +77,6 @@ function ResendBox({ initialEmail }: { initialEmail: string }) {
           A new verification link is on its way.
         </p>
       )}
-      {resend.isError && (
-        <p role="alert" className="text-xs text-status-cancelled">
-          {resend.error.message}
-        </p>
-      )}
       <Button
         type="submit"
         variant="outline"
@@ -118,7 +113,8 @@ export function VerifyEmailView() {
       toast.add({
         type: "error",
         title: "Verification failed",
-        description: error.message || "The verification link may be invalid or expired.",
+        description:
+          error.message || "The verification link may be invalid or expired.",
       });
     },
   });

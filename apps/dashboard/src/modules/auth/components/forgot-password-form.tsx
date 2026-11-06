@@ -1,3 +1,4 @@
+import { Field } from "@journeyhome/ui";
 import { Button } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
@@ -9,7 +10,6 @@ import { DemoNotice } from "@/components/demo-notice";
 import { isUnsupported, UNSUPPORTED_MESSAGE, USE_MOCKS } from "@/lib/api";
 import { DEMO_RESET_TOKEN } from "@/lib/api/mocks";
 import { forgotPassword } from "@/modules/auth/api";
-import { Field } from "@journeyhome/ui";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -19,7 +19,8 @@ export function ForgotPasswordForm() {
       toast.add({
         type: "success",
         title: "Reset link sent",
-        description: "Check your email for instructions to reset your password.",
+        description:
+          "Check your email for instructions to reset your password.",
       });
     },
     onError: (error: Error) => {
@@ -129,16 +130,6 @@ export function ForgotPasswordForm() {
             placeholder="e.g. adunni@example.com"
           />
         </Field>
-
-        {send.isError && !unsupported && (
-          <p
-            role="alert"
-            className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-[13px] text-status-cancelled"
-          >
-            {send.error.message}
-          </p>
-        )}
-
         <Button
           type="submit"
           size="lg"

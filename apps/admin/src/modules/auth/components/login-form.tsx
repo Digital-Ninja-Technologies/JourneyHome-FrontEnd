@@ -63,14 +63,6 @@ export function LoginForm() {
           placeholder="Enter your password"
           className={darkField}
         />
-        {loginMutation.error && (
-          <p
-            role="alert"
-            className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-[13px] text-status-cancelled"
-          >
-            {loginMutation.error.message || "Sign in failed"}
-          </p>
-        )}
       </FieldGroup>
 
       <Button

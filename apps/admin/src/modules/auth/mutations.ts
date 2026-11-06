@@ -23,6 +23,13 @@ export function useLoginMutation() {
       });
       navigate({ href: redirectTarget(variables.redirect), replace: true });
     },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Sign in failed",
+        description: error.message || "Invalid email or password.",
+      });
+    },
   });
 }
 
