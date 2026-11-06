@@ -121,41 +121,52 @@ async function mockApis(page: Page) {
 		);
 	});
 
-	await page.route("**/api/v1/payments**", async (route) => {
-		await route.fulfill({
-			status: 200,
-			contentType: "application/json",
-			body: JSON.stringify({
-				data: [
+	const pagination = (total: number) => ({
+		page: 1,
+		limit: 20,
+		total,
+		totalPages: total ? 1 : 0,
+		hasNextPage: false,
+		hasPreviousPage: false,
+	});
+
+	await page.route("**/api/v1/payments**", (route) =>
+		route.fulfill(
+			ok({
+				items: [
 					{
 						_id: "pay_1",
+						owner: "demo-cust-1",
 						plan: "plan_demo_1",
-						amountMinor: 500000,
+						amount: 500000,
 						currency: "NGN",
+						reference: "jh_init_demo_1",
+						provider: "paystack",
+						purpose: "recurring_contribution",
 						status: "Successful",
 						createdAt: new Date().toISOString(),
+						updatedAt: new Date().toISOString(),
 						processedAt: new Date().toISOString(),
 					},
 				],
+				pagination: pagination(1),
 			}),
-		});
-	});
+		),
+	);
 
-	await page.route("**/api/v1/service-requests**", async (route) => {
-		await route.fulfill({
-			status: 200,
-			contentType: "application/json",
-			body: JSON.stringify({ data: [] }),
-		});
-	});
+	await page.route("**/api/v1/service-requests**", (route) =>
+		route.fulfill(ok([])),
+	);
 
-	await page.route("**/api/v1/notifications**", async (route) => {
-		await route.fulfill({
-			status: 200,
-			contentType: "application/json",
-			body: JSON.stringify({ data: [] }),
-		});
-	});
+	await page.route("**/api/v1/notifications**", (route) =>
+		route.fulfill(
+			ok({
+				items: [],
+				pagination: pagination(0),
+				counts: { totalNotifications: 0, totalUnreadNotifications: 0 },
+			}),
+		),
+	);
 }
 
 test.describe("Dashboard Smoke Tests", () => {

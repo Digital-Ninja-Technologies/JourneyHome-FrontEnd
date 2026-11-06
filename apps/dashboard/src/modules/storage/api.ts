@@ -1,3 +1,4 @@
+import { MOCK_STORAGE_ORIGIN } from "@/lib/api/mocks";
 /** A presigned upload handed out by the API (`.../upload-url` endpoints). */
 export interface PresignedUpload {
   fileId: string;
@@ -28,6 +29,11 @@ export function putToStorage(
   file: File,
   onProgress?: (percent: number) => void,
 ) {
+  // Mock mode hands out fake presigned URLs; there's nothing to PUT to.
+  if (uploadUrl.startsWith(MOCK_STORAGE_ORIGIN)) {
+    onProgress?.(100);
+    return Promise.resolve();
+  }
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
 
