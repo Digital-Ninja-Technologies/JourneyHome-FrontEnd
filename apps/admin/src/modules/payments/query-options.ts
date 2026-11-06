@@ -1,9 +1,18 @@
-import { queryOptions } from "@tanstack/react-query";
-import { fetchAdminPayments } from "./api";
+import {
+  keepPreviousData,
+  queryOptions,
+  useQuery,
+} from "@tanstack/react-query";
+import { type FetchPaymentsParams, fetchPayments } from "./api";
 
-export const adminPaymentsQueryOptions = (userId?: string) =>
+export const paymentsQueryOptions = (params?: FetchPaymentsParams) =>
   queryOptions({
-    queryKey: ["admin-payments", userId] as const,
-    queryFn: () => fetchAdminPayments(),
+    queryKey: ["payments", "list", params] as const,
+    queryFn: () => fetchPayments(params),
     staleTime: 30_000,
+    placeholderData: keepPreviousData,
   });
+
+export function usePayments(params?: FetchPaymentsParams) {
+  return useQuery(paymentsQueryOptions(params));
+}

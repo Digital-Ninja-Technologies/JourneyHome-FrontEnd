@@ -262,7 +262,11 @@ export function PlansView() {
         </span>
       </button>
 
-      <CreatePlanDialog open={open} onClose={() => setOpen(false)} />
+      <CreatePlanDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        initialPackageId={search.package}
+      />
     </main>
   );
 }

@@ -1,102 +1,118 @@
-import { api, ApiError, USE_MOCKS } from "@/lib/api";
-import type { AdminLoginInput } from "@journeyhome/schemas";
+import {
+  type AdminLoginInput,
+  type AdminMe,
+  type AuthUser,
+  adminMeSchema,
+  authLoginResponseSchema,
+} from "@journeyhome/schemas";
+import {
+  ApiError,
+  api,
+  parseApiResponse,
+  SESSION_KEY,
+  USE_MOCKS,
+} from "@/lib/api";
 
-export interface AdminUser {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  isSuperAdmin: boolean;
-}
+export type AdminSessionUser = Pick<
+  AuthUser,
+  "id" | "email" | "name" | "role" | "isSuperAdmin"
+>;
 
 export interface AdminSession {
-  user: AdminUser;
+  user: AdminSessionUser;
   token: string;
 }
 
-const STORAGE_KEY = "jh_admin_session";
-
-export function readAdminSession(): AdminSession | null {
+/** Admin sessions live in sessionStorage, so closing the tab signs out. */
+export function readSession(): AdminSession | null {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
+    const raw = sessionStorage.getItem(SESSION_KEY);
     return raw ? (JSON.parse(raw) as AdminSession) : null;
   } catch {
     return null;
   }
 }
 
-export function writeAdminSession(session: AdminSession | null) {
+export function writeSession(session: AdminSession | null) {
   try {
-    if (session) {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-    } else {
-      sessionStorage.removeItem(STORAGE_KEY);
-    }
+    if (session) sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    else sessionStorage.removeItem(SESSION_KEY);
   } catch {
     /* storage unavailable */
   }
 }
 
-export async function fetchAdminSession(): Promise<AdminSession | null> {
-  const session = readAdminSession();
-  if (!session) return null;
+const isStaff = (role: string) => role === "admin" || role === "super_admin";
 
-  if (USE_MOCKS) {
-    return session;
-  }
+function toSessionUser(u: AdminSessionUser): AdminSessionUser {
+  return {
+    id: u.id,
+    email: u.email,
+    name: u.name,
+    role: u.role,
+    isSuperAdmin: Boolean(u.isSuperAdmin || u.role === "super_admin"),
+  };
+}
+
+export async function fetchMe(): Promise<AdminMe> {
+  const res = await api<unknown>("/auth/me");
+  return parseApiResponse(
+    adminMeSchema,
+    res,
+    "Invalid profile response from server",
+  );
+}
+
+/** Revalidates the stored session against `/auth/me`. */
+export async function fetchSession(): Promise<AdminSession | null> {
+  const session = readSession();
+  if (!session) return null;
+  if (USE_MOCKS) return session;
 
   try {
-    const me = await api<AdminUser>("/auth/me");
-    const updated: AdminSession = {
-      ...session,
-      user: {
-        id: me.id,
-        email: me.email,
-        name: me.name,
-        role: me.role,
-        isSuperAdmin: Boolean(
-          me.isSuperAdmin || me.role === "super_admin",
-        ),
-      },
-    };
-    writeAdminSession(updated);
+    const me = await fetchMe();
+    if (!isStaff(me.role)) {
+      writeSession(null);
+      return null;
+    }
+    const updated: AdminSession = { ...session, user: toSessionUser(me) };
+    writeSession(updated);
     return updated;
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) {
-      writeAdminSession(null);
+      writeSession(null);
       return null;
     }
+    // Network blips keep the cached session; the API will reject a bad token.
     return session;
   }
 }
 
-export async function adminLogin(
-  input: AdminLoginInput,
-): Promise<AdminSession> {
-  const res = await api<{ user: AdminUser; token: string }>(
-    "/auth/admin/login",
-    {
-      body: {
-        email: input.email.trim(),
-        password: input.password,
-      },
-    },
+/** Staff sign in through the shared `POST /auth/login`; customer accounts are refused. */
+export async function login(input: AdminLoginInput): Promise<AdminSession> {
+  const raw = await api<unknown>("/auth/login", {
+    body: { email: input.email.trim(), password: input.password },
+  });
+  const res = parseApiResponse(
+    authLoginResponseSchema,
+    raw,
+    "Invalid login response from server",
   );
 
+  if (!isStaff(res.user.role)) {
+    throw new Error(
+      "This account isn't a staff account. Customers sign in on the Journey Home app.",
+    );
+  }
+
   const session: AdminSession = {
-    user: {
-      ...res.user,
-      isSuperAdmin: Boolean(
-        res.user.isSuperAdmin || res.user.role === "super_admin",
-      ),
-    },
+    user: toSessionUser(res.user),
     token: res.token,
   };
-
-  writeAdminSession(session);
+  writeSession(session);
   return session;
 }
 
-export async function adminLogout(): Promise<void> {
-  writeAdminSession(null);
+export async function logout(): Promise<void> {
+  writeSession(null);
 }

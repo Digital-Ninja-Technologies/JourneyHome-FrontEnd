@@ -17,6 +17,25 @@ export function formatMoneyCompact(minor: number, currency = "NGN") {
   }).format(minor / 100);
 }
 
+export const formatCount = (n: number) => n.toLocaleString("en-NG");
+
+export const firstName = (full: string) => full.trim().split(/\s+/)[0] ?? full;
+
+export const initials = (full: string) =>
+  full
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase())
+    .join("");
+
+export const capitalise = (s: string) =>
+  s ? s[0].toUpperCase() + s.slice(1) : s;
+
+/** `Payment_Due` → `Payment due`. */
+export const humanise = (s: string) =>
+  capitalise(s.replace(/_/g, " ").toLowerCase());
+
 const MONTHS = [
   "Jan",
   "Feb",
@@ -64,7 +83,7 @@ export const formatDate = (iso: string) =>
 export const formatDateTime = (iso: string) => {
   const d = new Date(iso);
   const h = d.getHours();
-  return `${formatDay(iso)}, ${((h + 11) % 12) + 1}:${String(d.getMinutes()).padStart(2, "0")}${h < 12 ? "am" : "pm"}`;
+  return `${formatDate(iso)}, ${((h + 11) % 12) + 1}:${String(d.getMinutes()).padStart(2, "0")}${h < 12 ? "am" : "pm"}`;
 };
 export const formatMonthYear = (iso: string) => {
   const d = new Date(iso);
@@ -73,16 +92,10 @@ export const formatMonthYear = (iso: string) => {
 export const formatToday = (d = new Date()) =>
   `${WEEKDAYS[d.getDay()]}, ${d.getDate()} ${MONTHS_LONG[d.getMonth()]}`;
 
-export const initials = (full: string) =>
-  full
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join("");
-
-export const capitalise = (s: string) =>
-  s ? s[0].toUpperCase() + s.slice(1) : s;
+export function greeting(d = new Date()) {
+  const h = d.getHours();
+  return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+}
 
 export function ageFrom(dobIso: string, now = new Date()) {
   const dob = new Date(dobIso);
@@ -94,10 +107,3 @@ export function ageFrom(dobIso: string, now = new Date()) {
     age--;
   return age;
 }
-
-export const isThisMonth = (iso: string, now = new Date()) => {
-  const d = new Date(iso);
-  return (
-    d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
-  );
-};

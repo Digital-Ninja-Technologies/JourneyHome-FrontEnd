@@ -1,331 +1,224 @@
 import { expect, type Page, test } from "@playwright/test";
 
-const DEMO_ADMIN = {
+/**
+ * Runs against `pnpm dev`, where VITE_USE_MOCKS defaults to on and the in-app
+ * mock server (src/lib/api/mocks.ts) answers every request with spec-shaped
+ * data. Each test gets a fresh browser context, so the mock DB reseeds.
+ */
+
+const ADMIN = {
   id: "admin-1",
-  email: "admin@journeyhome.test",
+  email: "admin@journeyhome.ng",
   name: "Operations Admin",
   role: "super_admin",
   isSuperAdmin: true,
 };
 
-const MOCK_CUSTOMERS = [
-  {
-    _id: "cust_1",
-    name: "Chidi Obi",
-    email: "chidi@example.com",
-    role: "customer",
-    createdAt: new Date().toISOString(),
-  },
-];
-
-const MOCK_PLANS = [
-  {
-    _id: "plan_1",
-    owner: "cust_1",
-    status: "Active",
-    currency: "NGN",
-    contributionAmountMinor: 500000,
-    totalContributedMinor: 1500000,
-    startDate: new Date().toISOString(),
-    nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
-    packageSnapshot: {
-      name: "Standard",
-      monthlyContributionMinor: 500000,
-    },
-    coveredPerson: {
-      fullName: "Adebayo Johnson",
-      relationship: "father",
-      gender: "male",
-      phoneNumber: "+2348012345678",
-      address: "12 Marina, Lagos",
-    },
-    createdAt: new Date().toISOString(),
-  },
-];
-
-const MOCK_REQUESTS = [
-  {
-    _id: "req_1",
-    owner: "cust_1",
-    plan: "plan_1",
-    status: "Under_Review",
-    dateOfDeath: new Date().toISOString(),
-    expectedBurialDate: new Date(Date.now() + 86400000 * 7).toISOString(),
-    burialLocation: "Ikoyi Cemetery, Lagos",
-    contactPerson: "Chidi Obi",
-    contactPhone: "+2348012345678",
-    coveredPersonSnapshot: {
-      fullName: "Adebayo Johnson",
-      relationship: "father",
-    },
-    createdAt: new Date().toISOString(),
-  },
-];
-
-async function setAdminSession(page: Page) {
+async function signIn(page: Page) {
   await page.addInitScript((user) => {
-    const session = {
-      user,
-      token: "demo-admin-token",
-    };
-    sessionStorage.setItem("jh_admin_session", JSON.stringify(session));
-  }, DEMO_ADMIN);
+    sessionStorage.setItem(
+      "jh_admin_session",
+      JSON.stringify({ user, token: "demo-admin-token" }),
+    );
+  }, ADMIN);
 }
 
-async function mockAdminApis(page: Page) {
-  await page.route("**/api/v1/auth/me", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        data: {
-          id: DEMO_ADMIN.id,
-          email: DEMO_ADMIN.email,
-          name: DEMO_ADMIN.name,
-          role: DEMO_ADMIN.role,
-          isSuperAdmin: DEMO_ADMIN.isSuperAdmin,
-          preferences: {
-            newServiceRequest: true,
-            paymentFailed: true,
-            weeklyDigest: false,
-          },
-        },
-      }),
-    });
-  });
+const heading = (page: Page) => page.getByRole("heading", { level: 1 });
 
-  await page.route("**/api/v1/auth/admin/login", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        data: {
-          user: DEMO_ADMIN,
-          token: "demo-admin-token",
-        },
-      }),
-    });
-  });
-
-  await page.route("**/api/v1/auth/customers**", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ data: MOCK_CUSTOMERS }),
-    });
-  });
-
-  await page.route("**/api/v1/plans**", async (route) => {
-    const url = route.request().url();
-    if (url.includes("/plans/plan_1")) {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ data: MOCK_PLANS[0] }),
-      });
-      return;
-    }
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ data: MOCK_PLANS }),
-    });
-  });
-
-  await page.route("**/api/v1/service-requests**", async (route) => {
-    const url = route.request().url();
-    if (url.includes("/service-requests/req_1")) {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            request: MOCK_REQUESTS[0],
-            documents: [],
-          },
-        }),
-      });
-      return;
-    }
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ data: MOCK_REQUESTS }),
-    });
-  });
-
-  await page.route("**/api/v1/packages**", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        data: [
-          {
-            _id: "pkg_1",
-            name: "Standard",
-            monthlyContributionMinor: 500000,
-            isActive: true,
-          },
-        ],
-      }),
-    });
-  });
-
-  await page.route("**/api/v1/auth/admin", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        data: [DEMO_ADMIN],
-      }),
-    });
-  });
+/** Picks an option from one of the toolbar's "Label: value" filter selects. */
+async function chooseFilter(page: Page, label: string, option: string) {
+  await page.getByRole("combobox", { name: `Filter by ${label.toLowerCase()}` }).click();
+  await page.getByRole("option", { name: option, exact: true }).click();
 }
 
-test.describe("Admin TanStack Router Smoke Tests", () => {
-  test("1. Login page loads without console errors", async ({ page }) => {
+test.describe("auth & guards", () => {
+  test("login page renders without errors", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
 
     await page.goto("/login");
-
-    await expect(page.locator("h1")).toContainText("Operations");
+    await expect(heading(page)).toContainText("Operations");
     await expect(page.locator('input[name="email"]')).toBeVisible();
     await expect(page.locator('input[name="password"]')).toBeVisible();
-    await expect(page.getByRole("button", { name: /sign in/i })).toBeVisible();
-
     expect(errors).toHaveLength(0);
   });
 
-  test("2. Auth-guard redirects unauthenticated user to /login with redirect param", async ({
-    page,
-  }) => {
-    await page.goto("/");
-    await expect(page).toHaveURL(/\/login\?redirect=%2F$/);
-
-    await page.goto("/users");
-    await expect(page).toHaveURL(/\/login\?redirect=%2Fusers$/);
-
-    await page.goto("/plans");
-    await expect(page).toHaveURL(/\/login\?redirect=%2Fplans$/);
-
-    await page.goto("/service-requests");
-    await expect(page).toHaveURL(/\/login\?redirect=%2Fservice-requests$/);
-
-    await page.goto("/payments");
-    await expect(page).toHaveURL(/\/login\?redirect=%2Fpayments$/);
-
-    await page.goto("/audit-log");
-    await expect(page).toHaveURL(/\/login\?redirect=%2Faudit-log$/);
-
-    await page.goto("/settings");
-    await expect(page).toHaveURL(/\/login\?redirect=%2Fsettings$/);
+  test("login form validates with zod", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await expect(page.getByText("Please enter your work email")).toBeVisible();
+    await expect(page.getByText("Password is required")).toBeVisible();
   });
 
-  test("3. Guest-guard redirects authenticated user away from /login", async ({
-    page,
-  }) => {
-    await setAdminSession(page);
-    await mockAdminApis(page);
+  test("protected routes redirect to /login with a redirect param", async ({ page }) => {
+    for (const path of ["/", "/users", "/plans", "/payments", "/contact", "/settings"]) {
+      await page.goto(path);
+      await expect(page).toHaveURL(
+        new RegExp(`/login\\?redirect=${encodeURIComponent(path)}$`),
+      );
+    }
+  });
 
+  test("a failed sign-in shows a toast, not stale inline text", async ({ page }) => {
     await page.goto("/login");
-    await expect(page).toHaveURL(/\/$/);
+    await page.fill('input[name="email"]', "nobody@example.com");
+    await page.fill('input[name="password"]', "wrong-password");
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await expect(page.getByText("Sign in failed")).toBeVisible();
+    await expect(page.getByText("Invalid email or password.")).toBeVisible();
+    await expect(page).toHaveURL(/\/login/);
+  });
 
+  test("signing in follows the redirect", async ({ page }) => {
+    await page.goto("/login?redirect=/plans");
+    await page.fill('input[name="email"]', "admin@journeyhome.test");
+    await page.fill('input[name="password"]', "Admin123!");
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await expect(page).toHaveURL(/\/plans\/?$/);
+  });
+
+  test("an off-site redirect is ignored", async ({ page }) => {
+    await page.goto("/login?redirect=https://evil.example");
+    await expect(heading(page)).toContainText("Operations");
+    await page.fill('input[name="email"]', "admin@journeyhome.test");
+    await page.fill('input[name="password"]', "Admin123!");
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await expect(page).toHaveURL(/^http:\/\/localhost:\d+\/$/);
+  });
+
+  test("signed-in admins are bounced away from /login", async ({ page }) => {
+    await signIn(page);
     await page.goto("/login?redirect=/settings");
     await expect(page).toHaveURL(/\/settings$/);
   });
+});
 
-  test("4. Navigation between key pages works for authenticated staff in AdminShell", async ({
-    page,
-  }) => {
-    await setAdminSession(page);
-    await mockAdminApis(page);
-
+test.describe("navigation", () => {
+  test("every sidebar link opens its view", async ({ page }) => {
+    await signIn(page);
     await page.goto("/");
-    await expect(page.locator("h1")).toContainText("Operations overview");
-    await expect(page.getByRole("complementary")).toBeVisible();
+    await expect(heading(page)).toContainText(/Good (morning|afternoon|evening)/);
 
-    // Navigate to Users
-    await page.getByRole("link", { name: "Users", exact: true }).click();
-    await expect(page).toHaveURL(/\/users\/?$/);
-    await expect(page.locator("h1")).toContainText("Users");
-    await expect(page.getByText("Chidi Obi")).toBeVisible();
-
-    // Navigate to Plans
-    await page.getByRole("link", { name: "Plans", exact: true }).click();
-    await expect(page).toHaveURL(/\/plans\/?$/);
-    await expect(page.locator("h1")).toContainText("Plans");
-    await expect(page.getByText("Adebayo Johnson")).toBeVisible();
-
-    // Navigate to Service requests
-    await page.getByRole("link", { name: "Service requests", exact: true }).click();
-    await expect(page).toHaveURL(/\/service-requests\/?$/);
-    await expect(page.locator("h1")).toContainText("Service requests");
-
-    // Navigate to Payments
-    await page.getByRole("link", { name: "Payments", exact: true }).click();
-    await expect(page).toHaveURL(/\/payments\/?$/);
-    await expect(page.locator("h1")).toContainText("Payments");
-
-    // Navigate to Audit log
-    await page.getByRole("link", { name: "Audit log", exact: true }).click();
-    await expect(page).toHaveURL(/\/audit-log\/?$/);
-    await expect(page.locator("h1")).toContainText("Audit log");
-
-    // Navigate to Settings
-    await page.getByRole("link", { name: "Settings", exact: true }).click();
-    await expect(page).toHaveURL(/\/settings\/?$/);
-    await expect(page.locator("h1")).toContainText("Settings");
+    const pages: [link: string, title: RegExp][] = [
+      ["Users", /Users/],
+      ["Plans", /Plans/],
+      ["Service requests", /Service requests/],
+      ["Payments", /Payments/],
+      ["Contact messages", /Contact messages/],
+      ["Audit log", /Audit log/],
+      ["Settings", /Settings/],
+    ];
+    for (const [link, title] of pages) {
+      await page.getByRole("link", { name: link, exact: true }).click();
+      await expect(heading(page)).toContainText(title);
+    }
   });
 
-  test("5. Dynamic route loads with param (/users/$id)", async ({ page }) => {
-    await setAdminSession(page);
-    await mockAdminApis(page);
+  test("unknown routes go home", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/not-a-real-page");
+    await expect(page).toHaveURL(/^http:\/\/localhost:\d+\/$/);
+  });
+});
 
+test.describe("server-paginated tables", () => {
+  test("paging lives in the URL and survives a reload", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/payments");
+    await expect(page.getByText(/Showing\s*1–20\s*of\s*48\s*payments/)).toBeVisible();
+
+    await page.getByRole("button", { name: "Go to next page" }).click();
+    await expect(page).toHaveURL(/page=2/);
+    await expect(page.getByText(/Showing\s*21–40\s*of\s*48/)).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByText(/Showing\s*21–40\s*of\s*48/)).toBeVisible();
+  });
+
+  test("a bad page param falls back to page 1", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/payments?page=abc&limit=7");
+    await expect(page.getByText(/Showing\s*1–20\s*of\s*48/)).toBeVisible();
+  });
+
+  test("filters update the URL and reset to page 1", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/plans?page=1");
+    await chooseFilter(page, "Status", "Active");
+    await expect(page).toHaveURL(/status=Active/);
+    await expect(page.getByText(/of\s*3\s*plans/)).toBeVisible();
+    await expect(page.getByText("Emeka Okafor")).toBeVisible();
+
+    await page.getByRole("button", { name: "Reset" }).click();
+    await expect(page).not.toHaveURL(/status=/);
+  });
+
+  test("search is debounced into the URL", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/users");
+    await page.getByRole("searchbox", { name: "Search name or email" }).fill("grace");
+    await expect(page).toHaveURL(/search=grace/);
+    await expect(page.getByText(/of\s*1\s*user$/)).toBeVisible();
+  });
+});
+
+test.describe("details & mutations", () => {
+  test("user detail lists their plans and requests", async ({ page }) => {
+    await signIn(page);
     await page.goto("/users/cust_1");
-    await expect(page.locator("h1")).toContainText("Chidi Obi");
-    await expect(page.getByText("chidi@example.com")).toBeVisible();
-    await expect(page.getByText("Plans (1)")).toBeVisible();
+    await expect(heading(page)).toContainText("Chidi Okafor");
+    await expect(page.getByText("chidi@example.com").first()).toBeVisible();
+    await expect(page.getByText("Plans (2)")).toBeVisible();
   });
 
-  test("6. Dynamic route loads with param (/plans/$id)", async ({ page }) => {
-    await setAdminSession(page);
-    await mockAdminApis(page);
-
+  test("plan status changes through the status form", async ({ page }) => {
+    await signIn(page);
     await page.goto("/plans/plan_1");
-    await expect(page.locator("h1")).toContainText("Adebayo Johnson's plan");
-    await expect(page.getByText("Covered person")).toBeVisible();
-    await expect(page.getByLabel("Update status")).toBeVisible();
+    await expect(heading(page)).toContainText("Emeka Okafor's");
+
+    await page.getByRole("combobox", { name: "Move to" }).click();
+    await page.getByRole("option", { name: "Paused", exact: true }).click();
+    await page.getByRole("button", { name: "Save status" }).click();
+    await expect(page.getByText("Plan updated")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 }).locator("..")).toContainText(
+      "Paused",
+    );
   });
 
-  test("7. Dynamic route loads with param (/service-requests/$id)", async ({
-    page,
-  }) => {
-    await setAdminSession(page);
-    await mockAdminApis(page);
+  test("rejecting a request needs a message to the customer", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/service-requests/req_2");
+    await expect(heading(page)).toContainText("Adaeze Nwosu's");
 
-    await page.goto("/service-requests/req_1");
-    await expect(page.locator("h1")).toContainText("Adebayo Johnson's service");
-    await expect(page.getByText("Request details")).toBeVisible();
+    await page.getByRole("button", { name: "Reject" }).click();
+    await expect(page.getByText(/Tell the customer why/)).toBeVisible();
+
+    await page.getByLabel("Message to the customer").fill("The plan is not eligible.");
+    await page.getByRole("button", { name: "Reject" }).click();
+    await expect(page.getByText("Request updated")).toBeVisible();
+    await expect(page.getByText("Reason given: The plan is not eligible.")).toBeVisible();
   });
 
-  test("8. Wildcard / unknown route redirects to /", async ({ page }) => {
-    await setAdminSession(page);
-    await mockAdminApis(page);
+  test("approve, then assign a photographer to close", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/service-requests/req_4");
+    await page.getByRole("button", { name: "Approve request" }).click();
+    await expect(page.getByRole("button", { name: "Assign photographer" })).toBeVisible();
 
-    await page.goto("/some-completely-invalid-admin-path");
-    await expect(page).toHaveURL(/\/$/);
-    await expect(page.locator("h1")).toContainText("Operations overview");
+    await page.getByRole("button", { name: "Assign photographer" }).click();
+    await page.getByRole("button", { name: "Assign and close" }).click();
+    await expect(page.getByText("Enter the photographer's full name")).toBeVisible();
+
+    await page.getByLabel("Photographer's full name").fill("Femi Bello");
+    await page.getByRole("button", { name: "Assign and close" }).click();
+    await expect(page.getByText("Photographer assigned").first()).toBeVisible();
   });
 
-  test("9. Login submission navigates to redirect target", async ({ page }) => {
-    await mockAdminApis(page);
-
-    await page.goto("/login?redirect=/plans");
-    await page.fill('input[name="email"]', "admin@journeyhome.test");
-    await page.fill('input[name="password"]', "SecretPass123");
-    await page.getByRole("button", { name: /sign in/i }).click();
-
-    await expect(page).toHaveURL(/\/plans\/?$/);
+  test("contact message opens in a linkable sheet", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/contact");
+    await page.getByText("Adebayo Okafor").click();
+    await expect(page).toHaveURL(/message=msg_1/);
+    await expect(page.getByRole("link", { name: "Reply by email" })).toBeVisible();
   });
 });

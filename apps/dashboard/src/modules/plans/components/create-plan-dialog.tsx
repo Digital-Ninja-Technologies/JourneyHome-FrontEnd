@@ -33,9 +33,12 @@ const FORM_ID = "create-plan-form";
 export function CreatePlanDialog({
   open,
   onClose,
+  initialPackageId,
 }: {
   open: boolean;
   onClose: () => void;
+  /** Preselected when the dialog opens, if it's still an available package. */
+  initialPackageId?: string;
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -46,7 +49,7 @@ export function CreatePlanDialog({
     resolver: zodResolver(planFormSchema),
     defaultValues: planFormDefaults,
   });
-  const { control, reset } = form;
+  const { control, reset, getValues, setValue } = form;
 
   const packageId = useWatch({ control, name: "packageId" });
   const selected = packagesQ.data?.find((p) => p._id === packageId);
@@ -74,6 +77,13 @@ export function CreatePlanDialog({
     },
   });
   const { reset: resetMutation } = create;
+
+  useEffect(() => {
+    if (!open || !initialPackageId || getValues("packageId")) return;
+    if (packagesQ.data?.some((p) => p._id === initialPackageId)) {
+      setValue("packageId", initialPackageId);
+    }
+  }, [open, initialPackageId, packagesQ.data, getValues, setValue]);
 
   // Start fresh every time the dialog is reopened.
   useEffect(() => {
@@ -134,14 +144,6 @@ export function CreatePlanDialog({
         </form>
 
         <div className="flex shrink-0 flex-col gap-3 border-t border-border/60 bg-popover px-5 py-3 sm:px-8 sm:py-4">
-          {create.isError && (
-            <p
-              role="alert"
-              className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-[13px] text-status-cancelled"
-            >
-              {create.error.message}
-            </p>
-          )}
           <DialogFooter className="flex-row items-center justify-end gap-3">
             <Button
               type="button"

@@ -105,3 +105,22 @@ export type PaginatedPlans = z.infer<typeof paginatedPlansSchema>;
 export const paginatedAdminPlansSchema =
   createPaginatedDataSchema(adminPlanSchema);
 export type PaginatedAdminPlans = z.infer<typeof paginatedAdminPlansSchema>;
+
+/**
+ * Query schema for admin `GET /plans/admin`.
+ */
+export const adminPlanQuerySchema = paginationQuerySchema.extend({
+  status: PlanStatusEnum.optional(),
+  ownerId: z.string().optional(),
+  packageId: z.string().optional(),
+  search: z.string().optional(),
+});
+export type AdminPlanQueryInput = z.infer<typeof adminPlanQuerySchema>;
+
+/**
+ * Body for admin `PATCH /plans/{id}/status`.
+ */
+export const updatePlanStatusSchema = z.object({
+  status: PlanStatusEnum,
+});
+export type UpdatePlanStatusInput = z.infer<typeof updatePlanStatusSchema>;

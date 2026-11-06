@@ -1,24 +1,34 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { fetchAdminSession } from "./api";
+import { fetchMe, fetchSession } from "./api";
 
-export function adminSessionQueryOptions() {
+export function sessionQueryOptions() {
   return queryOptions({
-    queryKey: ["auth", "admin-session"] as const,
-    queryFn: () => fetchAdminSession(),
-    staleTime: Infinity,
+    queryKey: ["auth", "session"] as const,
+    queryFn: () => fetchSession(),
+    staleTime: 5 * 60 * 1000,
   });
 }
 
-export function useAdminSession() {
-  return useQuery(adminSessionQueryOptions());
+export function useSession() {
+  return useQuery(sessionQueryOptions());
 }
 
 export function useAdminUser() {
-  const { data } = useAdminSession();
+  const { data } = useSession();
   return data?.user ?? null;
 }
 
 export function useIsSuperAdmin() {
-  const user = useAdminUser();
-  return Boolean(user && (user.isSuperAdmin || user.role === "super_admin"));
+  return Boolean(useAdminUser()?.isSuperAdmin);
+}
+
+export const meQueryOptions = () =>
+  queryOptions({
+    queryKey: ["auth", "me"] as const,
+    queryFn: () => fetchMe(),
+    staleTime: 30_000,
+  });
+
+export function useMe() {
+  return useQuery(meQueryOptions());
 }

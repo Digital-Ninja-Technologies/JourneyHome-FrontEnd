@@ -12,6 +12,7 @@ export const env = createEnv({
     VITE_USE_MOCKS: z
       .string()
       .optional()
+      .default(import.meta.env.DEV ? "true" : "false")
       .transform((val) => val === "true"),
   },
   runtimeEnv: import.meta.env,

@@ -29,6 +29,8 @@ export type TokenSearch = z.infer<typeof tokenSearchSchema>;
 
 export const plansSearchSchema = z.object({
   new: z.coerce.string().optional(),
+  /** Package to preselect when the "new plan" dialog opens (e.g. chosen on the marketing site). */
+  package: z.coerce.string().optional(),
 });
 export type PlansSearch = z.infer<typeof plansSearchSchema>;
 

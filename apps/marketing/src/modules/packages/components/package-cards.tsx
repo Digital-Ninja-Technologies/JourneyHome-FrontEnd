@@ -2,11 +2,13 @@ import { buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Check } from "lucide-react";
 import { SIGNUP_URL } from "@/lib/config";
-import { formatMoney, packageSubtitle } from "../packages.utils";
+import { billingUnit, formatMoney, packageSubtitle } from "../packages.utils";
 import type { Package } from "../types";
 
 /**
- * With three packages, the middle one is highlighted as "Most chosen" (as in the design).
+ * Renders exactly what the API returns (name, description, price, currency, interval,
+ * features). With three packages the middle card gets the dark treatment from the design;
+ * that's layout only — there's no "most chosen" claim, since the API has no such data.
  * The mockup uses slightly different card metrics for the Home teaser (compact, no features)
  * vs. the full Pricing cards (showFeatures) — padding, inner gap and price size scale up
  * accordingly to match Home.dc.html vs Pricing.dc.html exactly.
@@ -34,11 +36,6 @@ export function PackageCards({
                 : "border-border bg-white",
             )}
           >
-            {featured && (
-              <span className="absolute right-6 top-6 rounded-md bg-accent px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-foreground">
-                Most chosen
-              </span>
-            )}
             <div>
               <div
                 className={cn(
@@ -48,14 +45,16 @@ export function PackageCards({
               >
                 {p.name}
               </div>
-              <div
-                className={cn(
-                  "mt-1 text-sm",
-                  featured ? "text-canvas/70" : "text-muted-foreground",
-                )}
-              >
-                {packageSubtitle(p)}
-              </div>
+              {packageSubtitle(p) && (
+                <div
+                  className={cn(
+                    "mt-1 text-sm",
+                    featured ? "text-canvas/70" : "text-muted-foreground",
+                  )}
+                >
+                  {packageSubtitle(p)}
+                </div>
+              )}
             </div>
             <div
               className={cn(
@@ -70,8 +69,7 @@ export function PackageCards({
                   featured ? "text-canvas/70" : "text-muted-foreground",
                 )}
               >
-                /{" "}
-                {p.billingInterval === "monthly" ? "month" : p.billingInterval}
+                / {billingUnit(p.billingInterval)}
               </span>
             </div>
             <a
@@ -88,14 +86,16 @@ export function PackageCards({
             >
               Choose {p.name}
             </a>
-            {showFeatures && (p.features?.length ?? 0) > 0 && (
+            {showFeatures && p.features.length > 0 && (
               <>
                 <hr
                   className={featured ? "border-canvas/15" : "border-border"}
                 />
                 <ul className="flex flex-col gap-3 text-sm">
-                  {p.features?.map((d) => (
-                    <li key={d} className="flex items-center gap-2.5">
+                  {p.features.map((d, i) => (
+                    // Features are plain strings and may repeat; position is the identity.
+                    // biome-ignore lint/suspicious/noArrayIndexKey: static list, never reordered client-side
+                    <li key={`${i}-${d}`} className="flex items-center gap-2.5">
                       <Check
                         className={cn(
                           "size-4 shrink-0",

@@ -10,12 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SplatRouteImport } from './routes/$'
+import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as ProtectedRouteRouteImport } from './routes/_protected/route'
-import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ProtectedIndexRouteImport } from './routes/_protected/index'
 import { Route as ProtectedAuditLogRouteImport } from './routes/_protected/audit-log'
 import { Route as ProtectedPaymentsRouteImport } from './routes/_protected/payments'
 import { Route as ProtectedSettingsRouteImport } from './routes/_protected/settings'
+import { Route as ProtectedContactIndexRouteImport } from './routes/_protected/contact/index'
 import { Route as ProtectedPlansIndexRouteImport } from './routes/_protected/plans/index'
 import { Route as ProtectedPlansIdRouteImport } from './routes/_protected/plans/$id'
 import { Route as ProtectedServiceRequestsIndexRouteImport } from './routes/_protected/service-requests/index'
@@ -28,14 +30,18 @@ const SplatRoute = SplatRouteImport.update({
   path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRouteRoute = AuthRouteRouteImport.update({
+  id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProtectedRouteRoute = ProtectedRouteRouteImport.update({
   id: '/_protected',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginRoute = LoginRouteImport.update({
+const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthRouteRoute,
 } as any)
 const ProtectedIndexRoute = ProtectedIndexRouteImport.update({
   id: '/',
@@ -55,6 +61,11 @@ const ProtectedPaymentsRoute = ProtectedPaymentsRouteImport.update({
 const ProtectedSettingsRoute = ProtectedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => ProtectedRouteRoute,
+} as any)
+const ProtectedContactIndexRoute = ProtectedContactIndexRouteImport.update({
+  id: '/contact/',
+  path: '/contact/',
   getParentRoute: () => ProtectedRouteRoute,
 } as any)
 const ProtectedPlansIndexRoute = ProtectedPlansIndexRouteImport.update({
@@ -93,36 +104,39 @@ const ProtectedUsersIdRoute = ProtectedUsersIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof ProtectedIndexRoute
   '/$': typeof SplatRoute
-  '/login': typeof LoginRoute
+  '/login': typeof AuthLoginRoute
   '/audit-log': typeof ProtectedAuditLogRoute
   '/payments': typeof ProtectedPaymentsRoute
   '/settings': typeof ProtectedSettingsRoute
   '/plans/$id': typeof ProtectedPlansIdRoute
   '/service-requests/$id': typeof ProtectedServiceRequestsIdRoute
   '/users/$id': typeof ProtectedUsersIdRoute
+  '/contact/': typeof ProtectedContactIndexRoute
   '/plans/': typeof ProtectedPlansIndexRoute
   '/service-requests/': typeof ProtectedServiceRequestsIndexRoute
   '/users/': typeof ProtectedUsersIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof ProtectedIndexRoute
   '/$': typeof SplatRoute
-  '/login': typeof LoginRoute
+  '/login': typeof AuthLoginRoute
   '/audit-log': typeof ProtectedAuditLogRoute
   '/payments': typeof ProtectedPaymentsRoute
   '/settings': typeof ProtectedSettingsRoute
-  '/': typeof ProtectedIndexRoute
   '/plans/$id': typeof ProtectedPlansIdRoute
   '/service-requests/$id': typeof ProtectedServiceRequestsIdRoute
   '/users/$id': typeof ProtectedUsersIdRoute
+  '/contact': typeof ProtectedContactIndexRoute
   '/plans': typeof ProtectedPlansIndexRoute
   '/service-requests': typeof ProtectedServiceRequestsIndexRoute
   '/users': typeof ProtectedUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/_auth': typeof AuthRouteRouteWithChildren
   '/_protected': typeof ProtectedRouteRouteWithChildren
   '/$': typeof SplatRoute
-  '/login': typeof LoginRoute
+  '/_auth/login': typeof AuthLoginRoute
   '/_protected/audit-log': typeof ProtectedAuditLogRoute
   '/_protected/payments': typeof ProtectedPaymentsRoute
   '/_protected/settings': typeof ProtectedSettingsRoute
@@ -130,6 +144,7 @@ export interface FileRoutesById {
   '/_protected/plans/$id': typeof ProtectedPlansIdRoute
   '/_protected/service-requests/$id': typeof ProtectedServiceRequestsIdRoute
   '/_protected/users/$id': typeof ProtectedUsersIdRoute
+  '/_protected/contact/': typeof ProtectedContactIndexRoute
   '/_protected/plans/': typeof ProtectedPlansIndexRoute
   '/_protected/service-requests/': typeof ProtectedServiceRequestsIndexRoute
   '/_protected/users/': typeof ProtectedUsersIndexRoute
@@ -146,28 +161,31 @@ export interface FileRouteTypes {
     | '/plans/$id'
     | '/service-requests/$id'
     | '/users/$id'
+    | '/contact/'
     | '/plans/'
     | '/service-requests/'
     | '/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/$'
     | '/login'
     | '/audit-log'
     | '/payments'
     | '/settings'
-    | '/'
     | '/plans/$id'
     | '/service-requests/$id'
     | '/users/$id'
+    | '/contact'
     | '/plans'
     | '/service-requests'
     | '/users'
   id:
     | '__root__'
+    | '/_auth'
     | '/_protected'
     | '/$'
-    | '/login'
+    | '/_auth/login'
     | '/_protected/audit-log'
     | '/_protected/payments'
     | '/_protected/settings'
@@ -175,15 +193,16 @@ export interface FileRouteTypes {
     | '/_protected/plans/$id'
     | '/_protected/service-requests/$id'
     | '/_protected/users/$id'
+    | '/_protected/contact/'
     | '/_protected/plans/'
     | '/_protected/service-requests/'
     | '/_protected/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
   ProtectedRouteRoute: typeof ProtectedRouteRouteWithChildren
   SplatRoute: typeof SplatRoute
-  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -195,6 +214,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_protected': {
       id: '/_protected'
       path: ''
@@ -202,12 +228,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
+    '/_auth/login': {
+      id: '/_auth/login'
       path: '/login'
       fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
     '/_protected/': {
       id: '/_protected/'
@@ -235,6 +261,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof ProtectedSettingsRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
+    '/_protected/contact/': {
+      id: '/_protected/contact/'
+      path: '/contact'
+      fullPath: '/contact/'
+      preLoaderRoute: typeof ProtectedContactIndexRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
     '/_protected/plans/': {
@@ -282,6 +315,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthRouteRouteChildren {
+  AuthLoginRoute: typeof AuthLoginRoute
+}
+
+const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthLoginRoute: AuthLoginRoute,
+}
+
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
+
 interface ProtectedRouteRouteChildren {
   ProtectedAuditLogRoute: typeof ProtectedAuditLogRoute
   ProtectedPaymentsRoute: typeof ProtectedPaymentsRoute
@@ -290,6 +335,7 @@ interface ProtectedRouteRouteChildren {
   ProtectedPlansIdRoute: typeof ProtectedPlansIdRoute
   ProtectedServiceRequestsIdRoute: typeof ProtectedServiceRequestsIdRoute
   ProtectedUsersIdRoute: typeof ProtectedUsersIdRoute
+  ProtectedContactIndexRoute: typeof ProtectedContactIndexRoute
   ProtectedPlansIndexRoute: typeof ProtectedPlansIndexRoute
   ProtectedServiceRequestsIndexRoute: typeof ProtectedServiceRequestsIndexRoute
   ProtectedUsersIndexRoute: typeof ProtectedUsersIndexRoute
@@ -303,6 +349,7 @@ const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
   ProtectedPlansIdRoute: ProtectedPlansIdRoute,
   ProtectedServiceRequestsIdRoute: ProtectedServiceRequestsIdRoute,
   ProtectedUsersIdRoute: ProtectedUsersIdRoute,
+  ProtectedContactIndexRoute: ProtectedContactIndexRoute,
   ProtectedPlansIndexRoute: ProtectedPlansIndexRoute,
   ProtectedServiceRequestsIndexRoute: ProtectedServiceRequestsIndexRoute,
   ProtectedUsersIndexRoute: ProtectedUsersIndexRoute,
@@ -313,9 +360,9 @@ const ProtectedRouteRouteWithChildren = ProtectedRouteRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
+  AuthRouteRoute: AuthRouteRouteWithChildren,
   ProtectedRouteRoute: ProtectedRouteRouteWithChildren,
   SplatRoute: SplatRoute,
-  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

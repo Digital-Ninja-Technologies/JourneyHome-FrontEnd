@@ -128,14 +128,6 @@ export function OnboardingPlanView() {
               Compare full package details
             </a>
           </section>
-          {create.isError && (
-            <p
-              role="alert"
-              className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-[13px] text-status-cancelled"
-            >
-              {create.error.message}
-            </p>
-          )}
           <Button
             type="submit"
             size="lg"

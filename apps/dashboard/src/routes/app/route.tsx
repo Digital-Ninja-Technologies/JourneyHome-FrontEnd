@@ -49,7 +49,8 @@ function AppLayout() {
       <AppSidebar />
       <SidebarInset className="min-w-0 max-w-full overflow-x-hidden flex flex-1 flex-col bg-canvas">
         {/* Mobile sticky header with SidebarTrigger and Logo */}
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-canvas px-4 py-3.5 md:hidden">
+        <header className="sticky top-0 z-30 flex items-center gap-2 border-b border-border bg-canvas px-4 py-3.5 md:hidden">
+          <SidebarTrigger className="-ml-1.5 text-foreground md:hidden" />
           <Link
             to="/app"
             className="flex items-center gap-2"
@@ -78,7 +79,6 @@ function AppLayout() {
               Journey <span className="italic text-link">Home</span>
             </span>
           </Link>
-          <SidebarTrigger className="text-foreground md:hidden" />
         </header>
 
         <div className="page-wrapper flex flex-1 flex-col min-w-0">

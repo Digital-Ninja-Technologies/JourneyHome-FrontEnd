@@ -88,24 +88,12 @@ export function LoginForm() {
               Forgot password?
             </Link>
           </div>
-          {loginMutation.error && (
-            <div
-              role="alert"
-              className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-[13px] text-status-cancelled"
-            >
-              <p>
-                {loginMutation.error instanceof Error
-                  ? loginMutation.error.message
-                  : "Login failed"}
-              </p>
-              {isUnverified && (
-                <p className="mt-1">
-                  <Link to="/verify-email" className="font-bold underline">
-                    Click here to verify your email →
-                  </Link>
-                </p>
-              )}
-            </div>
+          {isUnverified && (
+            <p className="text-[13px] text-status-paused">
+              <Link to="/verify-email" className="font-bold underline">
+                Click here to verify your email →
+              </Link>
+            </p>
           )}
         </section>
         <Button

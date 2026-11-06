@@ -19,7 +19,8 @@ async function setCustomerSession(page: Page) {
 	}, DEMO_USER);
 }
 
-async function mockApis(page: Page) {
+async function mockApis(page: Page, opts: { hasPlans?: boolean } = {}) {
+	const hasPlans = opts.hasPlans ?? true;
 	// The /app route guard validates the stored session via GET /auth/me.
 	await page.route("**/api/v1/auth/me", async (route) => {
 		await route.fulfill({
@@ -94,6 +95,16 @@ async function mockApis(page: Page) {
 					billingInterval: "monthly",
 					isActive: true,
 				},
+				{
+					_id: "pkg_premium",
+					name: "Premium",
+					description: "",
+					features: [],
+					amount: 1500000,
+					currency: "NGN",
+					billingInterval: "monthly",
+					isActive: true,
+				},
 			]),
 		),
 	);
@@ -108,12 +119,12 @@ async function mockApis(page: Page) {
 		}
 		await route.fulfill(
 			ok({
-				items: [makePlan("plan_demo_1", "Active")],
+				items: hasPlans ? [makePlan("plan_demo_1", "Active")] : [],
 				pagination: {
 					page: 1,
 					limit: 20,
-					total: 1,
-					totalPages: 1,
+					total: hasPlans ? 1 : 0,
+					totalPages: hasPlans ? 1 : 0,
 					hasNextPage: false,
 					hasPreviousPage: false,
 				},
@@ -247,12 +258,14 @@ test.describe("Dashboard Smoke Tests", () => {
 		page,
 	}) => {
 		await setCustomerSession(page);
-		await mockApis(page);
+		// Onboarding is only shown to accounts with no plans yet.
+		await mockApis(page, { hasPlans: false });
 
-		// /signup/plan
-		await page.goto("/signup/plan");
-		await page.waitForURL("/signup/plan");
+		// /signup/plan, with the package picked on the marketing site preselected
+		await page.goto("/signup/plan?package=pkg_premium");
+		await page.waitForURL("/signup/plan?package=pkg_premium");
 		await expect(page.locator("h1")).toContainText("Set up your first plan.");
+		await expect(page.getByRole("radio", { name: /Premium/ })).toBeChecked();
 
 		// /signup/payment?plan=plan_pending_1 (stays on payment because status is Pending)
 		await page.goto("/signup/payment?plan=plan_pending_1");
@@ -261,6 +274,26 @@ test.describe("Dashboard Smoke Tests", () => {
 		// /welcome?plan=plan_demo_1
 		await page.goto("/welcome?plan=plan_demo_1");
 		await expect(page.locator("h1")).toContainText("You’re all set");
+	});
+
+	test("6b. Customers with plans skip onboarding and get the new-plan dialog", async ({
+		page,
+	}) => {
+		await setCustomerSession(page);
+		await mockApis(page, { hasPlans: true });
+
+		// e.g. an existing customer clicking a package on the marketing site
+		await page.goto("/signup?package=pkg_premium");
+		await page.waitForURL(/\/app\/plans\?/);
+		expect(page.url()).toContain("pkg_premium");
+		await expect(page.getByRole("dialog")).toContainText("Start a new plan");
+		await expect(page.getByRole("radio", { name: /Premium/ })).toBeChecked();
+
+		// Without a package (e.g. after the verify-email "log in" link)
+		await page.goto("/signup/plan");
+		await page.waitForURL(/\/app\/plans\?/);
+		await expect(page.getByRole("dialog")).toContainText("Start a new plan");
+		await expect(page.locator("h1")).not.toContainText("Set up your first plan");
 	});
 
 	test("7. Paystack callback route handles query params without crashing", async ({

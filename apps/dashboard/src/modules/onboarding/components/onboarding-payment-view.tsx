@@ -43,14 +43,6 @@ function Checkout({ plan }: { plan: Plan }) {
           </div>
         </div>
       </section>
-      {start.isError && (
-        <p
-          role="alert"
-          className="rounded-lg bg-status-cancelled-bg px-3 py-2 text-[13px] text-status-cancelled"
-        >
-          {start.error.message}
-        </p>
-      )}
       <Button
         type="button"
         variant="accent"
