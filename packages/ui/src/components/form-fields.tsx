@@ -11,6 +11,11 @@ import {
   useController,
 } from "react-hook-form";
 import {
+  caretAfterMoneyChars,
+  countMoneyCharsBefore,
+  formatMoneyInput,
+} from "../lib/money";
+import {
   type CountryCode,
   caretAfterDigits,
   countDigitsBefore,
@@ -165,6 +170,112 @@ export function FormPhoneInput<T extends FieldValues>({
         aria-invalid={fieldState.invalid}
         className={className}
       />
+      {description && <FieldDescription>{description}</FieldDescription>}
+      <FieldError>{fieldState.error?.message}</FieldError>
+    </Field>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*                               FormMoneyInput                               */
+/* -------------------------------------------------------------------------- */
+
+export interface FormMoneyInputProps<T extends FieldValues>
+  extends Omit<
+      ComponentProps<"input">,
+      "name" | "value" | "onChange" | "type" | "defaultValue" | "prefix"
+    >,
+    BaseFormProps<T> {
+  /** Shown inside the field before the amount, e.g. `₦`. */
+  currencySymbol?: React.ReactNode;
+}
+
+/**
+ * Money field that groups thousands as the user types (`1,250,000.50`).
+ * The form value is the formatted string; convert it with `parseMoneyInput` from
+ * `lib/money` (e.g. in the zod schema) before sending it to an API.
+ */
+export function FormMoneyInput<T extends FieldValues>({
+  control,
+  name,
+  label,
+  className,
+  description,
+  currencySymbol,
+  ...props
+}: FormMoneyInputProps<T>) {
+  const { field, fieldState } = useController({ name, control });
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const el = e.target;
+    const raw = el.value;
+    const previous: string = field.value ?? "";
+    let source = raw;
+    let caret = el.selectionStart ?? raw.length;
+
+    // Backspacing over a comma ("1,|000") removes nothing meaningful, so the formatter
+    // would put it back. Treat it as deleting the digit before the comma instead.
+    const onlySeparatorRemoved =
+      raw.length < previous.length &&
+      raw.replace(/[^\d.]/g, "") === previous.replace(/[^\d.]/g, "");
+    if (onlySeparatorRemoved) {
+      const idx = raw.slice(0, caret).search(/\d(?=[^\d]*$)/);
+      if (idx >= 0) {
+        source = raw.slice(0, idx) + raw.slice(idx + 1);
+        caret = idx;
+      }
+    }
+
+    const charsBeforeCaret = countMoneyCharsBefore(source, caret);
+    const formatted = formatMoneyInput(source);
+    field.onChange(formatted);
+
+    requestAnimationFrame(() => {
+      const target = inputRef.current;
+      if (!target || document.activeElement !== target) return;
+      const pos = caretAfterMoneyChars(formatted, charsBeforeCaret);
+      target.setSelectionRange(pos, pos);
+    });
+  }
+
+  const input = (
+    <Input
+      autoComplete="off"
+      {...props}
+      id={field.name}
+      name={field.name}
+      type="text"
+      inputMode="decimal"
+      value={field.value ?? ""}
+      onChange={handleChange}
+      onBlur={field.onBlur}
+      disabled={props.disabled ?? field.disabled}
+      ref={(node) => {
+        inputRef.current = node;
+        field.ref(node);
+      }}
+      aria-invalid={fieldState.invalid}
+      className={cn("tabular-nums", currencySymbol && "pl-7", className)}
+    />
+  );
+
+  return (
+    <Field data-invalid={fieldState.invalid}>
+      {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
+      {currencySymbol ? (
+        <div className="relative">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground"
+          >
+            {currencySymbol}
+          </span>
+          {input}
+        </div>
+      ) : (
+        input
+      )}
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError>{fieldState.error?.message}</FieldError>
     </Field>
