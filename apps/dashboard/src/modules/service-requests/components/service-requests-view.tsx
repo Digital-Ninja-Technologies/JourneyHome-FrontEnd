@@ -164,17 +164,23 @@ export function ServiceRequestsView() {
             Service <span className="italic">requests</span>
           </h1>
         </div>
-        {canRequest && (
-          <Link
-            to="/app/service-requests/new"
-            className={cn(
-              buttonVariants({ variant: "default", size: "lg" }),
-              "h-[52px] rounded-2xl px-6 text-sm font-semibold",
-            )}
-          >
-            Request service
-          </Link>
-        )}
+        <Link
+          to="/app/service-requests/new"
+          disabled={!canRequest}
+          title={
+            canRequest
+              ? undefined
+              : "You need an active plan to request a service"
+          }
+          className={cn(
+            buttonVariants({ variant: "default", size: "lg" }),
+            "h-[52px] rounded-2xl px-6 text-sm font-semibold",
+            // An anchor has no :disabled state; TanStack Link sets aria-disabled instead.
+            "aria-disabled:cursor-not-allowed aria-disabled:bg-muted aria-disabled:text-muted-foreground aria-disabled:hover:bg-muted/90 aria-disabled:hover:translate-0 aria-disabled:hover:shadow-none",
+          )}
+        >
+          Request service
+        </Link>
       </header>
 
       <AsyncBoundary
