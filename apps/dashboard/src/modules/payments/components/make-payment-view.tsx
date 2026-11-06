@@ -15,7 +15,7 @@ import { usePlans } from "@/modules/plans/query-options";
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="flex max-w-[620px] flex-col gap-6 p-5 md:p-10">
+    <main className="flex flex-1 flex-col gap-6 max-w-2xl">
       <div>
         <div className="text-sm text-muted-foreground">
           <Link to="/app" className="hover:underline">
@@ -27,7 +27,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           </Link>{" "}
           / Make payment
         </div>
-        <h1 className="font-serif text-[36px] font-normal leading-[1.05] sm:text-[44px] md:text-[56px]">
+        <h1 className="page-title">
           Make a <span className="italic">payment</span>
         </h1>
       </div>

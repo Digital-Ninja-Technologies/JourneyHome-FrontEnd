@@ -1,28 +1,16 @@
-import { Button } from "@journeyhome/ui/components/button";
 import {
-  createFileRoute,
-  Link,
-  Outlet,
-  redirect,
-} from "@tanstack/react-router";
-import { Menu } from "lucide-react";
-import { useEffect, useState } from "react";
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@journeyhome/ui/components/sidebar";
+import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { CatchBoundary } from "@/components/catch-boundary";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { setPendingVerificationEmail } from "@/modules/auth/api";
 import { sessionQueryOptions } from "@/modules/auth/query-options";
 import { clearStoredSelectedPackage } from "@/modules/onboarding/storage";
 import { setOnboardingPlan } from "@/modules/payments/checkout";
-
-const COLLAPSE_KEY = "jh_nav_collapsed";
-
-function readCollapsed() {
-  try {
-    return localStorage.getItem(COLLAPSE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
 
 export const Route = createFileRoute("/app")({
   beforeLoad: async ({ context, location }) => {
@@ -39,42 +27,29 @@ export const Route = createFileRoute("/app")({
   errorComponent: CatchBoundary,
 });
 
-function AppLayout() {
-  const [collapsed, setCollapsed] = useState(readCollapsed);
-  const [mobileOpen, setMobileOpen] = useState(false);
+function getSidebarStateFromCookie(): boolean {
+  if (typeof document === "undefined") return true;
+  const match = document.cookie.match(/sidebar_state=([^;]+)/);
+  if (!match) return true;
+  return match[1] === "true";
+}
 
+function AppLayout() {
   useEffect(() => {
     clearStoredSelectedPackage();
     setOnboardingPlan(null);
     setPendingVerificationEmail(null);
   }, []);
 
-  function toggle() {
-    setCollapsed((c) => {
-      try {
-        localStorage.setItem(COLLAPSE_KEY, c ? "0" : "1");
-      } catch {
-        /* ignore */
-      }
-      return !c;
-    });
-  }
-
-  function closeMobile() {
-    setMobileOpen(false);
-  }
-
   return (
-    <div className="flex min-h-screen">
-      <AppSidebar
-        collapsed={collapsed}
-        mobileOpen={mobileOpen}
-        onToggle={toggle}
-        onCloseMobile={closeMobile}
-      />
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-canvas px-4 py-3.5 md:hidden">
+    <SidebarProvider
+      defaultOpen={getSidebarStateFromCookie()}
+      className="min-w-0 max-w-full"
+    >
+      <AppSidebar />
+      <SidebarInset className="min-w-0 max-w-full overflow-x-hidden flex flex-1 flex-col bg-canvas">
+        {/* Mobile sticky header with SidebarTrigger and Logo */}
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-canvas px-4 py-3.5 md:hidden">
           <Link
             to="/app"
             className="flex items-center gap-2"
@@ -103,19 +78,13 @@ function AppLayout() {
               Journey <span className="italic text-link">Home</span>
             </span>
           </Link>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Open menu"
-            className="text-foreground md:hidden"
-          >
-            <Menu className="size-5" />
-          </Button>
+          <SidebarTrigger className="text-foreground md:hidden" />
+        </header>
+
+        <div className="page-wrapper flex flex-1 flex-col min-w-0">
+          <Outlet />
         </div>
-        <Outlet />
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

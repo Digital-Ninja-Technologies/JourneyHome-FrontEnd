@@ -1,12 +1,20 @@
 import { ApiError } from "@journeyhome/api-client";
-import type { Plan } from "@journeyhome/schemas";
+import type {
+  AppNotification,
+  Payment,
+  Plan,
+  ServiceDocument,
+  ServiceRequest,
+} from "@journeyhome/schemas";
 
 /**
  * Simulated server for endpoints when running locally with VITE_USE_MOCKS=true.
- * State lives in localStorage. Mirrors docs/BACKEND_CONTRACT.md.
+ * State lives in localStorage. Mirrors api-doc.yaml.
  */
 export const NOT_MOCKED = Symbol("not-mocked");
 export const DEMO_RESET_TOKEN = "demo-token";
+/** Presigned upload URLs from the mock point here; `putToStorage` skips the network for them. */
+export const MOCK_STORAGE_ORIGIN = "https://mock-storage.local";
 
 export interface Preferences {
   paymentReminders: boolean;
@@ -14,15 +22,6 @@ export interface Preferences {
   serviceRequestUpdates: boolean;
   productNewsOffers: boolean;
 }
-export interface Card {
-  _id: string;
-  brand: string;
-  last4: string;
-  expMonth: number;
-  expYear: number;
-  isDefault: boolean;
-}
-
 const DEFAULT_PREFS: Preferences = {
   paymentReminders: true,
   deficitAlerts: true,
@@ -60,6 +59,119 @@ function sessionUser(): { id: string; name: string; email: string } {
 }
 
 const bad = (message: string) => new ApiError(message, 400);
+
+const DAY = 86400000;
+const nowIso = () => new Date().toISOString();
+const inDays = (n: number) => new Date(Date.now() + DAY * n).toISOString();
+const page = <T>(items: T[]) => ({
+  items,
+  pagination: {
+    page: 1,
+    limit: 20,
+    total: items.length,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPreviousPage: false,
+  },
+});
+
+const PACKAGES = [
+  {
+    _id: "pkg_standard",
+    name: "Standard",
+    description: "Photography + videography",
+    features: ["Full-day photography & video", "Digital gallery"],
+    amount: 500000,
+    currency: "NGN",
+    billingInterval: "monthly",
+    isActive: true,
+  },
+  {
+    _id: "pkg_premium",
+    name: "Premium",
+    description: "Full production",
+    features: ["Everything in Standard", "Second videographer"],
+    amount: 1000000,
+    currency: "NGN",
+    billingInterval: "monthly",
+    isActive: true,
+  },
+];
+
+const defaultPlan = (): Plan => ({
+  _id: "plan_demo_1",
+  owner: "demo-cust-1",
+  package: "pkg_tier_1",
+  packageDetails: {
+    packageId: "pkg_tier_1",
+    name: "Standard",
+    description: "Standard package",
+    features: ["Photography", "Live Stream"],
+    amount: 500000,
+    currency: "NGN",
+  },
+  coveredPerson: {
+    fullName: "Adebayo Johnson",
+    dateOfBirth: "1960-01-01",
+    gender: "male",
+    relationship: "father",
+    address: "12 Marina, Lagos",
+    phoneNumber: "08012345678",
+  },
+  amount: 500000,
+  currency: "NGN",
+  billingInterval: "monthly",
+  startDate: nowIso(),
+  totalContributedAmount: 1500000,
+  status: "Active",
+  coverageStatus: "Active",
+  nextPaymentDate: inDays(15),
+  createdAt: nowIso(),
+  updatedAt: nowIso(),
+});
+const storedPlans = () => read<Plan[]>("jh_mock:plans", [defaultPlan()]);
+
+const mockPayment = (over: Partial<Payment> = {}): Payment => ({
+  _id: "pay_1",
+  owner: "demo-cust-1",
+  plan: "plan_demo_1",
+  amount: 500000,
+  currency: "NGN",
+  reference: "jh_init_demo_1",
+  providerReference: "jh_init_demo_1",
+  provider: "paystack",
+  purpose: "recurring_contribution",
+  status: "Successful",
+  createdAt: nowIso(),
+  updatedAt: nowIso(),
+  processedAt: nowIso(),
+  ...over,
+});
+
+const REQUESTS_KEY = "jh_mock:requests";
+const storedRequests = () => read<ServiceRequest[]>(REQUESTS_KEY, []);
+
+const NOTIFICATIONS_KEY = "jh_mock:notifications";
+const seedNotifications = (): AppNotification[] => [
+  {
+    _id: "notif_1",
+    title: "Contribution received",
+    message: "Your monthly contribution was received. Thank you.",
+    event: "payment_successful",
+    isRead: false,
+    createdAt: nowIso(),
+  },
+  {
+    _id: "notif_2",
+    title: "Welcome to Journey Home",
+    message: "Your account is ready. Start a plan whenever you are.",
+    event: "welcome",
+    isRead: true,
+    createdAt: inDays(-3),
+  },
+];
+const storedNotifications = () =>
+  read<AppNotification[]>(NOTIFICATIONS_KEY, seedNotifications());
 
 export async function mockRequest(
   method: string,
@@ -155,20 +267,7 @@ export async function mockRequest(
         throw bad("New password must be at least 6 characters.");
       return { changed: true, success: true };
     },
-    "PATCH /auth/me/password": () => {
-      if (b.currentPassword === "wrong")
-        throw bad("Your current password is incorrect.");
-      if (!b.newPassword || b.newPassword.length < 6)
-        throw bad("New password must be at least 6 characters.");
-      return { changed: true };
-    },
     "PATCH /auth/notification-preferences": () => {
-      const u = sessionUser();
-      const next = { ...read(`jh_mock:prefs:${u.id}`, {}), ...b };
-      write(`jh_mock:prefs:${u.id}`, next);
-      return { ...DEFAULT_PREFS, ...next };
-    },
-    "PATCH /auth/me/preferences": () => {
       const u = sessionUser();
       const next = { ...read(`jh_mock:prefs:${u.id}`, {}), ...b };
       write(`jh_mock:prefs:${u.id}`, next);
@@ -178,73 +277,8 @@ export async function mockRequest(
       if (!b.password) throw bad("Current password is required.");
       return { success: true, closed: true };
     },
-    "GET /packages": () => [
-      {
-        _id: "pkg_standard",
-        name: "Standard",
-        description: "Photography + videography",
-        features: ["Full-day photography & video", "Digital gallery"],
-        amount: 500000,
-        currency: "NGN",
-        billingInterval: "monthly",
-        isActive: true,
-      },
-      {
-        _id: "pkg_premium",
-        name: "Premium",
-        description: "Full production",
-        features: ["Everything in Standard", "Second videographer"],
-        amount: 1000000,
-        currency: "NGN",
-        billingInterval: "monthly",
-        isActive: true,
-      },
-    ],
-    "GET /plans": () => {
-      const defaultPlan: Plan = {
-        _id: "plan_demo_1",
-        owner: "demo-cust-1",
-        package: "pkg_tier_1",
-        packageDetails: {
-          packageId: "pkg_tier_1",
-          name: "Standard",
-          description: "Standard package",
-          features: ["Photography", "Live Stream"],
-          amount: 500000,
-          currency: "NGN",
-        },
-        coveredPerson: {
-          fullName: "Adebayo Johnson",
-          dateOfBirth: "1960-01-01",
-          gender: "male",
-          relationship: "father",
-          address: "12 Marina, Lagos",
-          phoneNumber: "08012345678",
-        },
-        amount: 500000,
-        currency: "NGN",
-        billingInterval: "monthly",
-        startDate: new Date().toISOString(),
-        totalContributedAmount: 1500000,
-        status: "Active",
-        coverageStatus: "Active",
-        nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      const plans = read<Plan[]>("jh_mock:plans", [defaultPlan]);
-      return {
-        items: plans,
-        pagination: {
-          page: 1,
-          limit: 20,
-          total: plans.length,
-          totalPages: 1,
-          hasNextPage: false,
-          hasPreviousPage: false,
-        },
-      };
-    },
+    "GET /packages": () => PACKAGES,
+    "GET /plans": () => page(storedPlans()),
     "POST /plans": () => {
       const newPlan: Plan = {
         _id: `plan_${Date.now()}`,
@@ -293,43 +327,12 @@ export async function mockRequest(
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      const defaultPlan: Plan = {
-        _id: "plan_demo_1",
-        owner: "demo-cust-1",
-        package: "pkg_tier_1",
-        packageDetails: {
-          packageId: "pkg_tier_1",
-          name: "Standard",
-          description: "Standard package",
-          features: ["Photography", "Live Stream"],
-          amount: 500000,
-          currency: "NGN",
-        },
-        coveredPerson: {
-          fullName: "Adebayo Johnson",
-          dateOfBirth: "1960-01-01",
-          gender: "male",
-          relationship: "father",
-          address: "12 Marina, Lagos",
-          phoneNumber: "08012345678",
-        },
-        amount: 500000,
-        currency: "NGN",
-        billingInterval: "monthly",
-        startDate: new Date().toISOString(),
-        totalContributedAmount: 1500000,
-        status: "Active",
-        coverageStatus: "Active",
-        nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      const current = read<Plan[]>("jh_mock:plans", [defaultPlan]);
+      const current = storedPlans();
       write("jh_mock:plans", [newPlan, ...current]);
       return newPlan;
     },
     "GET /plans/dashboard": () => {
-      const plans = read<Plan[]>("jh_mock:plans", []);
+      const plans = storedPlans();
       const active = plans.filter((p) => p.status === "Active");
       const totalContributed = plans.reduce(
         (sum, p) => sum + (p.totalContributedAmount ?? p.amount ?? 0),
@@ -360,196 +363,213 @@ export async function mockRequest(
         hasPreviousPage: false,
       },
     }),
-    "GET /payments": () => ({
-      items: [
-        {
-          _id: "pay_1",
-          owner: "demo-cust-1",
-          plan: "plan_demo_1",
-          amount: 500000,
-          currency: "NGN",
-          reference: "jh_init_demo_1",
-          providerReference: "jh_init_demo_1",
-          provider: "paystack",
-          purpose: "recurring_contribution",
-          status: "Successful",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          processedAt: new Date().toISOString(),
+    "GET /payments": () => page([mockPayment()]),
+    "GET /service-requests": () => storedRequests(),
+    "POST /service-requests": () => {
+      const plan =
+        storedPlans().find((p) => p._id === b.planId) ?? storedPlans()[0];
+      const created: ServiceRequest = {
+        _id: `req_${Date.now()}`,
+        owner: "demo-cust-1",
+        plan: plan._id,
+        status: "Submitted",
+        dateOfDeath: b.dateOfDeath ?? nowIso(),
+        serviceLocation: b.serviceLocation ?? "",
+        expectedServiceDate: b.expectedServiceDate ?? inDays(7),
+        contactPerson: b.contactPerson ?? "",
+        contactPhone: b.contactPhone ?? "",
+        ...(b.additionalInformation && {
+          additionalInformation: b.additionalInformation,
+        }),
+        coveredPersonSnapshot: plan.coveredPerson,
+        documents: [],
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      };
+      write(REQUESTS_KEY, [created, ...storedRequests()]);
+      return created;
+    },
+    "GET /notifications": () => {
+      const all = storedNotifications();
+      const unread = all.filter((n) => !n.isRead);
+      const filter = new URLSearchParams(path.split("?")[1] ?? "").get(
+        "isRead",
+      );
+      const items =
+        filter === null ? all : all.filter((n) => String(n.isRead) === filter);
+      return {
+        ...page(items),
+        counts: {
+          totalNotifications: all.length,
+          totalUnreadNotifications: unread.length,
         },
-      ],
-      pagination: {
-        page: 1,
-        limit: 20,
-        total: 1,
-        totalPages: 1,
-        hasNextPage: false,
-        hasPreviousPage: false,
-      },
-    }),
-    "POST /payments/initialize": () => ({
-      paymentId: `pay_${Date.now()}`,
-      reference: `ref_demo_${Date.now()}`,
-      authorizationUrl: `${window.location.origin}/app/payments/callback?reference=ref_demo_${Date.now()}&trxref=ref_demo_${Date.now()}`,
-      accessCode: "access_code_mock",
-    }),
-    "GET /service-requests": () => [],
-    "POST /service-requests": () => ({
-      _id: `req_${Date.now()}`,
-      owner: "demo-cust-1",
-      plan: "plan_demo_1",
-      status: "Submitted",
-      dateOfDeath: new Date().toISOString(),
-      serviceLocation: "Ikoyi Cemetery, Lagos",
-      expectedServiceDate: new Date(Date.now() + 86400000 * 7).toISOString(),
-      contactPerson: "Demo Customer",
-      contactPhone: "+2348012345678",
-      coveredPersonSnapshot: {
-        fullName: "Adebayo Johnson",
-        dateOfBirth: "1960-01-01",
-        gender: "male",
-        relationship: "father",
-        address: "12 Marina, Lagos",
-        phoneNumber: "+2348012345678",
-      },
-      documents: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }),
-    "GET /notifications": () => ({
-      items: [],
-      pagination: {
-        page: 1,
-        limit: 20,
-        total: 0,
-        totalPages: 0,
-        hasNextPage: false,
-        hasPreviousPage: false,
-      },
-      counts: {
-        totalNotifications: 0,
-        totalUnreadNotifications: 0,
-      },
-    }),
+      };
+    },
   };
 
   let handler = handlers[route];
 
-  // Match dynamic routes
-  const planMatch = /^GET \/plans\/(.+)$/.exec(route);
-  if (!handler && planMatch) {
-    handler = () => {
-      const planId = planMatch[1];
-      const plans = read<Plan[]>("jh_mock:plans", []);
-      const found = plans.find((p) => p._id === planId);
-      if (found) return found;
-      return {
-        _id: planId || "plan_demo_1",
-        owner: "demo-cust-1",
-        package: "pkg_tier_1",
-        packageDetails: {
-          packageId: "pkg_tier_1",
-          name: "Standard",
-          description: "Standard package",
-          features: ["Photography", "Live Stream"],
-          amount: 500000,
-          currency: "NGN",
-        },
-        coveredPerson: {
-          fullName: "Adebayo Johnson",
-          dateOfBirth: "1960-01-01",
-          gender: "male",
-          relationship: "father",
-          address: "12 Marina, Lagos",
-          phoneNumber: "08012345678",
-        },
+  // Dynamic routes
+  const match = (re: RegExp) => re.exec(route);
+  const dyn: [RegExp, (m: RegExpExecArray) => unknown][] = [
+    [
+      /^GET \/packages\/([^/]+)$/,
+      (m) => {
+        const found = PACKAGES.find((p) => p._id === m[1]);
+        if (!found) throw new ApiError("Package not found.", 404);
+        return found;
+      },
+    ],
+    [
+      /^GET \/plans\/([^/]+)$/,
+      (m) => {
+        const planId = m[1];
+        const found = storedPlans().find((p) => p._id === planId);
+        if (found) return found;
+        return {
+          ...defaultPlan(),
+          _id: planId,
+          status: planId === "plan_pending_1" ? "Pending" : "Active",
+        };
+      },
+    ],
+    [
+      /^POST \/payments\/plans\/([^/]+)\/initialize-initial$/,
+      () => {
+        const ref = `ref_demo_${Date.now()}`;
+        return {
+          paymentId: `pay_${Date.now()}`,
+          reference: ref,
+          authorizationUrl: `${window.location.origin}/app/payments/callback?reference=${ref}&trxref=${ref}`,
+          accessCode: "access_code_mock",
+        };
+      },
+    ],
+    [
+      /^POST \/payments\/verify\/([^/]+)$/,
+      (m) =>
+        mockPayment({
+          _id: `pay_${m[1]}`,
+          reference: decodeURIComponent(m[1]),
+          providerReference: decodeURIComponent(m[1]),
+        }),
+    ],
+    [/^GET \/payments\/([^/]+)$/, (m) => mockPayment({ _id: m[1] })],
+    [
+      /^GET \/subscriptions\/([^/]+)$/,
+      (m) => ({
+        _id: m[1],
+        plan: "plan_demo_1",
+        status: "active",
         amount: 500000,
         currency: "NGN",
-        billingInterval: "monthly",
-        startDate: new Date().toISOString(),
-        totalContributedAmount: 1500000,
-        status: planId === "plan_pending_1" ? "Pending" : "Active",
-        coverageStatus: "Active",
-        nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-    };
-  }
-
-  const reqMatch = /^GET \/service-requests\/(.+)$/.exec(route);
-  if (!handler && reqMatch) {
-    handler = () => ({
-      request: {
-        _id: reqMatch[1],
-        owner: "demo-cust-1",
-        plan: "plan_demo_1",
-        status: "Submitted",
-        dateOfDeath: new Date().toISOString(),
-        serviceLocation: "Ikoyi Cemetery, Lagos",
-        expectedServiceDate: new Date(Date.now() + 86400000 * 7).toISOString(),
-        contactPerson: "Demo Customer",
-        contactPhone: "+2348012345678",
-        coveredPersonSnapshot: {
-          fullName: "Adebayo Johnson",
-          dateOfBirth: "1960-01-01",
-          gender: "male",
-          relationship: "father",
-          address: "12 Marina, Lagos",
-          phoneNumber: "+2348012345678",
-        },
-        documents: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        nextPaymentDate: inDays(15),
+        createdAt: nowIso(),
+      }),
+    ],
+    [
+      /^PATCH \/notifications\/([^/]+)\/read$/,
+      (m) => {
+        const next = storedNotifications().map((n) =>
+          n._id === m[1] ? { ...n, isRead: true } : n,
+        );
+        write(NOTIFICATIONS_KEY, next);
+        return next.find((n) => n._id === m[1]) ?? {};
       },
-      documents: [],
-    });
-  }
-
-  const initPaymentMatch =
-    /^POST \/payments\/plans\/(.+)\/initialize-initial$/.exec(route);
-  if (!handler && initPaymentMatch) {
-    handler = () => ({
-      paymentId: `pay_${Date.now()}`,
-      reference: `ref_demo_${Date.now()}`,
-      authorizationUrl: `${window.location.origin}/app/payments/callback?reference=ref_demo_${Date.now()}&trxref=ref_demo_${Date.now()}`,
-      accessCode: "access_code_mock",
-    });
-  }
-
-  const subMatch = /^GET \/subscriptions\/(.+)$/.exec(route);
-  if (!handler && subMatch) {
-    handler = () => ({
-      _id: subMatch[1],
-      plan: "plan_demo_1",
-      status: "active",
-      amount: 500000,
-      currency: "NGN",
-      nextPaymentDate: new Date(Date.now() + 86400000 * 15).toISOString(),
-      createdAt: new Date().toISOString(),
-    });
-  }
-
-  const del = /^DELETE \/payments\/methods\/(.+)$/.exec(route);
-  if (!handler && del) {
-    handler = () => {
-      const u = sessionUser();
-      const cards = read<Card[]>(`jh_mock:cards:${u.id}`, [
-        {
-          _id: "card_demo_1",
-          brand: "Visa",
-          last4: "4821",
-          expMonth: 9,
-          expYear: 2029,
-          isDefault: true,
-        },
-      ]);
-      const left = cards.filter((c) => c._id !== del[1]);
-      if (left.length && !left.some((c) => c.isDefault))
-        left[0].isDefault = true;
-      write(`jh_mock:cards:${u.id}`, left);
-      return { removed: true };
-    };
+    ],
+    [
+      /^DELETE \/notifications\/([^/]+)$/,
+      (m) => {
+        write(
+          NOTIFICATIONS_KEY,
+          storedNotifications().filter((n) => n._id !== m[1]),
+        );
+        return { success: true };
+      },
+    ],
+    [
+      /^GET \/service-requests\/([^/]+)$/,
+      (m) => {
+        const request = storedRequests().find((r) => r._id === m[1]);
+        if (!request) throw new ApiError("Service request not found.", 404);
+        return { request, documents: request.documents };
+      },
+    ],
+    [
+      /^POST \/service-requests\/([^/]+)\/documents\/upload-url$/,
+      () => {
+        const fileId = `file_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        return {
+          fileId,
+          uploadUrl: `${MOCK_STORAGE_ORIGIN}/upload/${fileId}`,
+          uploadToken: `tok_${fileId}`,
+          storageKey: `service-documents/${fileId}`,
+          expiresIn: 900,
+        };
+      },
+    ],
+    [
+      /^POST \/service-requests\/([^/]+)\/documents\/complete$/,
+      (m) => {
+        const requests = storedRequests();
+        const request = requests.find((r) => r._id === m[1]);
+        if (!request) throw new ApiError("Service request not found.", 404);
+        const doc: ServiceDocument = {
+          _id: `doc_${b.fileId}`,
+          serviceRequest: request._id,
+          owner: request.owner,
+          plan: request.plan,
+          file: b.fileId,
+          documentType: b.documentType,
+          verificationStatus: "Pending",
+          uploadedAt: nowIso(),
+          createdAt: nowIso(),
+          updatedAt: nowIso(),
+        };
+        const documents = [
+          ...request.documents.map((d) =>
+            d._id === b.replacesDocumentId ? { ...d, replacedBy: doc._id } : d,
+          ),
+          doc,
+        ];
+        write(
+          REQUESTS_KEY,
+          requests.map((r) =>
+            r._id === request._id
+              ? { ...r, documents, updatedAt: nowIso() }
+              : r,
+          ),
+        );
+        return doc;
+      },
+    ],
+    [
+      /^GET \/service-requests\/([^/]+)\/documents\/([^/]+)\/download-url$/,
+      (m) => {
+        const doc = storedRequests()
+          .find((r) => r._id === m[1])
+          ?.documents.find((d) => d._id === m[2]);
+        if (!doc) throw new ApiError("Document not found.", 404);
+        return {
+          document: {
+            _id: doc._id,
+            documentType: doc.documentType,
+            verificationStatus: doc.verificationStatus,
+          },
+          url: `${window.location.origin}/#mock-document`,
+          expiresIn: 300,
+        };
+      },
+    ],
+  ];
+  if (!handler) {
+    for (const [re, fn] of dyn) {
+      const m = match(re);
+      if (m) {
+        handler = () => fn(m);
+        break;
+      }
+    }
   }
 
   if (!handler) return NOT_MOCKED;

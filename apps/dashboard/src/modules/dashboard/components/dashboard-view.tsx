@@ -115,7 +115,7 @@ function PlanCard({ plan }: { plan: Plan }) {
         )}
       >
         <span>
-          {count} × {formatMoney(plan.amount, plan.currency)}
+          {count} x {formatMoney(plan.amount, plan.currency)}
         </span>
         <span>{dueLabel(plan)}</span>
       </div>
@@ -132,9 +132,8 @@ function PlanCard({ plan }: { plan: Plan }) {
           to="/app/plans/$id"
           params={{ id: plan._id }}
           className={cn(
-            buttonVariants({ variant: dark ? "outline" : "default" }),
+            buttonVariants({ variant: dark ? "secondary" : "default" }),
             "w-full",
-            dark && "border-canvas/30 text-canvas hover:bg-canvas/10",
           )}
         >
           View plan
@@ -152,7 +151,14 @@ function RecentPayments({
   plans: Plan[];
 }) {
   const byId = new Map(plans.map((p) => [p._id, p]));
-  const rows = payments.filter((p) => p.status !== "Pending").slice(0, 4);
+  const rows = [...payments]
+    .filter((p) => p.status !== "Pending")
+    .sort(
+      (a, b) =>
+        +new Date(b.processedAt ?? b.createdAt) -
+        +new Date(a.processedAt ?? a.createdAt),
+    )
+    .slice(0, 8);
   return (
     <>
       {rows.length === 0 && (
@@ -212,6 +218,10 @@ export function DashboardView() {
   const now = new Date();
 
   const plans = (plansQ.data ?? []).filter((p) => !HIDDEN.has(p.status));
+  const recentPlans = [...plans]
+    .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+    .slice(0, 4);
+
   const payments = paymentsQ.data ?? [];
   const live = plans.filter((p) => LIVE.has(p.status));
   const nextPlan = [...live]
@@ -230,13 +240,13 @@ export function DashboardView() {
   const summary = summaryQ.data;
 
   return (
-    <main className="flex flex-col gap-8 p-5 md:p-10">
+    <main className="flex flex-1 flex-col gap-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="text-sm text-muted-foreground">
             {formatToday(now)}
           </div>
-          <h1 className="font-serif text-[36px] font-normal leading-[1.05] sm:text-[44px] md:text-[56px]">
+          <h1 className="page-title">
             {greeting(now)},{" "}
             <span className="italic">{user ? firstName(user.name) : ""}</span>
           </h1>
@@ -337,7 +347,7 @@ export function DashboardView() {
         </SummaryCard>
       </section>
 
-      <div className="grid items-start gap-6 xl:grid-cols-[1.15fr_1fr]">
+      <div className="grid items-start gap-8 md:gap-12 xl:grid-cols-[1.15fr_1fr]">
         <section aria-label="Your plans" className="flex flex-col gap-4">
           <div className="flex items-end justify-between">
             <h2 className="font-serif text-[32px] font-normal">Your plans</h2>
@@ -356,7 +366,7 @@ export function DashboardView() {
             loadingFallback={<PlansCardsSkeleton count={2} />}
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              {plans.map((p) => (
+              {recentPlans.map((p) => (
                 <PlanCard key={p._id} plan={p} />
               ))}
               <Link

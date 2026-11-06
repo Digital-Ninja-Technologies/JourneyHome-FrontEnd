@@ -1,4 +1,5 @@
 import type { LoginInput, SignupInput } from "@journeyhome/schemas";
+import { toast } from "@journeyhome/ui/components/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { sanitizeRedirect } from "@/lib/search-schemas";
@@ -23,8 +24,20 @@ export function useLoginMutation() {
     onSuccess: (session, variables) => {
       queryClient.clear();
       queryClient.setQueryData(sessionQueryOptions().queryKey, session);
+      toast.add({
+        type: "success",
+        title: "Welcome back",
+        description: `Signed in as ${session.user.name || session.user.email}.`,
+      });
       const to = sanitizeRedirect(variables.redirect, "/app");
       navigate({ to: to as any, replace: true });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Sign in failed",
+        description: error.message || "Invalid email or password.",
+      });
     },
   });
 }
@@ -40,7 +53,19 @@ export function useLogoutMutation() {
     onSuccess: () => {
       queryClient.setQueryData(sessionQueryOptions().queryKey, null);
       queryClient.clear();
+      toast.add({
+        type: "info",
+        title: "Signed out",
+        description: "You have been logged out of your account.",
+      });
       navigate({ to: "/login", replace: true });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Logout failed",
+        description: error.message || "Could not log out at this time.",
+      });
     },
   });
 }
@@ -51,9 +76,21 @@ export function useSignupMutation() {
   return useMutation({
     mutationFn: (input: SignupInput) => signup(input),
     onSuccess: () => {
+      toast.add({
+        type: "success",
+        title: "Account created",
+        description: "Please check your email to verify your account.",
+      });
       navigate({
         to: "/verify-email",
         replace: true,
+      });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Sign up failed",
+        description: error.message || "Could not create account.",
       });
     },
   });
@@ -68,7 +105,19 @@ export function useDeleteAccountMutation() {
     onSuccess: () => {
       queryClient.setQueryData(sessionQueryOptions().queryKey, null);
       queryClient.clear();
+      toast.add({
+        type: "info",
+        title: "Account deleted",
+        description: "Your account and data have been removed.",
+      });
       navigate({ to: "/login", replace: true });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Delete account failed",
+        description: error.message || "Incorrect password or server error.",
+      });
     },
   });
 }
@@ -82,6 +131,18 @@ export function useUpdateUserMutation() {
     },
     onSuccess: (updatedSession) => {
       queryClient.setQueryData(sessionQueryOptions().queryKey, updatedSession);
+      toast.add({
+        type: "success",
+        title: "Profile updated",
+        description: "Your personal details have been updated.",
+      });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Update failed",
+        description: error.message || "Failed to update profile.",
+      });
     },
   });
 }

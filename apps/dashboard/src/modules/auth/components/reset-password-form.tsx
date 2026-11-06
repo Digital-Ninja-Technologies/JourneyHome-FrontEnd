@@ -1,6 +1,7 @@
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { Input } from "@journeyhome/ui/components/input";
 import { Label } from "@journeyhome/ui/components/label";
+import { toast } from "@journeyhome/ui/components/toast";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useSearch } from "@tanstack/react-router";
@@ -14,6 +15,20 @@ export function ResetPasswordForm() {
   const [mismatch, setMismatch] = useState(false);
   const reset = useMutation({
     mutationFn: (password: string) => resetPassword(token || "", password),
+    onSuccess: () => {
+      toast.add({
+        type: "success",
+        title: "Password reset",
+        description: "Your password has been reset successfully. You can now log in.",
+      });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Reset failed",
+        description: error.message || "Failed to reset password.",
+      });
+    },
   });
 
   if (!token) {

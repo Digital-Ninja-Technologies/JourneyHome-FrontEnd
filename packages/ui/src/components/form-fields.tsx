@@ -2,6 +2,7 @@
 
 import type * as React from "react";
 import type { ComponentProps } from "react";
+import { useRef } from "react";
 import {
   type Control,
   Controller,
@@ -9,6 +10,13 @@ import {
   type Path,
   useController,
 } from "react-hook-form";
+import {
+  type CountryCode,
+  caretAfterDigits,
+  countDigitsBefore,
+  DEFAULT_PHONE_COUNTRY,
+  formatPhoneInput,
+} from "../lib/phone";
 import { cn } from "../lib/utils";
 import { Checkbox } from "./checkbox";
 import { DatePicker } from "./date-picker";
@@ -64,6 +72,98 @@ export function FormInput<T extends FieldValues>({
         id={field.name}
         aria-invalid={fieldState.invalid}
         className={cn("", className)}
+      />
+      {description && <FieldDescription>{description}</FieldDescription>}
+      <FieldError>{fieldState.error?.message}</FieldError>
+    </Field>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*                               FormPhoneInput                               */
+/* -------------------------------------------------------------------------- */
+
+export interface FormPhoneInputProps<T extends FieldValues>
+  extends Omit<
+      ComponentProps<"input">,
+      "name" | "value" | "onChange" | "type" | "defaultValue"
+    >,
+    BaseFormProps<T> {
+  /** Region used to read numbers typed without a `+country` prefix. */
+  defaultCountry?: CountryCode;
+}
+
+/**
+ * Phone field that formats as the user types (`0803 123 4567`, `+234 803 123 4567`).
+ * The form value is the formatted string; validate it with `isValidPhone` and convert
+ * with `toE164` from `lib/phone` before sending it to an API.
+ */
+export function FormPhoneInput<T extends FieldValues>({
+  control,
+  name,
+  label,
+  className,
+  description,
+  defaultCountry = DEFAULT_PHONE_COUNTRY,
+  ...props
+}: FormPhoneInputProps<T>) {
+  const { field, fieldState } = useController({ name, control });
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const el = e.target;
+    const raw = el.value;
+    const previous: string = field.value ?? "";
+    let source = raw;
+    let caret = el.selectionStart ?? raw.length;
+
+    // Backspacing over a separator ("0803 |123") removes no digit, so the formatter would
+    // just put it back and the caret would never move. Treat it as deleting the digit before it.
+    const onlySeparatorRemoved =
+      raw.length < previous.length &&
+      raw.replace(/\D/g, "") === previous.replace(/\D/g, "") &&
+      raw.startsWith("+") === previous.startsWith("+");
+    if (onlySeparatorRemoved) {
+      const idx = raw.slice(0, caret).search(/\d(?=\D*$)/);
+      if (idx >= 0) {
+        source = raw.slice(0, idx) + raw.slice(idx + 1);
+        caret = idx;
+      }
+    }
+
+    const digitsBeforeCaret = countDigitsBefore(source, caret);
+    const formatted = formatPhoneInput(source, defaultCountry);
+    field.onChange(formatted);
+
+    // Re-formatting moves the caret to the end; put it back where the user was typing.
+    requestAnimationFrame(() => {
+      const target = inputRef.current;
+      if (!target || document.activeElement !== target) return;
+      const pos = caretAfterDigits(formatted, digitsBeforeCaret);
+      target.setSelectionRange(pos, pos);
+    });
+  }
+
+  return (
+    <Field data-invalid={fieldState.invalid}>
+      {label && <FieldLabel htmlFor={field.name}>{label}</FieldLabel>}
+      <Input
+        autoComplete="tel"
+        {...props}
+        id={field.name}
+        name={field.name}
+        type="tel"
+        inputMode="tel"
+        value={field.value ?? ""}
+        onChange={handleChange}
+        onBlur={field.onBlur}
+        disabled={props.disabled ?? field.disabled}
+        ref={(node) => {
+          inputRef.current = node;
+          field.ref(node);
+        }}
+        aria-invalid={fieldState.invalid}
+        className={className}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError>{fieldState.error?.message}</FieldError>

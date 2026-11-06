@@ -1,4 +1,5 @@
 import { checkoutInitializeSchema } from "@journeyhome/schemas";
+import { toast } from "@journeyhome/ui/components/toast";
 import { useMutation } from "@tanstack/react-query";
 import { api, parseApiResponse } from "@/lib/api";
 
@@ -42,6 +43,14 @@ export function useStartCheckout(
     onSuccess: (data) => {
       if (opts.onboarding) setOnboardingPlan(planId);
       window.location.assign(data.authorizationUrl);
+    },
+    onError: (error: Error) => {
+      toast.add({
+        type: "error",
+        title: "Checkout failed",
+        description:
+          error.message || "Could not start checkout with payment provider.",
+      });
     },
   });
 }

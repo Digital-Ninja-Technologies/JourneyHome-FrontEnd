@@ -1,11 +1,11 @@
 import type {
   DocumentType,
+  DocumentVerificationStatus,
   Plan,
   ServiceDocument,
   ServiceRequest,
 } from "@journeyhome/schemas";
 import type { Tone } from "@/components/status-pill";
-import { api } from "@/lib/api";
 
 export const DOC_LABEL: Record<DocumentType, string> = {
   Death_Certificate: "Death certificate",
@@ -19,15 +19,25 @@ export const REQUIRED_DOCS: DocumentType[] = [
   "Valid_Identification",
 ];
 
-export const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
-export const MAX_BYTES = 10 * 1024 * 1024;
+/** Accepted by `POST /service-requests/{id}/documents/upload-url`: PDF, JPG or PNG, up to 10 MB. */
+export const DOC_ACCEPT = {
+  "application/pdf": [".pdf"],
+  "image/jpeg": [".jpg", ".jpeg"],
+  "image/png": [".png"],
+};
+export const DOC_MAX_BYTES = 10 * 1024 * 1024;
+export const DOC_HINT = "JPG, PNG or PDF";
 
-export function validateFile(file: File): string | null {
-  if (!ACCEPTED_TYPES.includes(file.type))
-    return "Please choose a JPG, PNG or PDF file.";
-  if (file.size > MAX_BYTES) return "That file is over 10MB.";
-  return null;
-}
+export const DOC_STATUS_LABEL: Record<DocumentVerificationStatus, string> = {
+  Pending: "Awaiting review",
+  Approved: "Approved",
+  Requires_Resubmission: "Needs a new copy",
+};
+export const DOC_STATUS_TONE: Record<DocumentVerificationStatus, Tone> = {
+  Pending: "review",
+  Approved: "active",
+  Requires_Resubmission: "due",
+};
 
 /** Plans that can have a service requested (matches the backend's eligibility rule). */
 export const ELIGIBLE_PLAN = new Set<Plan["status"]>([
@@ -44,6 +54,12 @@ export const STEPS = [
   "Completed",
 ];
 
+/** Why the team asked for more information; the API doesn't document which field carries it. */
+export const moreInfoReason = (req: ServiceRequest) =>
+  req.moreInfoReason ?? req.reason;
+export const rejectionReason = (req: ServiceRequest) =>
+  req.rejectionReason ?? req.reason;
+
 /** Display state, combining the request's status with its plan's status (which carries scheduling and completion). */
 export function requestState(
   req: ServiceRequest,
@@ -55,7 +71,7 @@ export function requestState(
     return { label: "Rejected", tone: "cancelled", step: 0, closed: true };
   if (req.status === "Cancelled")
     return { label: "Cancelled", tone: "paused", step: 0, closed: true };
-  if (plan?.status === "Service_Scheduled")
+  if (plan?.status === "Service_Scheduled" || req.status === "Closed")
     return { label: "Scheduled", tone: "approved", step: 4, closed: false };
   switch (req.status) {
     case "Submitted":
@@ -76,9 +92,23 @@ export function requestState(
   }
 }
 
-export function requestMessage(req: ServiceRequest, plan?: Plan): string {
-  if (plan?.status === "Service_Scheduled")
-    return "Your service has been scheduled.";
+export function requestMessage(
+  req: ServiceRequest,
+  plan?: Plan,
+  documents: ServiceDocument[] = req.documents,
+): string {
+  if (plan?.status === "Completed")
+    return "This service is complete. Thank you for trusting us with it.";
+  if (plan?.status === "Service_Scheduled" || req.status === "Closed")
+    return req.photographerName
+      ? `Your service has been scheduled. ${req.photographerName} has been assigned.`
+      : "Your service has been scheduled.";
+  // Verification can't start until every required document is in, so don't promise it.
+  if (
+    (req.status === "Submitted" || req.status === "Under_Review") &&
+    documentsSummary(documents).uploaded < REQUIRED_DOCS.length
+  )
+    return "We've received your request, but we can't start verifying it until all the required documents are uploaded.";
   switch (req.status) {
     case "Submitted":
       return "We've received your request and will start verifying your documents shortly.";
@@ -86,7 +116,7 @@ export function requestMessage(req: ServiceRequest, plan?: Plan): string {
       return "We're checking the documents you submitted. You'll be notified as soon as there's an update.";
     case "More_Info_Required":
       return (
-        req.moreInfoReason ??
+        moreInfoReason(req) ??
         "We need a little more information. Please upload a replacement for any document marked below."
       );
     case "Docs_Verified":
@@ -94,66 +124,51 @@ export function requestMessage(req: ServiceRequest, plan?: Plan): string {
     case "Approved":
       return "Your request has been approved. You'll be notified as the next steps are confirmed.";
     case "Rejected":
-      return req.rejectionReason ?? "This request couldn't be approved.";
+      return rejectionReason(req) ?? "This request couldn't be approved.";
+    case "Cancelled":
+      return "This request was cancelled.";
     default:
       return "";
   }
 }
 
-/** Uploads one document: get a signed URL, PUT the file straight to storage, then confirm it with the API. */
-export async function uploadServiceDocument(
-  requestId: string,
-  file: File,
-  documentType: DocumentType,
-  replacesDocumentId?: string,
-) {
-  const init = await api<{
-    fileId: string;
-    uploadUrl: string;
-    uploadToken: string;
-  }>(`/service-requests/${requestId}/documents/upload-url`, {
-    body: {
-      documentType,
-      fileName: file.name,
-      contentType: file.type,
-      size: file.size,
-    },
-  });
-  let res: Response;
-  try {
-    res = await fetch(init.uploadUrl, {
-      method: "PUT",
-      headers: { "Content-Type": file.type },
-      body: file,
-    });
-  } catch {
-    throw new Error(
-      `Couldn't upload ${file.name}. Check your connection and try again.`,
-    );
-  }
-  if (!res.ok)
-    throw new Error(
-      `Couldn't upload ${file.name} (storage returned ${res.status}).`,
-    );
-  return api<ServiceDocument>(
-    `/service-requests/${requestId}/documents/complete`,
-    {
-      body: {
-        fileId: init.fileId,
-        uploadToken: init.uploadToken,
-        documentType,
-        ...(replacesDocumentId && { replacesDocumentId }),
-      },
-    },
+/** Documents can be added or replaced only while the request is still being verified. */
+export function canUploadDocuments(req: ServiceRequest): boolean {
+  return (
+    req.status === "Submitted" ||
+    req.status === "Under_Review" ||
+    req.status === "More_Info_Required" ||
+    req.status === "Docs_Verified"
   );
 }
 
-export async function openServiceDocument(
-  requestId: string,
-  documentId: string,
-) {
-  const { url } = await api<{ url: string }>(
-    `/service-requests/${requestId}/documents/${documentId}/download-url`,
+/** The current document of each type; replaced documents are history. */
+export function currentDocuments(
+  documents: ServiceDocument[],
+): Map<DocumentType, ServiceDocument> {
+  return new Map(
+    documents.filter((d) => !d.replacedBy).map((d) => [d.documentType, d]),
   );
-  window.open(url, "_blank", "noopener");
+}
+
+/** Document types to show: the required ones, plus anything else that was uploaded. */
+export function documentTypes(
+  current: Map<DocumentType, ServiceDocument>,
+): DocumentType[] {
+  return [...new Set<DocumentType>([...REQUIRED_DOCS, ...current.keys()])];
+}
+
+export function documentsSummary(documents: ServiceDocument[]) {
+  const current = currentDocuments(documents);
+  const docs = [...current.values()];
+  return {
+    uploaded: REQUIRED_DOCS.filter((t) => current.has(t)).length,
+    required: REQUIRED_DOCS.length,
+    needsAttention:
+      docs.filter((d) => d.verificationStatus === "Requires_Resubmission")
+        .length + REQUIRED_DOCS.filter((t) => !current.has(t)).length,
+    resubmit: docs.filter(
+      (d) => d.verificationStatus === "Requires_Resubmission",
+    ).length,
+  };
 }

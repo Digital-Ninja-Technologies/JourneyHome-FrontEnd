@@ -1,176 +1,182 @@
 import type { DocumentType, ServiceDocument } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
+import { toast } from "@journeyhome/ui/components/toast";
+import { cn } from "@journeyhome/ui/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
-import { ServiceDocumentsSkeleton } from "@/components/skeletons";
+import { AlertCircle, ExternalLink, FileText } from "lucide-react";
+import { useState } from "react";
 import { Pill } from "@/components/status-pill";
-import { formatDay } from "@/lib/format";
-import { useServiceRequest } from "@/modules/service-requests/query-options";
+import { formatDate } from "@/lib/format";
 import {
-  DOC_LABEL,
   openServiceDocument,
-  REQUIRED_DOCS,
-  uploadServiceDocument,
-  validateFile,
+  serviceDocumentUpload,
+} from "@/modules/service-requests/api";
+import {
+  currentDocuments,
+  DOC_ACCEPT,
+  DOC_HINT,
+  DOC_LABEL,
+  DOC_MAX_BYTES,
+  DOC_STATUS_LABEL,
+  DOC_STATUS_TONE,
+  documentTypes,
 } from "@/modules/service-requests/service-requests.utils";
+import { FileUploadArea } from "@/modules/storage/components/file-upload-area";
+import { useFileUpload } from "@/modules/storage/hooks/use-file-upload";
 
-const TONE = {
-  Pending: "review",
-  Approved: "active",
-  Requires_Resubmission: "due",
-} as const;
-const LABEL = {
-  Pending: "Awaiting review",
-  Approved: "Approved",
-  Requires_Resubmission: "Needs a new copy",
-} as const;
+/** Stage a file, then upload it as a new document (or as the replacement for a flagged one). */
+function DocumentUpload({
+  requestId,
+  type,
+  replacesId,
+}: {
+  requestId: string;
+  type: DocumentType;
+  replacesId?: string;
+}) {
+  const queryClient = useQueryClient();
+  const { uploadFile, isUploading, progress } = useFileUpload();
+  const [file, setFile] = useState<File | null>(null);
 
-/** Lists the request's documents and lets the customer upload missing ones or replace flagged ones. */
+  const upload = useMutation({
+    mutationFn: (f: File) =>
+      uploadFile(f, serviceDocumentUpload(requestId, type, replacesId)),
+    onSuccess: () => {
+      setFile(null);
+      void queryClient.invalidateQueries({ queryKey: ["service-request"] });
+      void queryClient.invalidateQueries({ queryKey: ["service-requests"] });
+      toast.add({
+        type: "success",
+        title: "Document uploaded",
+        description: `Your ${DOC_LABEL[type].toLowerCase()} was uploaded and is awaiting review.`,
+      });
+    },
+    // The upload hook has already shown the failure toast.
+  });
+
+  return (
+    <div className="flex flex-col gap-3">
+      <FileUploadArea
+        label={replacesId ? "Upload a new copy" : "Upload document"}
+        accept={DOC_ACCEPT}
+        maxSize={DOC_MAX_BYTES}
+        hint={DOC_HINT}
+        value={file}
+        onChange={setFile}
+        isUploading={isUploading}
+        progress={progress}
+      />
+      {file && (
+        <Button
+          type="button"
+          disabled={upload.isPending}
+          onClick={() => upload.mutate(file)}
+          className="h-11 rounded-xl text-sm font-bold"
+        >
+          {upload.isPending ? `Uploading (${progress}%)` : "Upload"}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+/** Every document the request needs, with its review status and, where allowed, a way to upload or replace it. */
 export function RequestDocuments({
   requestId,
+  documents,
   canUpload,
 }: {
   requestId: string;
+  documents: ServiceDocument[];
   canUpload: boolean;
 }) {
-  const q = useServiceRequest(requestId);
-  const queryClient = useQueryClient();
-  const [error, setError] = useState<string | null>(null);
-  const pending = useRef<{ type: DocumentType; replaces?: string } | null>(
-    null,
-  );
-  const input = useRef<HTMLInputElement>(null);
-
-  const upload = useMutation({
-    mutationFn: ({
-      file,
-      type,
-      replaces,
-    }: {
-      file: File;
-      type: DocumentType;
-      replaces?: string;
-    }) => uploadServiceDocument(requestId, file, type, replaces),
-    onSuccess: () => {
-      setError(null);
-      void queryClient.invalidateQueries({ queryKey: ["service-request"] });
-      void queryClient.invalidateQueries({ queryKey: ["service-requests"] });
-    },
-    onError: (e: Error) => setError(e.message),
-  });
+  const current = currentDocuments(documents);
 
   const open = useMutation({
-    mutationFn: (id: string) => openServiceDocument(requestId, id),
-    onError: (e: Error) => setError(e.message),
+    mutationFn: (documentId: string) =>
+      openServiceDocument(requestId, documentId),
+    onError: (e: Error) =>
+      toast.add({
+        type: "error",
+        title: "Couldn't open document",
+        description: e.message,
+      }),
   });
 
-  if (q.isPending) return <ServiceDocumentsSkeleton />;
-  if (q.isError)
-    return (
-      <p className="text-sm text-status-cancelled">
-        Couldn&rsquo;t load documents. {q.error.message}
-      </p>
-    );
-
-  // Replaced documents are history; show only the current one of each type.
-  const current = q.data.documents.filter((d) => !d.replacedBy);
-  const byType = new Map<DocumentType, ServiceDocument>(
-    current.map((d) => [d.documentType, d]),
-  );
-  const types = [
-    ...new Set<DocumentType>([
-      ...REQUIRED_DOCS,
-      ...current.map((d) => d.documentType),
-    ]),
-  ];
-
-  function choose(type: DocumentType, replaces?: string) {
-    pending.current = { type, replaces };
-    input.current?.click();
-  }
-
-  function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file || !pending.current) return;
-    const problem = validateFile(file);
-    if (problem) return setError(problem);
-    upload.mutate({ file, ...pending.current });
-  }
-
   return (
-    <div className="flex flex-col gap-1">
-      <input
-        ref={input}
-        type="file"
-        accept="application/pdf,image/jpeg,image/png"
-        className="hidden"
-        onChange={onFile}
-      />
-      {types.map((type) => {
-        const doc = byType.get(type);
+    <ul className="flex flex-col gap-3">
+      {documentTypes(current).map((type) => {
+        const doc = current.get(type);
         const resubmit = doc?.verificationStatus === "Requires_Resubmission";
+        const needsFile = canUpload && (!doc || resubmit);
+
         return (
-          <div
+          <li
             key={type}
-            className="flex flex-wrap items-center justify-between gap-3 border-t border-border py-3.5 first:border-t-0"
+            className={cn(
+              "flex flex-col gap-4 rounded-2xl border p-4 sm:p-5",
+              resubmit ? "border-status-due/40 bg-cream/40" : "border-border",
+            )}
           >
-            <div>
-              <div className="text-sm font-semibold">{DOC_LABEL[type]}</div>
-              <div className="text-xs text-muted-foreground">
-                {doc
-                  ? `Uploaded ${formatDay(doc.uploadedAt)}`
-                  : "Not uploaded yet"}
-                {resubmit && doc?.rejectionReason
-                  ? ` · ${doc.rejectionReason}`
-                  : ""}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-muted text-muted-foreground">
+                  <FileText className="size-5" />
+                </span>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold">{DOC_LABEL[type]}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {doc
+                      ? `Uploaded ${formatDate(doc.uploadedAt)}`
+                      : "Not uploaded yet"}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                {doc && (
+                  <Pill
+                    label={DOC_STATUS_LABEL[doc.verificationStatus]}
+                    tone={DOC_STATUS_TONE[doc.verificationStatus]}
+                  />
+                )}
+                {doc && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={open.isPending}
+                    onClick={() => open.mutate(doc._id)}
+                    className="gap-1.5 font-semibold text-link"
+                  >
+                    View
+                    <ExternalLink className="size-3.5" />
+                  </Button>
+                )}
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              {doc && (
-                <Pill
-                  label={LABEL[doc.verificationStatus]}
-                  tone={TONE[doc.verificationStatus]}
-                />
-              )}
-              {doc && (
-                <Button
-                  type="button"
-                  variant="link"
-                  size="xs"
-                  className="h-auto p-0 font-semibold text-link underline"
-                  onClick={() => open.mutate(doc._id)}
-                >
-                  View
-                </Button>
-              )}
-              {canUpload && (!doc || resubmit) && (
-                <Button
-                  type="button"
-                  size="sm"
-                  disabled={upload.isPending}
-                  onClick={() => choose(type, doc?._id)}
-                  className="h-9 rounded-xl px-4 text-xs font-bold"
-                >
-                  {upload.isPending
-                    ? "Uploading…"
-                    : doc
-                      ? "Upload replacement"
-                      : "Upload"}
-                </Button>
-              )}
-            </div>
-          </div>
+
+            {resubmit && (
+              <div className="flex items-start gap-2.5 rounded-xl bg-cream px-4 py-3 text-[13px] leading-relaxed text-status-due">
+                <AlertCircle className="mt-0.5 size-4 shrink-0" />
+                <div>
+                  <span className="font-bold">
+                    This document needs a new copy.
+                  </span>{" "}
+                  {doc?.rejectionReason ?? "Please upload a clearer copy."}
+                </div>
+              </div>
+            )}
+
+            {needsFile && (
+              <DocumentUpload
+                requestId={requestId}
+                type={type}
+                replacesId={doc?._id}
+              />
+            )}
+          </li>
         );
       })}
-      {error && (
-        <p
-          role="alert"
-          className="mt-2 rounded-lg bg-status-cancelled-bg px-3 py-2 text-[13px] text-status-cancelled"
-        >
-          {error}
-        </p>
-      )}
-    </div>
+    </ul>
   );
 }
