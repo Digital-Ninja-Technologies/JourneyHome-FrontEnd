@@ -1632,8 +1632,8 @@ components:
         needsReview:
           type: array
           maxItems: 5
-          description: Up to five most recent service requests needing staff review.
-          items: { $ref: '#/components/schemas/ServiceRequest' }
+          description: Up to five most recent service requests needing staff review, with `owner` and `plan` populated.
+          items: { $ref: '#/components/schemas/AdminServiceRequest' }
         period:
           type: object
           properties:

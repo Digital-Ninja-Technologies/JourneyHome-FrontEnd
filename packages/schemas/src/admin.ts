@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createPaginatedDataSchema, paginationQuerySchema } from "./pagination";
-import { serviceRequestSchema } from "./service-request";
+import { adminServiceRequestSchema } from "./service-request";
 
 /**
  * Operations overview returned by `GET /admin/overview`.
@@ -55,7 +55,7 @@ export const adminOverviewSchema = z.object({
       closed: 0,
       pendingVerification: 0,
     }),
-  needsReview: z.array(serviceRequestSchema).default([]),
+  needsReview: z.array(adminServiceRequestSchema).default([]),
   period: z
     .object({
       startDate: z.string().optional(),

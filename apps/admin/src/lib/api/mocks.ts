@@ -716,7 +716,18 @@ const routes: [method: string, pattern: RegExp, handler: Handler][] = [
         needsReview: db.requests
           .filter((r) => isPendingReview(r.status))
           .sort(newestFirst)
-          .slice(0, 5),
+          .slice(0, 5)
+          .map((r) => {
+            const plan = db.plans.find((p) => p._id === r.plan);
+            return {
+              ...r,
+              owner: summaryOf(db, r.owner),
+              plan: {
+                _id: r.plan,
+                packageDetails: plan && { name: plan.packageDetails.name },
+              },
+            };
+          }),
         period: {
           startDate: from ? `${from}T00:00:00.000Z` : undefined,
           endDate: to ? `${to}T23:59:59.999Z` : undefined,
