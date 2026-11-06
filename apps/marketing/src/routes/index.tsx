@@ -26,7 +26,9 @@ import {
 
 export const Route = createFileRoute("/")({
   loader: async ({ context }) => {
-    await context.queryClient.query(packagesQueryOptions());
+    // prefetchQuery never throws: if the API is down, the packages section shows
+    // "pricing unavailable" instead of the whole home page failing.
+    await context.queryClient.prefetchQuery(packagesQueryOptions());
   },
   head: () => createPageHead({ path: "/" }),
   component: Home,

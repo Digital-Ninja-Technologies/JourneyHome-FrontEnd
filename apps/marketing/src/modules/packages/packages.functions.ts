@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { api, DUMMY_PACKAGES } from "@/lib/api";
+import { api } from "@/lib/api";
 import { type Package, packageSchema } from "./types";
 
 interface CacheEntry {
@@ -10,6 +10,12 @@ interface CacheEntry {
 let packageCache: CacheEntry | null = null;
 const CACHE_TTL_MS = 300 * 1000;
 
+/**
+ * Lists the packages customers can sign up for. Only real packages from the API are ever
+ * returned: their ids go into the signup links, so made-up stand-ins would break signup.
+ * When the API is unreachable or answers with something unexpected this throws (and caches
+ * nothing), and the page shows "pricing unavailable" with a retry instead.
+ */
 export const getPackagesFn = createServerFn({ method: "GET" }).handler(
   async () => {
     const now = Date.now();
@@ -17,21 +23,14 @@ export const getPackagesFn = createServerFn({ method: "GET" }).handler(
       return packageCache.data;
     }
 
-    try {
-      const list = await api<Package[]>("/packages");
-      const parsed = packageSchema.array().safeParse(list);
-
-      if (parsed.success && parsed.data.length > 0) {
-        const sorted = [...parsed.data].sort((a, b) => a.amount - b.amount);
-        packageCache = { data: sorted, timestamp: now };
-        return sorted;
-      }
-    } catch {
-      // Backend unreachable or offline; fallback cleanly
+    const list = await api<Package[]>("/packages");
+    const parsed = packageSchema.array().safeParse(list);
+    if (!parsed.success) {
+      throw new Error("Invalid packages response from server");
     }
 
-    const fallback = [...DUMMY_PACKAGES].sort((a, b) => a.amount - b.amount);
-    packageCache = { data: fallback, timestamp: now };
-    return fallback;
+    const sorted = [...parsed.data].sort((a, b) => a.amount - b.amount);
+    packageCache = { data: sorted, timestamp: now };
+    return sorted;
   },
 );
