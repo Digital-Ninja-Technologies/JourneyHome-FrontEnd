@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import Plans from "@/pages/plans";
+import { TableViewSkeleton } from "@/components/skeletons";
+import { plansSearchSchema } from "@/lib/search-schemas";
+import { PlansView } from "@/modules/plans/components/plans-view";
 
 export const Route = createFileRoute("/_protected/plans/")({
-  component: Plans,
+  validateSearch: plansSearchSchema,
+  component: PlansView,
+  pendingComponent: TableViewSkeleton,
 });

@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import Payments from "@/pages/payments";
+import { TableViewSkeleton } from "@/components/skeletons";
+import { paymentsSearchSchema } from "@/lib/search-schemas";
+import { PaymentsView } from "@/modules/payments/components/payments-view";
 
 export const Route = createFileRoute("/_protected/payments")({
-  component: Payments,
+  validateSearch: paymentsSearchSchema,
+  component: PaymentsView,
+  pendingComponent: () => <TableViewSkeleton kpis={3} />,
 });

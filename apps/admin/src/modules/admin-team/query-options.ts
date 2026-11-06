@@ -1,9 +1,13 @@
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { fetchAdmins } from "./api";
 
-export const adminsQueryOptions = (enabled = true) =>
+export const adminsQueryOptions = () =>
   queryOptions({
     queryKey: ["admins"] as const,
     queryFn: () => fetchAdmins(),
-    enabled,
+    staleTime: 60_000,
   });
+
+export function useAdmins({ enabled = true }: { enabled?: boolean } = {}) {
+  return useQuery({ ...adminsQueryOptions(), enabled });
+}

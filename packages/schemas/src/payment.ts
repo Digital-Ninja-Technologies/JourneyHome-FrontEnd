@@ -108,3 +108,42 @@ export const paginatedSubscriptionsSchema =
 export type PaginatedSubscriptions = z.infer<
   typeof paginatedSubscriptionsSchema
 >;
+
+/**
+ * Status total for a selected date range (minor units).
+ * Aligned with OpenAPI components.schemas.PaymentStatusTotal.
+ */
+export const paymentStatusTotalSchema = z.object({
+  amount: z.number().int().default(0),
+  count: z.number().int().default(0),
+});
+export type PaymentStatusTotal = z.infer<typeof paymentStatusTotalSchema>;
+
+/**
+ * Query schema for admin `GET /payments/admin`.
+ * `from` / `to` are `YYYY-MM-DD` dates.
+ */
+export const adminPaymentQuerySchema = paginationQuerySchema.extend({
+  search: z.string().optional(),
+  status: PaymentStatusEnum.optional(),
+  purpose: z.string().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+});
+export type AdminPaymentQueryInput = z.infer<typeof adminPaymentQuerySchema>;
+
+/**
+ * Paginated admin payments, plus status totals for the selected date range.
+ * Aligned with OpenAPI components.schemas.AdminPaymentListResponse.
+ */
+export const paginatedAdminPaymentsSchema = createPaginatedDataSchema(
+  adminPaymentSchema,
+).extend({
+  summary: z
+    .record(z.string(), paymentStatusTotalSchema)
+    .optional()
+    .default({}),
+});
+export type PaginatedAdminPayments = z.infer<
+  typeof paginatedAdminPaymentsSchema
+>;

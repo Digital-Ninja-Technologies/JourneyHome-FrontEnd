@@ -1,20 +1,46 @@
-import { api } from "@/lib/api";
-import type { Plan, PlanStatus } from "@/lib/types";
+import {
+  type AdminPlanQueryInput,
+  type PaginatedAdminPlans,
+  type Plan,
+  type PlanStatus,
+  paginatedAdminPlansSchema,
+  planSchema,
+} from "@journeyhome/schemas";
+import { api, parseApiResponse, toQueryString } from "@/lib/api";
 
-export async function fetchAllPlans(): Promise<Plan[]> {
-  return api<Plan[]>("/plans/admin");
+export type FetchPlansParams = Partial<AdminPlanQueryInput>;
+
+export async function fetchPlans(
+  params?: FetchPlansParams,
+): Promise<PaginatedAdminPlans> {
+  const res = await api<unknown>(`/plans/admin${toQueryString(params)}`);
+  return parseApiResponse(
+    paginatedAdminPlansSchema,
+    res,
+    "Invalid plans response from server",
+  );
 }
 
 export async function fetchPlan(id: string): Promise<Plan> {
-  return api<Plan>(`/plans/${id}`);
+  const res = await api<unknown>(`/plans/${id}`);
+  return parseApiResponse(
+    planSchema,
+    res,
+    `Invalid plan (${id}) response from server`,
+  );
 }
 
 export async function updatePlanStatus(
   id: string,
   status: PlanStatus,
 ): Promise<Plan> {
-  return api<Plan>(`/plans/${id}/status`, {
+  const res = await api<unknown>(`/plans/${id}/status`, {
     method: "PATCH",
     body: { status },
   });
+  return parseApiResponse(
+    planSchema,
+    res,
+    "Invalid plan status response from server",
+  );
 }

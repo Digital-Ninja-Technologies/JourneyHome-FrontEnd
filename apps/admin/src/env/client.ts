@@ -4,8 +4,11 @@ import { z } from "zod";
 export const env = createEnv({
   clientPrefix: "VITE_",
   client: {
-    VITE_API_BASE_URL: z.string().url().default("http://localhost:4000/api/v1"),
-    VITE_MARKETING_URL: z.string().url().default("http://localhost:3000"),
+    VITE_API_BASE_URL: z
+      .url()
+      .default("https://journey-home.onrender.com/api/v1"),
+    VITE_MARKETING_URL: z.url().default("http://localhost:3000"),
+    /** Empty → on in dev, off in production. `true` / `false` to force. */
     VITE_USE_MOCKS: z
       .string()
       .optional()

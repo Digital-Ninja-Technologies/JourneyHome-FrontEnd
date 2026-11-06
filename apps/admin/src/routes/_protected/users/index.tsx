@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import Users from "@/pages/users";
+import { TableViewSkeleton } from "@/components/skeletons";
+import { usersSearchSchema } from "@/lib/search-schemas";
+import { UsersView } from "@/modules/users/components/users-view";
 
 export const Route = createFileRoute("/_protected/users/")({
-  component: Users,
+  validateSearch: usersSearchSchema,
+  component: UsersView,
+  pendingComponent: TableViewSkeleton,
 });

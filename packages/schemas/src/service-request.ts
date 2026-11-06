@@ -144,8 +144,12 @@ export type DownloadUrlResponse = z.infer<typeof downloadUrlResponseSchema>;
  * Query schema for admin service requests queue (`GET /service-requests/admin`).
  */
 export const serviceRequestQuerySchema = paginationQuerySchema.extend({
+  search: z.string().optional(),
   status: ServiceRequestStatusEnum.optional(),
+  ownerId: z.string().optional(),
   planId: z.string().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
 });
 export type ServiceRequestQueryInput = z.infer<
   typeof serviceRequestQuerySchema
@@ -160,3 +164,50 @@ export const paginatedAdminServiceRequestsSchema = createPaginatedDataSchema(
 export type PaginatedAdminServiceRequests = z.infer<
   typeof paginatedAdminServiceRequestsSchema
 >;
+
+/**
+ * Statuses an admin may set via `PATCH /service-requests/{id}/status`.
+ * `Closed` is set only by assigning a photographer.
+ */
+export const AdminServiceRequestStatusEnum = z.enum([
+  "Under_Review",
+  "Docs_Verified",
+  "Approved",
+  "Rejected",
+  "More_Info_Required",
+  "Cancelled",
+]);
+export type AdminServiceRequestStatus = z.infer<
+  typeof AdminServiceRequestStatusEnum
+>;
+
+/**
+ * Body for admin `PATCH /service-requests/{id}/status`.
+ */
+export const updateServiceRequestStatusSchema = z.object({
+  status: AdminServiceRequestStatusEnum,
+  reason: z.string().trim().optional(),
+});
+export type UpdateServiceRequestStatusInput = z.infer<
+  typeof updateServiceRequestStatusSchema
+>;
+
+/**
+ * Body for admin `PATCH /service-requests/{id}/documents/{documentId}/verify`.
+ */
+export const verifyDocumentSchema = z.object({
+  verificationStatus: DocumentVerificationStatusEnum,
+  reason: z.string().trim().optional(),
+});
+export type VerifyDocumentInput = z.infer<typeof verifyDocumentSchema>;
+
+/**
+ * Body for admin `PATCH /service-requests/{id}/assign-photographer`.
+ */
+export const assignPhotographerSchema = z.object({
+  photographerName: z
+    .string()
+    .trim()
+    .min(2, "Enter the photographer's full name"),
+});
+export type AssignPhotographerInput = z.infer<typeof assignPhotographerSchema>;

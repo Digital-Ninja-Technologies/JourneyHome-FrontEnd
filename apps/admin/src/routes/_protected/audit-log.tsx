@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import AuditLog from "@/pages/audit-log";
+import { TableViewSkeleton } from "@/components/skeletons";
+import { auditLogSearchSchema } from "@/lib/search-schemas";
+import { AuditLogView } from "@/modules/audit-log/components/audit-log-view";
 
 export const Route = createFileRoute("/_protected/audit-log")({
-  component: AuditLog,
+  validateSearch: auditLogSearchSchema,
+  component: AuditLogView,
+  pendingComponent: TableViewSkeleton,
 });

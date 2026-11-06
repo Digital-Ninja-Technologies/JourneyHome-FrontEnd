@@ -1,6 +1,7 @@
+import { Button, buttonVariants } from "@journeyhome/ui/components/button";
+import { cn } from "@journeyhome/ui/lib/utils";
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { AlertTriangle, RefreshCw } from "lucide-react";
-import { Button } from "@journeyhome/ui/components/button";
 
 export function CatchBoundary({ error, reset }: ErrorComponentProps) {
   const message =
@@ -17,20 +18,13 @@ export function CatchBoundary({ error, reset }: ErrorComponentProps) {
       <p className="mt-2 max-w-md text-sm text-muted-foreground">{message}</p>
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         {reset && (
-          <Button
-            type="button"
-            onClick={() => reset()}
-            className="gap-2"
-          >
+          <Button type="button" onClick={() => reset()} className="gap-2">
             <RefreshCw className="h-4 w-4" />
             Try again
           </Button>
         )}
-        <a
-          href="/"
-          className="inline-flex h-10 items-center justify-center rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
-        >
-          Return to console
+        <a href="/" className={cn(buttonVariants({ variant: "outline" }))}>
+          Return to dashboard
         </a>
       </div>
     </main>

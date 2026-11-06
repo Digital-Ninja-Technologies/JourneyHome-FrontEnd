@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createPaginatedDataSchema, paginationQuerySchema } from "./pagination";
 
 /**
  * Public package shape returned by `GET /packages`.
@@ -47,3 +48,22 @@ export type CreatePackageInput = z.infer<typeof createPackageSchema>;
 
 export const updatePackageSchema = createPackageSchema.partial();
 export type UpdatePackageInput = z.infer<typeof updatePackageSchema>;
+
+/**
+ * Query schema for admin `GET /packages/admin`.
+ */
+export const adminPackageQuerySchema = paginationQuerySchema.extend({
+  search: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
+export type AdminPackageQueryInput = z.infer<typeof adminPackageQuerySchema>;
+
+/**
+ * Paginated admin packages.
+ * Aligned with OpenAPI components.schemas.AdminPackageListResponse.
+ */
+export const paginatedAdminPackagesSchema =
+  createPaginatedDataSchema(adminPackageSchema);
+export type PaginatedAdminPackages = z.infer<
+  typeof paginatedAdminPackagesSchema
+>;

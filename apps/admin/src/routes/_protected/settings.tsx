@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import Settings from "@/pages/settings";
+import { SettingsSkeleton } from "@/components/skeletons";
+import { SettingsView } from "@/modules/settings/components/settings-view";
 
 export const Route = createFileRoute("/_protected/settings")({
-  component: Settings,
+  component: SettingsView,
+  pendingComponent: SettingsSkeleton,
 });
