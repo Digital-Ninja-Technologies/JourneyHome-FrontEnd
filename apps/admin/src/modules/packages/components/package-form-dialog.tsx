@@ -4,8 +4,10 @@ import { FieldGroup } from "@journeyhome/ui/components/field";
 import {
   FormCheckbox,
   FormInput,
+  FormMoneyInput,
   FormTextarea,
 } from "@journeyhome/ui/components/form-fields";
+import { FormSortableList } from "@journeyhome/ui/components/form-sortable-list";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { FormDialog } from "@/components/form-dialog";
@@ -14,6 +16,7 @@ import {
   useUpdatePackageMutation,
 } from "../mutations";
 import {
+  MAX_FEATURES,
   type PackageFormInput,
   type PackageFormValues,
   packageFormDefaults,
@@ -77,15 +80,12 @@ export function PackageFormDialog({
             label="Name"
             placeholder="e.g. Classic Memorial"
           />
-          <FormInput
+          <FormMoneyInput
             control={control}
             name="amount"
-            type="number"
-            inputMode="decimal"
-            min={1}
-            step="1"
-            label="Monthly contribution (₦)"
-            placeholder="10000"
+            currencySymbol="₦"
+            label="Monthly contribution"
+            placeholder="10,000"
           />
           <FormTextarea
             control={control}
@@ -94,13 +94,16 @@ export function PackageFormDialog({
             rows={2}
             placeholder="What this package covers"
           />
-          <FormTextarea
+          <FormSortableList
             control={control}
             name="features"
             label="Features"
-            description="One per line. Shown to customers when they choose a package."
-            rows={4}
-            placeholder={"Full-day photography\nDigital gallery"}
+            description="Shown to customers in this order when they choose a package. Drag to reorder."
+            placeholder="e.g. Full-day photography"
+            addLabel="Add feature"
+            emptyLabel="No features yet. Add what this package includes."
+            itemLabel="feature"
+            maxItems={MAX_FEATURES}
           />
           <FormCheckbox
             control={control}
