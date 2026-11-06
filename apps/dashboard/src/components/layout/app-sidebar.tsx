@@ -56,13 +56,14 @@ export function AppSidebar({
   const logoutMutation = useLogoutMutation();
   const isCollapsed = state === "collapsed";
 
-  // Close mobile drawer on route change
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <depends on pathname>
+  // Close the mobile drawer on route change. Keyed on pathname only: depending
+  // on `openMobile` would close the drawer the instant it opens.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: depends on pathname
   React.useEffect(() => {
     if (isMobile && openMobile) {
       setOpenMobile(false);
     }
-  }, [pathname, isMobile, openMobile, setOpenMobile]);
+  }, [pathname]);
 
   return (
     <Sidebar

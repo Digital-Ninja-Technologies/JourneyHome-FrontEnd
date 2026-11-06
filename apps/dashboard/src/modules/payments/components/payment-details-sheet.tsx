@@ -1,22 +1,12 @@
 import type { Payment, Plan } from "@journeyhome/schemas";
-import { Badge } from "@journeyhome/ui/components/badge";
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { ResponsiveDetailsView } from "@journeyhome/ui/components/responsive-details-view";
 import { toast } from "@journeyhome/ui/components/toast";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
-import {
-  AlertCircle,
-  ArrowRight,
-  CheckCircle,
-  Clock,
-  Copy,
-  CreditCard,
-  RotateCcw,
-  ShieldAlert,
-  XCircle,
-} from "lucide-react";
-import { firstName, formatDay, formatMoney } from "@/lib/format";
+import { ArrowRight, Copy, RotateCcw, ShieldAlert } from "lucide-react";
+import { Pill, planStatusLabel, type Tone } from "@/components/status-pill";
+import { capitalise, formatDate, formatMoney } from "@/lib/format";
 
 export interface PaymentDetailsSheetProps {
   open: boolean;
@@ -25,50 +15,98 @@ export interface PaymentDetailsSheetProps {
   plan?: Plan;
 }
 
-function StatusBadge({ status }: { status: Payment["status"] }) {
-  switch (status) {
-    case "Successful":
-      return (
-        <Badge
-          variant="outline"
-          className="border-status-active-bg bg-status-active-bg text-status-active text-[11px] font-semibold gap-1 py-0.5 px-2"
+const PURPOSE_LABEL: Record<string, string> = {
+  initial_contribution: "First contribution",
+  recurring_contribution: "Monthly contribution",
+};
+
+const purposeLabel = (purpose: string) =>
+  PURPOSE_LABEL[purpose] ??
+  capitalise(purpose.replace(/_/g, " ").toLowerCase());
+
+const PAYMENT_TONE: Record<Payment["status"], Tone> = {
+  Successful: "active",
+  Pending: "due",
+  Processing: "due",
+  Failed: "cancelled",
+  Refunded: "paused",
+  Cancelled: "paused",
+};
+
+const formatWhen = (iso: string) =>
+  `${formatDate(iso)}, ${new Date(iso).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}`;
+
+/** A titled group of label/value rows. */
+function Section({
+  title,
+  action,
+  children,
+}: {
+  title: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <div className="mb-2 flex items-center justify-between px-1">
+        <h3 className="text-[11px] font-semibold uppercase tracking-[2px] text-muted-foreground">
+          {title}
+        </h3>
+        {action}
+      </div>
+      <dl className="divide-y divide-border/60 rounded-2xl border border-border/60 px-4">
+        {children}
+      </dl>
+    </section>
+  );
+}
+
+function Row({
+  label,
+  children,
+}: {
+  label: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-3">
+      <dt className="w-28 shrink-0 text-xs text-muted-foreground">{label}</dt>
+      <dd className="min-w-0 flex-1 text-right text-sm font-medium">
+        {children || "—"}
+      </dd>
+    </div>
+  );
+}
+
+/** Monospace identifier on its own line with a copy button. Wraps instead of squashing. */
+function IdRow({ label, value }: { label: string; value: string }) {
+  const handleCopy = () => {
+    void navigator.clipboard.writeText(value);
+    toast.add({ title: `${label} copied`, type: "success" });
+  };
+
+  return (
+    <div className="py-3">
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd className="mt-1.5 flex items-start justify-between gap-3">
+        <span className="min-w-0 break-all font-mono text-[13px] leading-snug">
+          {value}
+        </span>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="-mr-1.5 -mt-1 shrink-0 cursor-pointer rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          aria-label={`Copy ${label.toLowerCase()}`}
+          title={`Copy ${label.toLowerCase()}`}
         >
-          <CheckCircle className="size-3" />
-          <span>Successful</span>
-        </Badge>
-      );
-    case "Pending":
-    case "Processing":
-      return (
-        <Badge
-          variant="outline"
-          className="border-status-pending-bg bg-status-pending-bg text-status-pending text-[11px] font-semibold gap-1 py-0.5 px-2"
-        >
-          <Clock className="size-3" />
-          <span>{status}</span>
-        </Badge>
-      );
-    case "Failed":
-      return (
-        <Badge
-          variant="outline"
-          className="border-status-cancelled-bg bg-status-cancelled-bg text-status-cancelled text-[11px] font-semibold gap-1 py-0.5 px-2"
-        >
-          <XCircle className="size-3" />
-          <span>Failed</span>
-        </Badge>
-      );
-    default:
-      return (
-        <Badge
-          variant="outline"
-          className="border-border bg-muted/40 text-muted-foreground text-[11px] font-semibold gap-1 py-0.5 px-2"
-        >
-          <AlertCircle className="size-3" />
-          <span>{status}</span>
-        </Badge>
-      );
-  }
+          <Copy className="size-3.5" />
+        </button>
+      </dd>
+    </div>
+  );
 }
 
 export function PaymentDetailsSheet({
@@ -98,65 +136,20 @@ export function PaymentDetailsSheet({
       ? "Retry payment"
       : "Complete payment";
 
-  const handleCopy = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast.add({
-      title: `${label} copied to clipboard`,
-      type: "success",
-    });
-  };
-
   return (
     <ResponsiveDetailsView
       open={open}
       onOpenChange={onOpenChange}
-      headerExtra={
-        <div className="flex flex-wrap items-center gap-2">
-          <StatusBadge status={payment.status} />
-          {plan && (
-            <Badge variant="secondary" className="text-[10px] font-semibold">
-              {plan.packageDetails.name}
-            </Badge>
-          )}
-          <Badge
-            variant="outline"
-            className="text-[10px] uppercase font-mono text-muted-foreground"
-          >
-            {payment.provider || "paystack"}
-          </Badge>
-        </div>
-      }
-      title={
-        <div className="flex items-center gap-2 text-foreground font-mono text-sm sm:text-base break-all">
-          <span>{payment.reference}</span>
-          <button
-            type="button"
-            onClick={() => handleCopy(payment.reference, "Reference")}
-            className="text-muted-foreground hover:text-foreground cursor-pointer transition-colors p-1"
-            title="Copy reference"
-          >
-            <Copy className="size-3.5" />
-          </button>
-        </div>
-      }
-      description={
-        plan ? (
-          <span>
-            Journey Home Plan · {firstName(plan.coveredPerson.fullName)} (
-            {plan.coveredPerson.relationship})
-          </span>
-        ) : (
-          <span>Transaction record</span>
-        )
-      }
+      title="Payment details"
+      description={formatWhen(payment.createdAt)}
       footer={
-        <div className="flex items-center justify-between w-full gap-2">
+        <div className="flex w-full items-center justify-between gap-2">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => onOpenChange(false)}
-            className="rounded-full text-xs px-4"
+            className="rounded-full px-4 text-xs"
           >
             Close
           </Button>
@@ -168,7 +161,7 @@ export function PaymentDetailsSheet({
               onClick={() => onOpenChange(false)}
               className={cn(
                 buttonVariants({ variant: "default", size: "sm" }),
-                "rounded-full text-xs font-semibold gap-1.5 px-4",
+                "gap-1.5 rounded-full px-4 text-xs font-semibold",
               )}
             >
               <RotateCcw className="size-3.5" />
@@ -183,7 +176,7 @@ export function PaymentDetailsSheet({
               onClick={() => onOpenChange(false)}
               className={cn(
                 buttonVariants({ variant: "outline", size: "sm" }),
-                "rounded-full text-xs font-semibold gap-1.5 px-4",
+                "gap-1.5 rounded-full px-4 text-xs font-semibold",
               )}
             >
               <span>View plan</span>
@@ -193,152 +186,89 @@ export function PaymentDetailsSheet({
         </div>
       }
     >
-      <div className="space-y-4">
-        {/* Amount & Overview Card */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-muted/40 border border-border/60 space-y-3">
-          <div className="flex items-baseline justify-between">
-            <span className="text-xs text-muted-foreground font-medium">
-              Amount
+      <div className="flex flex-col gap-6">
+        {/* Amount + the one status badge */}
+        <div className="rounded-2xl border border-border/60 bg-muted/40 p-5">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-medium text-muted-foreground">
+              {purposeLabel(payment.purpose)}
             </span>
-            <div className="text-right">
-              <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">
-                {formatMoney(payment.amount, payment.currency)}
-              </span>
-              <span className="block text-[11px] text-muted-foreground font-mono">
-                {payment.currency}
-              </span>
-            </div>
+            <Pill
+              label={payment.status}
+              tone={PAYMENT_TONE[payment.status] ?? "paused"}
+              className="px-2.5 py-0.5 text-[11px]"
+            />
           </div>
-
-          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border/40 text-xs">
-            <div>
-              <span className="text-muted-foreground block text-[11px] mb-0.5">
-                Created At
-              </span>
-              <span className="font-semibold text-foreground">
-                {formatDay(payment.createdAt)}{" "}
-                {new Date(payment.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
-            </div>
-            <div>
-              <span className="text-muted-foreground block text-[11px] mb-0.5">
-                Paid At
-              </span>
-              <span className="font-semibold text-foreground">
-                {payment.processedAt
-                  ? `${formatDay(payment.processedAt)} ${new Date(payment.processedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-                  : "Pending verification"}
-              </span>
-            </div>
-          </div>
+          <p className="mt-2 text-3xl font-bold tabular-nums">
+            {formatMoney(payment.amount, payment.currency)}
+          </p>
         </div>
 
-        {/* Failure & Mismatch Analysis */}
         {(isFailed || failureMsg) && (
-          <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20 space-y-2">
-            <div className="flex items-center gap-2 text-destructive font-semibold text-xs">
+          <div className="space-y-1.5 rounded-2xl border border-destructive/20 bg-destructive/10 p-4">
+            <div className="flex items-center gap-2 text-xs font-semibold text-destructive">
               <ShieldAlert className="size-4 shrink-0" />
-              <span>Failure Analysis</span>
+              <span>Why this payment failed</span>
             </div>
             {failureMsg && (
-              <p className="text-xs text-destructive/90 leading-relaxed font-medium">
+              <p className="text-xs font-medium leading-relaxed text-destructive/90">
                 {failureMsg}
               </p>
             )}
           </div>
         )}
 
-        {/* Payment Breakdown Card */}
-        <div className="p-4 rounded-2xl bg-card border border-border/60 space-y-3">
-          <span className="text-xs font-semibold text-foreground uppercase tracking-wider block">
-            Payment Breakdown
-          </span>
-
-          <div className="space-y-2.5 text-xs">
-            <div className="flex items-center justify-between py-1 border-b border-border/40">
-              <span className="text-muted-foreground flex items-center gap-1.5">
-                <CreditCard className="size-3.5" />
-                <span>Payment Channel</span>
+        <Section title="Transaction">
+          <IdRow label="Reference" value={payment.reference} />
+          {payment.providerReference && (
+            <IdRow
+              label="Provider reference"
+              value={payment.providerReference}
+            />
+          )}
+          {payment.providerTransactionId && (
+            <IdRow
+              label="Transaction ID"
+              value={payment.providerTransactionId}
+            />
+          )}
+          <Row label="Payment method">
+            <span className="capitalize">{payment.provider || "Paystack"}</span>
+          </Row>
+          <Row label="Created">{formatWhen(payment.createdAt)}</Row>
+          <Row label="Paid">
+            {payment.processedAt ? (
+              formatWhen(payment.processedAt)
+            ) : (
+              <span className="font-normal text-muted-foreground">
+                Awaiting verification
               </span>
-              <span className="font-medium text-foreground capitalize">
-                {payment.provider || "Paystack"}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between py-1 border-b border-border/40">
-              <span className="text-muted-foreground">Purpose</span>
-              <span className="font-medium text-foreground">
-                {payment.purpose === "initial_contribution"
-                  ? "First Contribution"
-                  : "Monthly Recurring Contribution"}
-              </span>
-            </div>
-
-            {payment.providerReference && (
-              <div className="flex items-center justify-between py-1 border-b border-border/40">
-                <span className="text-muted-foreground">Provider Ref</span>
-                <span className="font-mono text-[11px] text-foreground">
-                  {payment.providerReference}
-                </span>
-              </div>
             )}
+          </Row>
+        </Section>
 
-            {payment.providerTransactionId && (
-              <div className="flex items-center justify-between py-1 border-b border-border/40">
-                <span className="text-muted-foreground">Transaction ID</span>
-                <span className="font-mono text-[11px] text-foreground">
-                  {payment.providerTransactionId}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Associated Plan Card */}
         {plan && (
-          <div className="p-4 rounded-2xl bg-card border border-border/60 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                Associated Plan
-              </span>
+          <Section
+            title="Plan"
+            action={
               <Link
                 to="/app/plans/$id"
                 params={{ id: plan._id }}
                 onClick={() => onOpenChange(false)}
-                className="text-xs font-semibold text-link hover:underline inline-flex items-center gap-1"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-link hover:underline"
               >
                 <span>View plan</span>
                 <ArrowRight className="size-3" />
               </Link>
-            </div>
-
-            <div className="space-y-2 text-xs">
-              <div className="flex items-center justify-between py-1 border-b border-border/40">
-                <span className="text-muted-foreground">Covered Person</span>
-                <span className="font-semibold text-foreground">
-                  {plan.coveredPerson.fullName} (
-                  {plan.coveredPerson.relationship})
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between py-1 border-b border-border/40">
-                <span className="text-muted-foreground">Package</span>
-                <span className="font-medium text-foreground">
-                  {plan.packageDetails.name}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between py-1">
-                <span className="text-muted-foreground">Plan Status</span>
-                <Badge variant="outline" className="text-[10px] font-semibold">
-                  {plan.status}
-                </Badge>
-              </div>
-            </div>
-          </div>
+            }
+          >
+            <Row label="Covers">{plan.coveredPerson.fullName}</Row>
+            <Row label="Relationship">
+              {capitalise(plan.coveredPerson.relationship)}
+            </Row>
+            <Row label="Package">{plan.packageDetails.name}</Row>
+            <Row label="Status">{planStatusLabel(plan.status)}</Row>
+          </Section>
         )}
       </div>
     </ResponsiveDetailsView>
