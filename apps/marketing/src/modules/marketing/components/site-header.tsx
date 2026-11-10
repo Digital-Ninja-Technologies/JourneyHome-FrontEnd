@@ -67,8 +67,8 @@ export function SiteHeader() {
           <a
             href={SIGNUP_URL}
             className={cn(
-              "hidden md:inline-flex",
               buttonVariants({ variant: "accent", size: "lg" }),
+              "hidden md:inline-flex",
             )}
           >
             Get started &rarr;
@@ -118,8 +118,8 @@ export function SiteHeader() {
           <a
             href={SIGNUP_URL}
             className={cn(
-              "mt-2 w-full justify-center",
               buttonVariants({ variant: "accent", size: "lg" }),
+              "mt-2 w-full justify-center",
             )}
           >
             Get started &rarr;
