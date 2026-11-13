@@ -1,4 +1,5 @@
 export * from "./admin";
+export * from "./audit-log";
 export * from "./auth";
 export * from "./contact";
 export * from "./enums";
