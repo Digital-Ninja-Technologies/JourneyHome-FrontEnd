@@ -1,4 +1,4 @@
-import type { ServiceRequest } from "@journeyhome/schemas";
+import type { Plan, ServiceRequest } from "@journeyhome/schemas";
 import { Button, buttonVariants } from "@journeyhome/ui/components/button";
 import { cn } from "@journeyhome/ui/lib/utils";
 import { Link, useParams } from "@tanstack/react-router";
@@ -10,6 +10,7 @@ import { capitalise, formatDate } from "@/lib/format";
 import { usePlans } from "@/modules/plans/query-options";
 import { useServiceRequest } from "@/modules/service-requests/query-options";
 import {
+  canRequestAgain,
   canUploadDocuments,
   moreInfoReason,
   rejectionReason,
@@ -50,11 +51,22 @@ function Detail({
 }
 
 /** The team's latest message about the request, surfaced where the customer is looking. */
-function Update({ req, text }: { req: ServiceRequest; text: string }) {
-  if (!text) return null;
+function Update({
+  req,
+  plan,
+  text,
+}: {
+  req: ServiceRequest;
+  plan?: Plan;
+  text: string;
+}) {
   const moreInfo = req.status === "More_Info_Required";
   const rejected = req.status === "Rejected";
-  const flagged = moreInfo || rejected;
+  const cancelled = req.status === "Cancelled";
+  const flagged = moreInfo || rejected || cancelled;
+  const again = canRequestAgain(req, plan);
+  // A cancellation says so in its heading; the text is only the reason, if any.
+  if (!text && !cancelled) return null;
 
   return (
     <div
@@ -62,6 +74,7 @@ function Update({ req, text }: { req: ServiceRequest; text: string }) {
         "flex items-start gap-3 rounded-2xl px-5 py-4 text-sm leading-relaxed",
         moreInfo && "bg-cream text-status-due",
         rejected && "bg-status-cancelled-bg text-status-cancelled",
+        cancelled && "bg-canvas/10 text-canvas/90",
         !flagged && "bg-canvas/10 text-canvas/90",
       )}
     >
@@ -73,7 +86,23 @@ function Update({ req, text }: { req: ServiceRequest; text: string }) {
             We couldn&rsquo;t approve this request
           </div>
         )}
+        {cancelled && (
+          <div className="mb-0.5 font-bold">This request was cancelled</div>
+        )}
         {text}
+        {again && (
+          <p className="mt-2">
+            Your plan is still active, so you can submit a new request whenever
+            you&rsquo;re ready.{" "}
+            <Link
+              to="/app/service-requests/new"
+              search={{ plan: req.plan }}
+              className="font-bold underline"
+            >
+              Request again
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   );
@@ -132,7 +161,9 @@ export function ServiceRequestDetailView() {
       ? (moreInfoReason(req) ?? requestMessage(req, plan, documents))
       : req.status === "Rejected"
         ? (rejectionReason(req) ?? requestMessage(req, plan, documents))
-        : requestMessage(req, plan, documents);
+        : req.status === "Cancelled"
+          ? (req.reason ?? "")
+          : requestMessage(req, plan, documents);
 
   return (
     <main className="flex max-w-4xl flex-1 flex-col gap-6">
@@ -163,7 +194,7 @@ export function ServiceRequestDetailView() {
           Requested {formatDate(req.createdAt)} · {req.serviceLocation}
         </div>
         <RequestProgress step={state.step} dark />
-        <Update req={req} text={update} />
+        <Update req={req} plan={plan} text={update} />
       </section>
 
       <section

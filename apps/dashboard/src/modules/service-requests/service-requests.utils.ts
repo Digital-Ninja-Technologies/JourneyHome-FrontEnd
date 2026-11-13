@@ -61,6 +61,14 @@ export const moreInfoReason = (req: ServiceRequest) =>
 export const rejectionReason = (req: ServiceRequest) =>
   req.rejectionReason ?? req.reason;
 
+/**
+ * A rejected or cancelled request leaves its plan as it was, so the customer
+ * can submit a new one for the same plan while that plan is still eligible.
+ */
+export const canRequestAgain = (req: ServiceRequest, plan?: Plan) =>
+  (req.status === "Cancelled" || req.status === "Rejected") &&
+  Boolean(plan && ELIGIBLE_PLAN.has(plan.status));
+
 /** Display state, combining the request's status with its plan's status (which carries scheduling and completion). */
 export function requestState(
   req: ServiceRequest,
@@ -131,7 +139,7 @@ export function requestMessage(
     case "Rejected":
       return rejectionReason(req) ?? "This request couldn't be approved.";
     case "Cancelled":
-      return "This request was cancelled.";
+      return req.reason ?? "This request was cancelled.";
     default:
       return "";
   }
