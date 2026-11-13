@@ -17,6 +17,11 @@ import {
   startedLabel,
 } from "@/modules/plans/plans.utils";
 import { usePlans } from "@/modules/plans/query-options";
+import { useServiceRequests } from "@/modules/service-requests/query-options";
+import {
+  activeRequestFor,
+  serviceNotice,
+} from "@/modules/service-requests/service-requests.utils";
 import { CreatePlanDialog } from "./create-plan-dialog";
 
 const FINISHED = new Set<Plan["status"]>(["Completed", "Cancelled", "Expired"]);
@@ -58,7 +63,10 @@ function PlanSection({ plan }: { plan: Plan }) {
   const dark = plan.status === "Active";
   const money = (n: number) => formatMoney(n, plan.currency);
   const next = nextCell(plan);
-  const notice = planNotice(plan);
+  const requestsQ = useServiceRequests();
+  const notice =
+    serviceNotice(plan, activeRequestFor(plan._id, requestsQ.data)) ??
+    planNotice(plan);
   const finished = FINISHED.has(plan.status);
   const review = plan.status === "Under_Review";
 

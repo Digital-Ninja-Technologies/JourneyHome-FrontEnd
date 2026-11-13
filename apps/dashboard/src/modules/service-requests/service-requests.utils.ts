@@ -6,6 +6,7 @@ import type {
   ServiceRequest,
 } from "@journeyhome/schemas";
 import type { Tone } from "@/components/status-pill";
+import type { Notice } from "@/modules/plans/plans.utils";
 
 export const DOC_LABEL: Record<DocumentType, string> = {
   Death_Certificate: "Death certificate",
@@ -101,7 +102,11 @@ export function requestMessage(
     return "This service is complete. Thank you for trusting us with it.";
   if (plan?.status === "Service_Scheduled" || req.status === "Closed")
     return req.photographerName
-      ? `Your service has been scheduled. ${req.photographerName} has been assigned.`
+      ? `Your service has been scheduled. ${req.photographerName} has been assigned${
+          req.photographerPhoneNo
+            ? ` and can be reached on ${req.photographerPhoneNo}`
+            : ""
+        }.`
       : "Your service has been scheduled.";
   // Verification can't start until every required document is in, so don't promise it.
   if (
@@ -130,6 +135,53 @@ export function requestMessage(
     default:
       return "";
   }
+}
+
+/**
+ * The request that currently speaks for a plan: its newest one that wasn't
+ * rejected or cancelled.
+ */
+export function activeRequestFor(
+  planId: string,
+  requests: ServiceRequest[] | undefined,
+): ServiceRequest | undefined {
+  return (requests ?? [])
+    .filter(
+      (r) =>
+        r.plan === planId &&
+        r.status !== "Rejected" &&
+        r.status !== "Cancelled",
+    )
+    .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))[0];
+}
+
+/** Plan statuses that mean a service is in progress. */
+const SERVICE_IN_PROGRESS = new Set<Plan["status"]>([
+  "Service_Request",
+  "Under_Review",
+  "Approved",
+  "Service_Scheduled",
+]);
+
+/**
+ * The plan banner while a service is in progress. The plan's own status can
+ * trail the request (the backend doesn't move the plan when a request is
+ * approved or a photographer is assigned), so once the request is past the
+ * first review the banner follows the request instead. Returns null to fall
+ * back to the plan-based notice.
+ */
+export function serviceNotice(
+  plan: Plan,
+  req: ServiceRequest | undefined,
+): Notice | null {
+  if (!req || !SERVICE_IN_PROGRESS.has(plan.status)) return null;
+  // Early on the plan text is accurate, and list responses may not include
+  // documents, which the early request messages depend on.
+  if (req.status === "Submitted" || req.status === "Under_Review") return null;
+  return {
+    tone: req.status === "More_Info_Required" ? "due" : "review",
+    text: requestMessage(req, plan),
+  };
 }
 
 /** Documents can be added or replaced only while the request is still being verified. */

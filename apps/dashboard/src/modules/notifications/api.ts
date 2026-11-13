@@ -5,17 +5,22 @@ import {
 } from "@journeyhome/schemas";
 import { api, parseApiResponse } from "@/lib/api";
 
-export async function fetchNotifications(
-  params?: NotificationQueryInput,
-): Promise<AppNotification[]> {
+/** `?a=1&b=2` from the set filters (`page`, `limit`, `title`, `isRead`, `from`, `to`). */
+function toQuery(params?: Partial<NotificationQueryInput>): string {
+  if (!params) return "";
   const query = new URLSearchParams();
-  if (params) {
-    if (params.page) query.set("page", String(params.page));
-    if (params.limit) query.set("limit", String(params.limit));
-    if (params.isRead !== undefined) query.set("isRead", String(params.isRead));
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null || value === "") continue;
+    query.set(key, String(value));
   }
-  const qs = query.toString() ? `?${query.toString()}` : "";
-  const res = await api<unknown>(`/notifications${qs}`);
+  const qs = query.toString();
+  return qs ? `?${qs}` : "";
+}
+
+export async function fetchNotifications(
+  params?: Partial<NotificationQueryInput>,
+): Promise<AppNotification[]> {
+  const res = await api<unknown>(`/notifications${toQuery(params)}`);
   const parsed = parseApiResponse(
     paginatedNotificationsSchema,
     res,
