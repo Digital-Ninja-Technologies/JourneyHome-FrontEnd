@@ -26,6 +26,7 @@ tags:
   - name: Notifications
   - name: Service Requests
   - name: Contact
+  - name: Audit Logs
   - name: Admin
 
 paths:
@@ -183,6 +184,27 @@ paths:
       responses:
         '200':
           description: User profile retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProfileResponse' }
+    patch:
+      tags: [Auth]
+      operationId: updateAuthProfile
+      summary: Update my profile
+      description: Updates the authenticated user's profile. `name` and `phoneNumber` are optional, but at least one must be provided. Email and account role are not editable.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              minProperties: 1
+              properties:
+                name: { type: string, example: "Ada Okafor" }
+                phoneNumber: { type: string, example: "+2348012345678" }
+      responses:
+        '200':
+          description: Profile updated; same fields as `GET /auth/me`
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ProfileResponse' }
@@ -799,12 +821,41 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/NotificationListResponse' }
 
+  /notifications/admin:
+    get:
+      tags: [Notifications, Admin]
+      operationId: listAdminNotifications
+      summary: List operational notifications
+      description: Requires admin or super admin. Returns the authenticated admin's operational notifications, newest first, with the same filters and `items`/`pagination`/`counts` shape as `GET /notifications`. Includes events for new plans, service requests, submitted service documents, and contact messages.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: title
+          in: query
+          description: Case-insensitive contains match
+          schema: { type: string }
+        - name: isRead
+          in: query
+          schema: { type: boolean, example: false }
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Notifications retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationListResponse' }
+
   /notifications/{id}/read:
     patch:
       tags: [Notifications]
       operationId: markNotificationRead
       summary: Mark notification as read
-      description: Marks one notification owned by the authenticated user as read.
+      description: Marks one notification owned by the authenticated account as read. Works for customer and admin notifications; other accounts' notifications are not accessible.
       parameters:
         - $ref: '#/components/parameters/IdPath'
       responses:
@@ -819,7 +870,7 @@ paths:
       tags: [Notifications]
       operationId: deleteNotification
       summary: Delete notification
-      description: Deletes one notification owned by the authenticated user.
+      description: Deletes one notification owned by the authenticated account. Works for customer and admin notifications; other accounts' notifications are not accessible.
       parameters:
         - $ref: '#/components/parameters/IdPath'
       responses:
@@ -1073,9 +1124,10 @@ paths:
           application/json:
             schema:
               type: object
-              required: [photographerName]
+              required: [photographerName, photographerPhoneNo]
               properties:
                 photographerName: { type: string, example: "Adebayo Johnson" }
+                photographerPhoneNo: { type: string, description: Contact number of the assigned photographer, example: "09067637823" }
       responses:
         '200':
           description: Photographer assigned and service request closed
@@ -1147,6 +1199,80 @@ paths:
               schema: { $ref: '#/components/schemas/ContactResponse' }
         '400': { description: Invalid ID }
         '404': { description: No matching submission }
+
+  # ---------------------------------------------------------- Audit Logs
+  /audit-logs:
+    get:
+      tags: [Audit Logs, Admin]
+      operationId: listAuditLogs
+      summary: List audit logs
+      description: Requires admin or super admin. Paginated system audit logs, newest first. `actor` is populated with `name`, `email`, and `role`.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: startDate
+          in: query
+          description: Logs created on or after this date (`YYYY-MM-DD` or ISO date-time). Alias `from`.
+          schema: { type: string, example: "2026-10-01" }
+        - name: from
+          in: query
+          description: Alias of `startDate`.
+          schema: { type: string }
+        - name: endDate
+          in: query
+          description: Logs created on or before this date (`YYYY-MM-DD` or ISO date-time). Alias `to`.
+          schema: { type: string, example: "2026-10-31" }
+        - name: to
+          in: query
+          description: Alias of `endDate`.
+          schema: { type: string }
+        - name: action
+          in: query
+          schema: { type: string, example: "service_request.approved" }
+        - name: resourceType
+          in: query
+          schema: { type: string, example: "ServiceRequest" }
+        - name: resourceId
+          in: query
+          schema: { type: string, example: "66f123456789012345678903" }
+      responses:
+        '200':
+          description: Audit logs retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditLogListResponse' }
+
+  /audit-logs/{id}:
+    get:
+      tags: [Audit Logs, Admin]
+      operationId: getAuditLog
+      summary: Get one audit log
+      description: Requires admin or super admin. `actor` is populated with `name`, `email`, and `role`.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Audit log retrieved successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditLogResponse' }
+        '400': { description: Invalid ID }
+        '404': { description: No matching audit log }
+    delete:
+      tags: [Audit Logs, Admin]
+      operationId: deleteAuditLog
+      summary: Delete an audit log
+      description: Requires admin or super admin. Permanently removes the audit log record. The returned record's `actor` is an id string.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Audit log deleted successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditLogDeleteResponse' }
+        '400': { description: Invalid ID }
+        '404': { description: No matching audit log }
 
   # --------------------------------------------------------------- Admin
   /admin/overview:
@@ -1545,6 +1671,7 @@ components:
         reviewedBy: { type: string, description: "Admin user id; set after an admin action", example: "66f123456789012345678907" }
         approvedAt: { type: string, format: date-time, description: Set when approved, example: "2026-11-04T12:10:00.000Z" }
         photographerName: { type: string, description: Set when a photographer is assigned, example: "Adebayo Johnson" }
+        photographerPhoneNo: { type: string, description: Set when a photographer is assigned, example: "09067637823" }
         photographerAssignedAt: { type: string, format: date-time, description: Set when a photographer is assigned, example: "2026-11-04T12:10:00.000Z" }
         createdAt: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
         updatedAt: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
@@ -1595,6 +1722,46 @@ components:
         __v: { type: integer, example: 0 }
 
     # --------------------------------------------------------------- admin
+    AuditLogActor:
+      type: object
+      description: Populated actor reference on audit logs.
+      properties:
+        _id: { type: string, example: "66f123456789012345678902" }
+        name: { type: string, example: "Jane Admin" }
+        email: { type: string, format: email, example: "admin@example.com" }
+        role: { type: string, example: "Admin" }
+
+    AuditLogBase:
+      type: object
+      properties:
+        _id: { type: string, example: "66f123456789012345678901" }
+        action: { type: string, example: "service_request.approved" }
+        resourceType: { type: string, example: "ServiceRequest" }
+        resourceId: { type: string, example: "66f123456789012345678903" }
+        metadata:
+          type: object
+          additionalProperties: true
+          example: { reason: "All documents verified" }
+        createdAt: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
+        updatedAt: { type: string, format: date-time, example: "2026-11-04T12:00:00.000Z" }
+        __v: { type: integer, example: 0 }
+
+    AuditLog:
+      description: Audit log with `actor` populated.
+      allOf:
+        - $ref: '#/components/schemas/AuditLogBase'
+        - type: object
+          properties:
+            actor: { $ref: '#/components/schemas/AuditLogActor' }
+
+    AuditLogRaw:
+      description: Audit log with `actor` as an id string (delete response).
+      allOf:
+        - $ref: '#/components/schemas/AuditLogBase'
+        - type: object
+          properties:
+            actor: { type: string, example: "66f123456789012345678902" }
+
     AdminOverview:
       type: object
       properties:
@@ -2011,6 +2178,33 @@ components:
                   type: array
                   items: { $ref: '#/components/schemas/ContactSubmission' }
                 pagination: { $ref: '#/components/schemas/Pagination' }
+
+    AuditLogListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items: { $ref: '#/components/schemas/AuditLog' }
+                pagination: { $ref: '#/components/schemas/Pagination' }
+
+    AuditLogResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/AuditLog' }
+
+    AuditLogDeleteResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/AuditLogRaw' }
 
     AdminOverviewResponse:
       allOf:
