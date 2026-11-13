@@ -1,84 +1,56 @@
+import type { AuditLog } from "@journeyhome/schemas";
 import { Button } from "@journeyhome/ui/components/button";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Download } from "lucide-react";
-import { useMemo } from "react";
+import { useCallback, useState } from "react";
 import { ComponentErrorState } from "@/components/async-boundary";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DataTableCard } from "@/components/data-table/data-table";
 import {
   DataTableFilter,
   DataTableToolbar,
 } from "@/components/data-table/data-table-toolbar";
-import { DemoNotice } from "@/components/demo-notice";
 import { PageHeader } from "@/components/page-header";
-import { UnsupportedState } from "@/components/unsupported-state";
-import { isUnsupported } from "@/lib/api";
+import { matchPreset, PERIOD_PRESETS, presetRange } from "@/lib/date";
 import type { AuditLogSearch } from "@/lib/search-schemas";
-import type { AuditEntry } from "../api";
 import {
-  actionLabel,
-  actorName,
+  ACTION_OPTIONS,
   describe,
   exportAuditCsv,
+  RESOURCE_TYPE_OPTIONS,
 } from "../audit-log.utils";
-import { useAuditLog } from "../query-options";
+import { useDeleteAuditLogMutation } from "../mutations";
+import { useAuditLogs } from "../query-options";
 import { AuditLogTable } from "./audit-log-table";
-
-const EMPTY: AuditEntry[] = [];
 
 export function AuditLogView() {
   const search = useSearch({ from: "/_protected/audit-log" });
   const navigate = useNavigate({ from: "/audit-log" });
-  const auditQ = useAuditLog();
+  const auditQ = useAuditLogs({
+    page: search.page,
+    limit: search.limit,
+    action: search.action,
+    resourceType: search.resourceType,
+    startDate: search.from,
+    endDate: search.to,
+  });
+  const remove = useDeleteAuditLogMutation();
+  const [pendingDelete, setPendingDelete] = useState<AuditLog | null>(null);
+  const onDelete = useCallback((e: AuditLog) => setPendingDelete(e), []);
 
   const setSearch = (patch: Partial<AuditLogSearch>) =>
     navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
   const setFilter = (patch: Partial<AuditLogSearch>) =>
     setSearch({ ...patch, page: undefined });
 
-  const all = auditQ.data ?? EMPTY;
-  const actors = useMemo(
-    () =>
-      [...new Set(all.map(actorName))]
-        .sort()
-        .map((a) => ({ value: a, label: a })),
-    [all],
-  );
-  const actions = useMemo(
-    () =>
-      [...new Set(all.map((e) => e.action))]
-        .sort()
-        .map((a) => ({ value: a, label: actionLabel(a) })),
-    [all],
-  );
-
-  const needle = search.search?.toLowerCase();
-  const rows = useMemo(
-    () =>
-      all.filter(
-        (e) =>
-          (!search.actor || actorName(e) === search.actor) &&
-          (!search.action || e.action === search.action) &&
-          (!needle || describe(e).toLowerCase().includes(needle)),
-      ),
-    [all, search.actor, search.action, needle],
-  );
-
+  const preset = matchPreset(search.from, search.to);
   const hasActiveFilters = Boolean(
-    search.search || search.actor || search.action,
+    search.action || search.resourceType || search.from || search.to,
   );
   const resetFilters = () =>
     navigate({ search: { limit: search.limit }, replace: true });
 
-  if (auditQ.isError && isUnsupported(auditQ.error)) {
-    return (
-      <main className="flex max-w-[720px] flex-col gap-6">
-        <PageHeader title="Audit log" />
-        <UnsupportedState endpoint="GET /audit-logs">
-          Admin actions are recorded, but there's no route to read them yet.
-        </UnsupportedState>
-      </main>
-    );
-  }
+  const rows = auditQ.data?.items ?? [];
 
   return (
     <main className="flex flex-col gap-6">
@@ -93,13 +65,12 @@ export function AuditLogView() {
             onClick={() => exportAuditCsv(rows)}
           >
             <Download />
-            Export CSV
+            Export page
           </Button>
         }
       />
-      <DemoNotice />
 
-      {auditQ.isError ? (
+      {auditQ.isError && !auditQ.data ? (
         <ComponentErrorState
           title="Couldn't load the audit log"
           error={auditQ.error}
@@ -108,35 +79,64 @@ export function AuditLogView() {
       ) : (
         <DataTableCard>
           <DataTableToolbar
-            search={search.search}
-            onSearchChange={(value) => setFilter({ search: value })}
-            searchPlaceholder="Search events"
             hasActiveFilters={hasActiveFilters}
             onReset={resetFilters}
           >
             <DataTableFilter
-              label="Actor"
-              value={search.actor}
-              options={actors}
-              onChange={(actor) => setFilter({ actor })}
+              label="Period"
+              allLabel={search.from || search.to ? "Custom" : "All time"}
+              value={preset}
+              options={PERIOD_PRESETS}
+              onChange={(p) =>
+                setFilter(
+                  p ? presetRange(p) : { from: undefined, to: undefined },
+                )
+              }
+            />
+            <DataTableFilter
+              label="Resource"
+              value={search.resourceType}
+              options={RESOURCE_TYPE_OPTIONS}
+              onChange={(resourceType) => setFilter({ resourceType })}
             />
             <DataTableFilter
               label="Action"
               value={search.action}
-              options={actions}
+              options={ACTION_OPTIONS}
               onChange={(action) => setFilter({ action })}
             />
           </DataTableToolbar>
           <AuditLogTable
-            rows={rows}
+            data={auditQ.data}
             isLoading={auditQ.isPending}
             search={search}
             setSearch={setSearch}
             hasActiveFilters={hasActiveFilters}
             onResetFilters={resetFilters}
+            onDelete={onDelete}
           />
         </DataTableCard>
       )}
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+        title="Delete this audit entry?"
+        description={
+          pendingDelete
+            ? `“${describe(pendingDelete)}” will be permanently removed from the audit log.`
+            : undefined
+        }
+        confirmLabel="Delete entry"
+        destructive
+        isPending={remove.isPending}
+        onConfirm={() =>
+          pendingDelete &&
+          remove.mutate(pendingDelete._id, {
+            onSettled: () => setPendingDelete(null),
+          })
+        }
+      />
     </main>
   );
 }
