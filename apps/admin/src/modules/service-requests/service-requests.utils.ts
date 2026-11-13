@@ -35,21 +35,31 @@ export const canReviewDocuments = (s: ServiceRequestStatus) =>
   s === "Under_Review" || s === "More_Info_Required";
 
 /**
+ * Statuses staff can pick directly. `More_Info_Required` isn't one: the request
+ * only moves there when a document is sent back for a new copy, which is the
+ * one thing the customer can actually act on.
+ */
+export type RequestDecision = Exclude<
+  AdminServiceRequestStatus,
+  "More_Info_Required"
+>;
+
+/**
  * The decisions offered from each status. `Docs_Verified` is listed while in
  * review even before every document is approved; the UI disables it until then.
  */
 export function availableDecisions(
   status: ServiceRequestStatus,
-): AdminServiceRequestStatus[] {
+): RequestDecision[] {
   switch (status) {
     case "Submitted":
       return ["Under_Review", "Cancelled"];
     case "Under_Review":
-      return ["Docs_Verified", "Approved", "More_Info_Required", "Rejected"];
+      return ["Docs_Verified", "Approved", "Rejected"];
     case "More_Info_Required":
       return ["Docs_Verified", "Approved", "Rejected"];
     case "Docs_Verified":
-      return ["Approved", "More_Info_Required", "Rejected"];
+      return ["Approved", "Rejected"];
     default:
       return [];
   }
@@ -77,20 +87,16 @@ export function approvalReadiness(
   };
 }
 
-export const DECISION_LABEL: Record<AdminServiceRequestStatus, string> = {
+export const DECISION_LABEL: Record<RequestDecision, string> = {
   Under_Review: "Start review",
   Docs_Verified: "Mark documents verified",
   Approved: "Approve request",
-  More_Info_Required: "Request more info",
   Rejected: "Reject",
   Cancelled: "Cancel request",
 };
 
-/** Customer-facing message is required when asking for more or saying no. */
-export const NEEDS_REASON = new Set<AdminServiceRequestStatus>([
-  "More_Info_Required",
-  "Rejected",
-]);
+/** Customer-facing message is required when saying no. */
+export const NEEDS_REASON = new Set<AdminServiceRequestStatus>(["Rejected"]);
 
 export const decisionFormSchema = z
   .object({

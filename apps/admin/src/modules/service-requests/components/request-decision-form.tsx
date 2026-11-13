@@ -22,20 +22,16 @@ import {
   type DecisionFormValues,
   DOCUMENT_LABEL,
   decisionFormSchema,
+  type RequestDecision,
 } from "../service-requests.utils";
 
 const TONE: Partial<Record<AdminServiceRequestStatus, string>> = {
   Approved: "bg-status-active text-white hover:bg-status-active/90",
   Docs_Verified: "bg-status-active text-white hover:bg-status-active/90",
-  More_Info_Required: "border-link text-link",
   Rejected: "border-status-cancelled text-status-cancelled",
   Cancelled: "border-status-cancelled text-status-cancelled",
 };
-const OUTLINED = new Set<AdminServiceRequestStatus>([
-  "More_Info_Required",
-  "Rejected",
-  "Cancelled",
-]);
+const OUTLINED = new Set<AdminServiceRequestStatus>(["Rejected", "Cancelled"]);
 
 /** One message box, one button per allowed decision. */
 export function RequestDecisionForm({
@@ -79,7 +75,7 @@ export function RequestDecisionForm({
       ),
     )();
 
-  const submitWith = (status: AdminServiceRequestStatus) => {
+  const submitWith = (status: RequestDecision) => {
     setValue("status", status);
     if (status === "Approved") {
       // Pending documents get approved with the request, so say so first.
@@ -105,7 +101,7 @@ export function RequestDecisionForm({
         control={control}
         name="reason"
         label="Message to the customer"
-        description="Required to request more info or reject. Sent with every decision."
+        description="Required to reject. Sent with every decision. To ask for a new document, send that document back above."
         rows={3}
         placeholder="e.g. Please upload a clearer death certificate."
       />
