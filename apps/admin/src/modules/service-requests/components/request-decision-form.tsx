@@ -7,13 +7,20 @@ import type {
 import { Button } from "@journeyhome/ui/components/button";
 import { FormTextarea } from "@journeyhome/ui/components/form-fields";
 import { cn } from "@journeyhome/ui/lib/utils";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useUpdateRequestStatusMutation } from "../mutations";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import {
+  useApproveRequestMutation,
+  useUpdateRequestStatusMutation,
+} from "../mutations";
+import {
+  approvalReadiness,
   availableDecisions,
   currentDocuments,
   DECISION_LABEL,
   type DecisionFormValues,
+  DOCUMENT_LABEL,
   decisionFormSchema,
 } from "../service-requests.utils";
 
@@ -39,22 +46,47 @@ export function RequestDecisionForm({
   documents: ServiceDocument[];
 }) {
   const update = useUpdateRequestStatusMutation(request._id);
+  const approve = useApproveRequestMutation(request._id);
+  const [confirmingApproval, setConfirmingApproval] = useState(false);
   const decisions = availableDecisions(request.status);
   const docs = currentDocuments(documents);
   const allApproved =
     docs.length > 0 && docs.every((d) => d.verificationStatus === "Approved");
+  const readiness = approvalReadiness(documents);
+  const pendingDocs = readiness.ok ? readiness.pending : [];
+  const isSaving = update.isPending || approve.isPending;
 
   const { control, handleSubmit, setValue, reset, watch } =
     useForm<DecisionFormValues>({
       resolver: zodResolver(decisionFormSchema),
       defaultValues: { status: decisions[0] ?? "Under_Review", reason: "" },
     });
-  const pendingStatus = update.isPending ? watch("status") : undefined;
+  const pendingStatus = isSaving ? watch("status") : undefined;
 
   if (decisions.length === 0) return null;
 
+  const runApproval = () =>
+    void handleSubmit((values) =>
+      approve.mutate(
+        {
+          pendingDocumentIds: pendingDocs.map((d) => d._id),
+          reason: values.reason || undefined,
+        },
+        {
+          onSuccess: () => reset({ status: "Approved", reason: "" }),
+          onSettled: () => setConfirmingApproval(false),
+        },
+      ),
+    )();
+
   const submitWith = (status: AdminServiceRequestStatus) => {
     setValue("status", status);
+    if (status === "Approved") {
+      // Pending documents get approved with the request, so say so first.
+      if (pendingDocs.length > 0) setConfirmingApproval(true);
+      else runApproval();
+      return;
+    }
     void handleSubmit((values) =>
       update.mutate(
         { status: values.status, reason: values.reason || undefined },
@@ -79,14 +111,19 @@ export function RequestDecisionForm({
       />
       <div className="flex flex-wrap gap-2">
         {decisions.map((status) => {
-          const blocked = status === "Docs_Verified" && !allApproved;
+          const blockedReason =
+            status === "Docs_Verified" && !allApproved
+              ? "Approve every document first"
+              : status === "Approved" && !readiness.ok
+                ? readiness.reason
+                : undefined;
           return (
             <Button
               key={status}
               type="button"
               variant={OUTLINED.has(status) ? "outline" : "default"}
-              disabled={update.isPending || blocked}
-              title={blocked ? "Approve every document first" : undefined}
+              disabled={isSaving || Boolean(blockedReason)}
+              title={blockedReason}
               onClick={() => submitWith(status)}
               className={cn("h-11 rounded-xl px-5 font-bold", TONE[status])}
             >
@@ -95,6 +132,29 @@ export function RequestDecisionForm({
           );
         })}
       </div>
+      {decisions.includes("Approved") && !readiness.ok && (
+        <p className="text-xs text-muted-foreground">
+          Can&rsquo;t approve yet: {readiness.reason}
+        </p>
+      )}
+
+      <ConfirmDialog
+        open={confirmingApproval}
+        onOpenChange={setConfirmingApproval}
+        title="Approve the documents too?"
+        description={`${
+          pendingDocs.length === 1
+            ? "This document hasn't been reviewed yet"
+            : `These ${pendingDocs.length} documents haven't been reviewed yet`
+        }: ${pendingDocs
+          .map((d) => DOCUMENT_LABEL[d.documentType])
+          .join(", ")}. Approving the request will approve ${
+          pendingDocs.length === 1 ? "it" : "them"
+        } as well.`}
+        confirmLabel="Approve documents and request"
+        isPending={approve.isPending}
+        onConfirm={runApproval}
+      />
     </form>
   );
 }
