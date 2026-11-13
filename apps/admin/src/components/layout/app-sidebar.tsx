@@ -16,6 +16,7 @@ import { cn } from "@journeyhome/ui/lib/utils";
 import type { LinkProps } from "@tanstack/react-router";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
+  Bell,
   Camera,
   ChevronLeft,
   ChevronRight,
@@ -33,6 +34,7 @@ import * as React from "react";
 import { initials } from "@/lib/format";
 import { useLogoutMutation } from "@/modules/auth/mutations";
 import { useAdminUser } from "@/modules/auth/query-options";
+import { useUnreadNotificationCount } from "@/modules/notifications/query-options";
 
 export const NAV: {
   to: LinkProps["to"];
@@ -46,6 +48,7 @@ export const NAV: {
   { to: "/service-requests", label: "Service requests", icon: Camera },
   { to: "/payments", label: "Payments", icon: CreditCard },
   { to: "/contact", label: "Contact messages", icon: Mail },
+  { to: "/notifications", label: "Notifications", icon: Bell },
   { to: "/audit-log", label: "Audit log", icon: History },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
@@ -94,6 +97,7 @@ export function AppSidebar({
     useSidebar();
   const user = useAdminUser();
   const logoutMutation = useLogoutMutation();
+  const unread = useUnreadNotificationCount();
   const isCollapsed = state === "collapsed";
 
   // Close the mobile drawer on navigation.
@@ -201,10 +205,26 @@ export function AppSidebar({
                       />
                     }
                   >
-                    <Icon className="size-[18px] shrink-0" />
+                    <span className="relative shrink-0">
+                      <Icon className="size-[18px]" />
+                      {to === "/notifications" && unread > 0 && isCollapsed && (
+                        <span className="absolute -right-1 -top-1 hidden size-2 rounded-full bg-accent md:block" />
+                      )}
+                    </span>
                     <span className={cn(isCollapsed && "md:hidden")}>
                       {label}
                     </span>
+                    {to === "/notifications" && unread > 0 && (
+                      <span
+                        className={cn(
+                          "ml-auto rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold tabular-nums text-sidebar",
+                          isCollapsed && "md:hidden",
+                        )}
+                      >
+                        {unread > 99 ? "99+" : unread}
+                        <span className="sr-only"> unread</span>
+                      </span>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
