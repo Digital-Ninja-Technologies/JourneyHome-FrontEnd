@@ -6,7 +6,12 @@ export function RequestTimeline({ request: r }: { request: ServiceRequest }) {
   const events: [what: string, when: string | undefined, note?: string][] = [
     ["Submitted", r.createdAt],
     ["Approved", r.approvedAt],
-    ["Photographer assigned", r.photographerAssignedAt, r.photographerName],
+    [
+      "Photographer assigned",
+      r.photographerAssignedAt,
+      [r.photographerName, r.photographerPhoneNo].filter(Boolean).join(" · ") ||
+        undefined,
+    ],
     [
       "Rejected",
       r.status === "Rejected" ? r.updatedAt : undefined,
