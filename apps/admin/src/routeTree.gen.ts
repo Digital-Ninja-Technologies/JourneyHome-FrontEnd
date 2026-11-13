@@ -15,6 +15,7 @@ import { Route as ProtectedRouteRouteImport } from './routes/_protected/route'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ProtectedIndexRouteImport } from './routes/_protected/index'
 import { Route as ProtectedAuditLogRouteImport } from './routes/_protected/audit-log'
+import { Route as ProtectedNotificationsRouteImport } from './routes/_protected/notifications'
 import { Route as ProtectedPaymentsRouteImport } from './routes/_protected/payments'
 import { Route as ProtectedSettingsRouteImport } from './routes/_protected/settings'
 import { Route as ProtectedContactIndexRouteImport } from './routes/_protected/contact/index'
@@ -51,6 +52,11 @@ const ProtectedIndexRoute = ProtectedIndexRouteImport.update({
 const ProtectedAuditLogRoute = ProtectedAuditLogRouteImport.update({
   id: '/audit-log',
   path: '/audit-log',
+  getParentRoute: () => ProtectedRouteRoute,
+} as any)
+const ProtectedNotificationsRoute = ProtectedNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => ProtectedRouteRoute,
 } as any)
 const ProtectedPaymentsRoute = ProtectedPaymentsRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/login': typeof AuthLoginRoute
   '/audit-log': typeof ProtectedAuditLogRoute
+  '/notifications': typeof ProtectedNotificationsRoute
   '/payments': typeof ProtectedPaymentsRoute
   '/settings': typeof ProtectedSettingsRoute
   '/plans/$id': typeof ProtectedPlansIdRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/$': typeof SplatRoute
   '/login': typeof AuthLoginRoute
   '/audit-log': typeof ProtectedAuditLogRoute
+  '/notifications': typeof ProtectedNotificationsRoute
   '/payments': typeof ProtectedPaymentsRoute
   '/settings': typeof ProtectedSettingsRoute
   '/plans/$id': typeof ProtectedPlansIdRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/$': typeof SplatRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_protected/audit-log': typeof ProtectedAuditLogRoute
+  '/_protected/notifications': typeof ProtectedNotificationsRoute
   '/_protected/payments': typeof ProtectedPaymentsRoute
   '/_protected/settings': typeof ProtectedSettingsRoute
   '/_protected/': typeof ProtectedIndexRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/login'
     | '/audit-log'
+    | '/notifications'
     | '/payments'
     | '/settings'
     | '/plans/$id'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/login'
     | '/audit-log'
+    | '/notifications'
     | '/payments'
     | '/settings'
     | '/plans/$id'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/_auth/login'
     | '/_protected/audit-log'
+    | '/_protected/notifications'
     | '/_protected/payments'
     | '/_protected/settings'
     | '/_protected/'
@@ -247,6 +259,13 @@ declare module '@tanstack/react-router' {
       path: '/audit-log'
       fullPath: '/audit-log'
       preLoaderRoute: typeof ProtectedAuditLogRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
+    '/_protected/notifications': {
+      id: '/_protected/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof ProtectedNotificationsRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
     '/_protected/payments': {
@@ -329,6 +348,7 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 
 interface ProtectedRouteRouteChildren {
   ProtectedAuditLogRoute: typeof ProtectedAuditLogRoute
+  ProtectedNotificationsRoute: typeof ProtectedNotificationsRoute
   ProtectedPaymentsRoute: typeof ProtectedPaymentsRoute
   ProtectedSettingsRoute: typeof ProtectedSettingsRoute
   ProtectedIndexRoute: typeof ProtectedIndexRoute
@@ -343,6 +363,7 @@ interface ProtectedRouteRouteChildren {
 
 const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
   ProtectedAuditLogRoute: ProtectedAuditLogRoute,
+  ProtectedNotificationsRoute: ProtectedNotificationsRoute,
   ProtectedPaymentsRoute: ProtectedPaymentsRoute,
   ProtectedSettingsRoute: ProtectedSettingsRoute,
   ProtectedIndexRoute: ProtectedIndexRoute,

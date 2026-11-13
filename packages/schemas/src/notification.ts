@@ -46,7 +46,11 @@ export type PaginatedNotifications = z.infer<
  */
 export const notificationQuerySchema = paginationQuerySchema.extend({
   title: z.string().optional(),
-  isRead: z.coerce.boolean().optional(),
+  // `z.coerce.boolean()` would turn the string "false" into `true`.
+  isRead: z
+    .union([z.boolean(), z.enum(["true", "false"])])
+    .transform((v) => v === true || v === "true")
+    .optional(),
   from: z.string().optional(),
   to: z.string().optional(),
 });

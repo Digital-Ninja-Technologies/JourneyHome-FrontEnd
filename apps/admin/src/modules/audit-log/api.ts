@@ -1,24 +1,44 @@
-import { z } from "zod";
-import { api, parseApiResponse } from "@/lib/api";
+import {
+  type AuditLog,
+  type AuditLogQueryInput,
+  type AuditLogRaw,
+  auditLogRawSchema,
+  auditLogSchema,
+  type PaginatedAuditLogs,
+  paginatedAuditLogsSchema,
+} from "@journeyhome/schemas";
+import { api, parseApiResponse, toQueryString } from "@/lib/api";
 
-/** Off-spec: `GET /audit-logs` isn't in api-doc.yaml yet. */
-export const auditEntrySchema = z.object({
-  _id: z.string(),
-  actor: z.string().optional(),
-  actorName: z.string().optional(),
-  action: z.string(),
-  resourceType: z.string(),
-  resourceId: z.string(),
-  resourceLabel: z.string().optional(),
-  createdAt: z.string(),
-});
-export type AuditEntry = z.infer<typeof auditEntrySchema>;
+export type FetchAuditLogsParams = Partial<AuditLogQueryInput>;
 
-export async function fetchAuditLog(): Promise<AuditEntry[]> {
-  const res = await api<unknown>("/audit-logs");
+/** Newest first, with `actor` populated. */
+export async function fetchAuditLogs(
+  params?: FetchAuditLogsParams,
+): Promise<PaginatedAuditLogs> {
+  const res = await api<unknown>(`/audit-logs${toQueryString(params)}`);
   return parseApiResponse(
-    z.array(auditEntrySchema),
+    paginatedAuditLogsSchema,
     res,
     "Invalid audit log response from server",
+  );
+}
+
+export async function fetchAuditLog(id: string): Promise<AuditLog> {
+  const res = await api<unknown>(`/audit-logs/${encodeURIComponent(id)}`);
+  return parseApiResponse(
+    auditLogSchema,
+    res,
+    `Invalid audit log (${id}) response from server`,
+  );
+}
+
+export async function deleteAuditLog(id: string): Promise<AuditLogRaw> {
+  const res = await api<unknown>(`/audit-logs/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+  return parseApiResponse(
+    auditLogRawSchema,
+    res,
+    "Invalid audit log deletion response from server",
   );
 }

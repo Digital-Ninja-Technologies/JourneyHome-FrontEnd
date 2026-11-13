@@ -116,6 +116,11 @@ function RequestDetail({
               {r.photographerName && (
                 <DetailItem label="Photographer">
                   {r.photographerName}
+                  {r.photographerPhoneNo && (
+                    <span className="block text-xs font-normal text-muted-foreground">
+                      {formatPhoneDisplay(r.photographerPhoneNo)}
+                    </span>
+                  )}
                 </DetailItem>
               )}
             </DetailGrid>

@@ -1,120 +1,138 @@
+import type { AuditLog, PaginatedAuditLogs } from "@journeyhome/schemas";
+import { Button } from "@journeyhome/ui/components/button";
 import { Link } from "@tanstack/react-router";
-import {
-  createColumnHelper,
-  createPaginatedRowModel,
-  createSortedRowModel,
-  rowPaginationFeature,
-  rowSortingFeature,
-  tableFeatures,
-  useTable,
-} from "@tanstack/react-table";
+import { createColumnHelper } from "@tanstack/react-table";
+import { Trash2 } from "lucide-react";
+import { useMemo } from "react";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
-import { SortHeader } from "@/components/data-table/sort-header";
+import {
+  type ServerTableFeatures,
+  type SetTableSearch,
+  useServerTable,
+} from "@/components/data-table/use-server-table";
 import { formatDateTime } from "@/lib/format";
-import { type AuditLogSearch, DEFAULT_PAGE_SIZE } from "@/lib/search-schemas";
-import type { AuditEntry } from "../api";
+import type { TableSearch } from "@/lib/search-schemas";
 import {
   actionLabel,
   actorName,
   describe,
+  reasonOf,
   resourceLink,
 } from "../audit-log.utils";
 
-// The endpoint returns everything at once, so sort + paginate in the browser.
-const features = tableFeatures({
-  rowSortingFeature,
-  rowPaginationFeature,
-  sortedRowModel: createSortedRowModel(),
-  paginatedRowModel: createPaginatedRowModel(),
-});
+const columnHelper = createColumnHelper<ServerTableFeatures, AuditLog>();
 
-const columnHelper = createColumnHelper<typeof features, AuditEntry>();
-
-const columns = columnHelper.columns([
-  columnHelper.accessor((row) => +new Date(row.createdAt), {
-    id: "time",
-    header: ({ column }) => <SortHeader column={column}>Time</SortHeader>,
-    cell: (info) => (
-      <span className="whitespace-nowrap text-xs tabular-nums text-muted-foreground">
-        {formatDateTime(info.row.original.createdAt)}
-      </span>
-    ),
-  }),
-  columnHelper.accessor((row) => actorName(row), {
-    id: "actor",
-    header: ({ column }) => <SortHeader column={column}>Actor</SortHeader>,
-    cell: (info) => (
-      <span className="text-xs font-semibold">{info.getValue()}</span>
-    ),
-  }),
-  columnHelper.accessor("action", {
-    header: "Action",
-    enableSorting: false,
-    cell: (info) => (
-      <span className="whitespace-nowrap rounded-full bg-muted/50 px-2.5 py-0.5 text-[11px] font-semibold">
-        {actionLabel(info.getValue())}
-      </span>
-    ),
-  }),
-  columnHelper.display({
-    id: "event",
-    header: "Event",
-    cell: (info) => {
-      const e = info.row.original;
-      const link = resourceLink(e);
-      const text = <span className="text-xs text-ink-soft">{describe(e)}</span>;
-      return link ? (
-        <Link to={link.to} params={{ id: link.id }} className="hover:underline">
-          {text}
-        </Link>
-      ) : (
-        text
-      );
-    },
-  }),
-]);
+function buildColumns(onDelete: (entry: AuditLog) => void) {
+  return columnHelper.columns([
+    columnHelper.accessor("createdAt", {
+      header: "Time",
+      cell: (info) => (
+        <span className="whitespace-nowrap text-xs tabular-nums text-muted-foreground">
+          {formatDateTime(info.getValue())}
+        </span>
+      ),
+    }),
+    columnHelper.display({
+      id: "actor",
+      header: "Actor",
+      cell: (info) => {
+        const e = info.row.original;
+        return (
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold">{actorName(e)}</p>
+            {e.actor?.email && (
+              <p className="truncate text-[11px] text-muted-foreground">
+                {e.actor.email}
+              </p>
+            )}
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor("action", {
+      header: "Action",
+      cell: (info) => (
+        <span className="whitespace-nowrap rounded-full bg-muted/50 px-2.5 py-0.5 text-[11px] font-semibold">
+          {actionLabel(info.getValue())}
+        </span>
+      ),
+    }),
+    columnHelper.display({
+      id: "event",
+      header: "Event",
+      cell: (info) => {
+        const e = info.row.original;
+        const link = resourceLink(e);
+        const reason = reasonOf(e);
+        const text = (
+          <span className="text-xs text-ink-soft">{describe(e)}</span>
+        );
+        return (
+          <div className="min-w-0">
+            {link ? (
+              <Link
+                to={link.to}
+                params={{ id: link.id }}
+                className="hover:underline"
+              >
+                {text}
+              </Link>
+            ) : (
+              text
+            )}
+            {reason && (
+              <p className="line-clamp-1 text-[11px] italic text-muted-foreground">
+                “{reason}”
+              </p>
+            )}
+          </div>
+        );
+      },
+    }),
+    columnHelper.display({
+      id: "delete",
+      header: () => <span className="sr-only">Delete</span>,
+      cell: (info) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Delete audit entry"
+          className="text-muted-foreground hover:text-status-cancelled"
+          onClick={() => onDelete(info.row.original)}
+        >
+          <Trash2 />
+        </Button>
+      ),
+    }),
+  ]);
+}
 
 export function AuditLogTable({
-  rows,
+  data,
   isLoading,
   search,
   setSearch,
   hasActiveFilters,
   onResetFilters,
+  onDelete,
 }: {
-  rows: AuditEntry[];
+  data: PaginatedAuditLogs | undefined;
   isLoading: boolean;
-  search: AuditLogSearch;
-  setSearch: (patch: Partial<AuditLogSearch>) => void;
+  search: TableSearch;
+  setSearch: SetTableSearch;
   hasActiveFilters: boolean;
   onResetFilters: () => void;
+  onDelete: (entry: AuditLog) => void;
 }) {
-  const pagination = {
-    pageIndex: (search.page ?? 1) - 1,
-    pageSize: search.limit ?? DEFAULT_PAGE_SIZE,
-  };
-
-  const table = useTable({
-    features,
+  const columns = useMemo(() => buildColumns(onDelete), [onDelete]);
+  const { table, paginationProps } = useServerTable({
     columns,
-    data: rows,
+    data: data?.items,
+    meta: data?.pagination,
+    search,
+    setSearch,
     getRowId: (row) => row._id,
-    enableSortingRemoval: false,
-    initialState: { sorting: [{ id: "time", desc: true }] },
-    state: { pagination },
-    onPaginationChange: (updater) => {
-      const next =
-        typeof updater === "function" ? updater(pagination) : updater;
-      const page =
-        next.pageSize !== pagination.pageSize ? 1 : next.pageIndex + 1;
-      setSearch({
-        page: page === 1 ? undefined : page,
-        limit: next.pageSize === DEFAULT_PAGE_SIZE ? undefined : next.pageSize,
-      });
-    },
-    // Filtering changes the row count; keep the URL page instead of auto-resetting.
-    autoResetPageIndex: false,
   });
 
   return (
@@ -127,18 +145,10 @@ export function AuditLogTable({
         empty={{
           title: "No activity",
           description: "Nothing has been recorded yet.",
-          filteredDescription: "No events match your search and filters.",
+          filteredDescription: "No events match your filters.",
         }}
       />
-      <DataTablePagination
-        pageIndex={pagination.pageIndex}
-        pageSize={pagination.pageSize}
-        pageCount={table.getPageCount()}
-        totalRows={rows.length}
-        onPageChange={(i) => table.setPageIndex(i)}
-        onPageSizeChange={(n) => table.setPageSize(n)}
-        noun={["event", "events"]}
-      />
+      <DataTablePagination {...paginationProps} noun={["event", "events"]} />
     </>
   );
 }

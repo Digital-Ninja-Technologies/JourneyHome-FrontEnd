@@ -95,7 +95,10 @@ export async function assignPhotographer(
     `/service-requests/${id}/assign-photographer`,
     {
       method: "PATCH",
-      body: { photographerName: body.photographerName.trim() },
+      body: {
+        photographerName: body.photographerName.trim(),
+        photographerPhoneNo: body.photographerPhoneNo.trim(),
+      },
     },
   );
   return parseApiResponse(

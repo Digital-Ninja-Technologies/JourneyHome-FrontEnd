@@ -27,6 +27,11 @@ import {
   startedLabel,
 } from "@/modules/plans/plans.utils";
 import { usePlan } from "@/modules/plans/query-options";
+import { useServiceRequests } from "@/modules/service-requests/query-options";
+import {
+  activeRequestFor,
+  serviceNotice,
+} from "@/modules/service-requests/service-requests.utils";
 
 function Detail({
   label,
@@ -51,6 +56,7 @@ export function PlanDetailView() {
   const { id } = useParams({ from: "/app/plans/$id" });
   const planQ = usePlan(id);
   const paymentsQ = usePayments();
+  const requestsQ = useServiceRequests();
   const plan = planQ.data;
 
   if (planQ.isPending) return <PlanDetailSkeleton />;
@@ -92,7 +98,9 @@ export function PlanDetailView() {
   const [first, ...rest] = plan.coveredPerson.fullName.split(" ");
   const money = (n: number) => formatMoney(n, plan.currency);
   const next = nextCell(plan);
-  const notice = planNotice(plan);
+  const notice =
+    serviceNotice(plan, activeRequestFor(plan._id, requestsQ.data)) ??
+    planNotice(plan);
   const person = plan.coveredPerson;
   const history = (paymentsQ.data ?? []).filter(
     (p) => p.plan === plan._id && p.status !== "Pending",

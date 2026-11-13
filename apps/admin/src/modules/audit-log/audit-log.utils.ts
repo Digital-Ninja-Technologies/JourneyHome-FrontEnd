@@ -1,6 +1,6 @@
+import type { AuditLog } from "@journeyhome/schemas";
 import { downloadCsv } from "@/lib/csv";
 import { humanise } from "@/lib/format";
-import type { AuditEntry } from "./api";
 
 const VERB: Record<string, string> = {
   "service_request.created": "submitted",
@@ -36,18 +36,43 @@ export const ACTION_LABEL: Record<string, string> = {
 
 export const actionLabel = (a: string) =>
   ACTION_LABEL[a] ?? humanise(a.replace(/\./g, " "));
-export const actorName = (e: AuditEntry) => e.actorName ?? "System";
-export const resourceLabel = (e: AuditEntry) =>
-  e.resourceLabel ??
-  `${e.resourceType.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()} ${e.resourceId.slice(-6)}`;
+export const actorName = (e: AuditLog) =>
+  e.actor?.name ?? e.actor?.email ?? "System";
+
+/** A human label from `metadata.label`/`metadata.name` when present, else "service request 9a3f01". */
+export function resourceLabel(e: AuditLog): string {
+  const m = e.metadata ?? {};
+  const named = [m.label, m.name, m.resourceLabel].find(
+    (v): v is string => typeof v === "string" && v.trim() !== "",
+  );
+  return (
+    named ??
+    `${e.resourceType.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()} ${e.resourceId.slice(-6)}`
+  );
+}
+
+/** Optional free-text reason recorded with the action. */
+export const reasonOf = (e: AuditLog): string | undefined =>
+  typeof e.metadata?.reason === "string" ? e.metadata.reason : undefined;
+
+/** Filter options for the server-side `action` param. */
+export const ACTION_OPTIONS = Object.entries(ACTION_LABEL).map(
+  ([value, label]) => ({ value, label }),
+);
+
+export const RESOURCE_TYPE_OPTIONS = [
+  { value: "ServiceRequest", label: "Service requests" },
+  { value: "Plan", label: "Plans" },
+  { value: "Package", label: "Packages" },
+];
 
 /** "Ops Admin approved Ada's service request". */
-export const describe = (e: AuditEntry) =>
+export const describe = (e: AuditLog) =>
   `${actorName(e)} ${VERB[e.action] ?? `${actionLabel(e.action).toLowerCase()} —`} ${resourceLabel(e)}`;
 
 /** Where a resource lives in this console, if anywhere. */
 export function resourceLink(
-  e: AuditEntry,
+  e: AuditLog,
 ): { to: "/service-requests/$id" | "/plans/$id"; id: string } | null {
   if (e.resourceType === "ServiceRequest")
     return { to: "/service-requests/$id", id: e.resourceId };
@@ -55,16 +80,27 @@ export function resourceLink(
   return null;
 }
 
-export function exportAuditCsv(rows: AuditEntry[]) {
+export function exportAuditCsv(rows: AuditLog[]) {
   downloadCsv("audit-log.csv", [
-    ["Time", "Actor", "Action", "Resource type", "Resource", "Resource ID"],
+    [
+      "Time",
+      "Actor",
+      "Actor email",
+      "Action",
+      "Resource type",
+      "Resource",
+      "Resource ID",
+      "Reason",
+    ],
     ...rows.map((e) => [
       e.createdAt,
       actorName(e),
+      e.actor?.email ?? "",
       e.action,
       e.resourceType,
       resourceLabel(e),
       e.resourceId,
+      reasonOf(e) ?? "",
     ]),
   ]);
 }

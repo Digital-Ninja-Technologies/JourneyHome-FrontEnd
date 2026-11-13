@@ -10,6 +10,10 @@ import { FormDialog } from "@/components/form-dialog";
 import { useAssignPhotographerMutation } from "../mutations";
 
 const FORM_ID = "assign-photographer-form";
+const EMPTY: AssignPhotographerInput = {
+  photographerName: "",
+  photographerPhoneNo: "",
+};
 
 export function AssignPhotographerDialog({
   requestId,
@@ -23,11 +27,11 @@ export function AssignPhotographerDialog({
   const assign = useAssignPhotographerMutation(requestId);
   const { control, handleSubmit, reset } = useForm<AssignPhotographerInput>({
     resolver: zodResolver(assignPhotographerSchema),
-    defaultValues: { photographerName: "" },
+    defaultValues: EMPTY,
   });
 
   useEffect(() => {
-    if (!open) reset({ photographerName: "" });
+    if (!open) reset(EMPTY);
   }, [open, reset]);
 
   return (
@@ -44,6 +48,7 @@ export function AssignPhotographerDialog({
       <form
         id={FORM_ID}
         noValidate
+        className="flex flex-col gap-4"
         onSubmit={handleSubmit((values) =>
           assign.mutate(values, { onSuccess: () => onOpenChange(false) }),
         )}
@@ -53,6 +58,15 @@ export function AssignPhotographerDialog({
           name="photographerName"
           label="Photographer's full name"
           placeholder="e.g. Femi Bello"
+          autoComplete="off"
+        />
+        <FormInput
+          control={control}
+          name="photographerPhoneNo"
+          label="Photographer's phone number"
+          placeholder="e.g. 0803 000 0000"
+          type="tel"
+          inputMode="tel"
           autoComplete="off"
         />
       </form>

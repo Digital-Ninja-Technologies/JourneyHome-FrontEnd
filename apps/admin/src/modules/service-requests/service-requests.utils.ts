@@ -55,6 +55,28 @@ export function availableDecisions(
   }
 }
 
+/**
+ * Whether "Approve request" can go ahead, and which documents it would approve
+ * along the way. A document sent back for a new copy blocks approval: the
+ * customer still owes a replacement, so it can't be approved on their behalf.
+ */
+export function approvalReadiness(
+  documents: ServiceDocument[],
+): { ok: true; pending: ServiceDocument[] } | { ok: false; reason: string } {
+  const docs = currentDocuments(documents);
+  if (docs.length === 0)
+    return { ok: false, reason: "No documents have been submitted yet." };
+  if (docs.some((d) => d.verificationStatus === "Requires_Resubmission"))
+    return {
+      ok: false,
+      reason: "A document is waiting for a new copy from the customer.",
+    };
+  return {
+    ok: true,
+    pending: docs.filter((d) => d.verificationStatus === "Pending"),
+  };
+}
+
 export const DECISION_LABEL: Record<AdminServiceRequestStatus, string> = {
   Under_Review: "Start review",
   Docs_Verified: "Mark documents verified",

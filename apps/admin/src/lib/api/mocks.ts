@@ -4,6 +4,8 @@ import type {
   AdminPackage,
   AdminPayment,
   AdminUser,
+  AppNotification,
+  AuditLog,
   ContactRecord,
   CoveredPerson,
   PaymentStatus,
@@ -18,11 +20,12 @@ import type {
 /**
  * Simulated server for admin endpoints when running with VITE_USE_MOCKS=true.
  * Response shapes mirror api-doc.yaml. State lives in localStorage so changes
- * survive reloads; clear `jh_admin_mock:db` to reseed.
+ * survive reloads; clear `jh_admin_mock:db:v2` to reseed.
  */
 export const NOT_MOCKED = Symbol("not-mocked");
 
-const DB_KEY = "jh_admin_mock:db";
+/** Bump the suffix whenever the stored shape changes so old data reseeds. */
+const DB_KEY = "jh_admin_mock:db:v2";
 const SESSION_KEY = "jh_admin_session";
 const DAY = 86_400_000;
 
@@ -44,17 +47,6 @@ interface Customer extends UserSummary {
   createdAt: string;
 }
 
-interface AuditEntry {
-  _id: string;
-  actor?: string;
-  actorName?: string;
-  action: string;
-  resourceType: string;
-  resourceId: string;
-  resourceLabel?: string;
-  createdAt: string;
-}
-
 interface Db {
   customers: Customer[];
   packages: AdminPackage[];
@@ -67,7 +59,8 @@ interface Db {
   requests: ServiceRequest[];
   contacts: ContactRecord[];
   admins: AdminUser[];
-  audit: AuditEntry[];
+  audit: AuditLog[];
+  notifications: AppNotification[];
   prefs: Record<string, NonNullable<AdminMe["preferences"]>>;
 }
 
@@ -231,6 +224,50 @@ const AUDIT: [actor: string, action: string, label: string, days: number][] = [
   ],
 ];
 
+const NOTIFICATIONS: [
+  title: string,
+  message: string,
+  event: string,
+  days: number,
+  isRead: boolean,
+][] = [
+  [
+    "New service request",
+    "Adaeze Nwosu submitted a service request for review.",
+    "ServiceRequestSubmitted",
+    0,
+    false,
+  ],
+  [
+    "Service document submitted",
+    "A death certificate was uploaded for Adaeze Nwosu's service request.",
+    "ServiceDocumentSubmitted",
+    1,
+    false,
+  ],
+  [
+    "New contact message",
+    "Someone asked about joining the photographer network.",
+    "ContactMessageReceived",
+    2,
+    true,
+  ],
+  [
+    "New plan created",
+    "Chidi Okafor started a Classic Memorial plan.",
+    "PlanCreated",
+    4,
+    true,
+  ],
+];
+
+const resourceTypeOf = (action: string) =>
+  action.startsWith("package")
+    ? "Package"
+    : action.startsWith("plan")
+      ? "Plan"
+      : "ServiceRequest";
+
 function coveredPerson(
   fullName: string,
   relationship: string,
@@ -366,6 +403,7 @@ function seed(): Db {
         }),
         ...(status === "Closed" && {
           photographerName: "Femi Bello",
+          photographerPhoneNo: "08031234567",
           photographerAssignedAt: daysAgo(submitted - 4),
         }),
         documents: docs.map((verificationStatus, d) => ({
@@ -420,21 +458,38 @@ function seed(): Db {
     },
   ];
 
-  const audit: AuditEntry[] = AUDIT.map(([actorName, action, label, d], i) => ({
-    _id: `aud_${i + 1}`,
-    actor: `actor_${actorName.toLowerCase().replace(/\s+/g, "_")}`,
-    actorName,
-    action,
-    resourceType:
-      action.split(".")[0] === "package"
-        ? "Package"
-        : action.startsWith("plan")
-          ? "Plan"
-          : "ServiceRequest",
-    resourceId: `res_${i + 1}`,
-    resourceLabel: label,
-    createdAt: daysAgo(d, 8 + (i % 9)),
-  }));
+  const audit: AuditLog[] = AUDIT.map(([name, action, label, d], i) => {
+    const slug = name.toLowerCase().replace(/\s+/g, "_");
+    const at = daysAgo(d, 8 + (i % 9));
+    return {
+      _id: `aud_${i + 1}`,
+      actor: {
+        _id: `actor_${slug}`,
+        name,
+        email: `${slug.replace(/_/g, ".")}@journeyhome.ng`,
+        role: "Admin",
+      },
+      action,
+      resourceType: resourceTypeOf(action),
+      resourceId: `res_${i + 1}`,
+      metadata: { label },
+      createdAt: at,
+      updatedAt: at,
+    };
+  });
+
+  const notifications: AppNotification[] = NOTIFICATIONS.map(
+    ([title, message, event, d, isRead], i) => ({
+      _id: `ntf_${i + 1}`,
+      userId: "admin",
+      title,
+      message,
+      event,
+      channel: "in_app",
+      isRead,
+      createdAt: daysAgo(d, 9 + (i % 8)),
+    }),
+  );
 
   return {
     customers,
@@ -445,6 +500,7 @@ function seed(): Db {
     contacts,
     admins,
     audit,
+    notifications,
     prefs: {},
   };
 }
@@ -529,19 +585,21 @@ const isPendingReview = (s: ServiceRequestStatus) =>
 
 function audit(db: Db, action: string, resourceId: string, label: string) {
   const actor = sessionUser();
+  const at = nowIso();
   db.audit.unshift({
     _id: `aud_${Date.now()}`,
-    actor: actor.id,
-    actorName: actor.name,
+    actor: {
+      _id: actor.id,
+      name: actor.name,
+      email: actor.email,
+      role: actor.isSuperAdmin ? "SuperAdmin" : "Admin",
+    },
     action,
-    resourceType: action.startsWith("package")
-      ? "Package"
-      : action.startsWith("plan")
-        ? "Plan"
-        : "ServiceRequest",
+    resourceType: resourceTypeOf(action),
     resourceId,
-    resourceLabel: label,
-    createdAt: nowIso(),
+    metadata: { label },
+    createdAt: at,
+    updatedAt: at,
   });
 }
 
@@ -957,8 +1015,11 @@ const routes: [method: string, pattern: RegExp, handler: Handler][] = [
       if (!r) throw notFound("Service request");
       if (r.status !== "Approved")
         throw bad("Only approved requests can be assigned a photographer.");
+      const phone = String(body.photographerPhoneNo || "").trim();
+      if (!phone) throw bad("photographerPhoneNo is required.");
       r.status = "Closed";
       r.photographerName = String(body.photographerName || "").trim();
+      r.photographerPhoneNo = phone;
       r.photographerAssignedAt = nowIso();
       r.updatedAt = nowIso();
       audit(
@@ -1103,7 +1164,93 @@ const routes: [method: string, pattern: RegExp, handler: Handler][] = [
   ],
 
   /* ------------------------------- Audit log ------------------------------- */
-  ["GET", /^\/audit-logs$/, ({ db }) => [...db.audit].sort(newestFirst)],
+  [
+    "GET",
+    /^\/audit-logs$/,
+    ({ db, qs }) => {
+      const from = qs.get("startDate") ?? qs.get("from");
+      const to = qs.get("endDate") ?? qs.get("to");
+      const action = qs.get("action");
+      const resourceType = qs.get("resourceType");
+      const resourceId = qs.get("resourceId");
+      return paginate(
+        db.audit
+          .filter(
+            (e) =>
+              (!action || e.action === action) &&
+              (!resourceType || e.resourceType === resourceType) &&
+              (!resourceId || e.resourceId === resourceId) &&
+              inRange(e.createdAt, from, to),
+          )
+          .sort(newestFirst),
+        qs,
+      );
+    },
+  ],
+  [
+    "GET",
+    /^\/audit-logs\/([^/]+)$/,
+    ({ db, params: [id] }) => {
+      const entry = db.audit.find((e) => e._id === id);
+      if (!entry) throw notFound("Audit log");
+      return entry;
+    },
+  ],
+  [
+    "DELETE",
+    /^\/audit-logs\/([^/]+)$/,
+    ({ db, params: [id] }) => {
+      const i = db.audit.findIndex((e) => e._id === id);
+      if (i < 0) throw notFound("Audit log");
+      const [removed] = db.audit.splice(i, 1);
+      return { ...removed, actor: removed.actor?._id ?? null };
+    },
+  ],
+
+  /* ----------------------------- Notifications ----------------------------- */
+  [
+    "GET",
+    /^\/notifications\/admin$/,
+    ({ db, qs }) => {
+      const isRead = qs.get("isRead");
+      const title = qs.get("title");
+      const items = db.notifications
+        .filter(
+          (n) =>
+            (isRead === null || String(n.isRead) === isRead) &&
+            matches(title, n.title) &&
+            inRange(n.createdAt, qs.get("from"), qs.get("to")),
+        )
+        .sort(newestFirst);
+      return {
+        ...paginate(items, qs),
+        counts: {
+          totalNotifications: db.notifications.length,
+          totalUnreadNotifications: db.notifications.filter((n) => !n.isRead)
+            .length,
+        },
+      };
+    },
+  ],
+  [
+    "PATCH",
+    /^\/notifications\/([^/]+)\/read$/,
+    ({ db, params: [id] }) => {
+      const n = db.notifications.find((x) => x._id === id);
+      if (!n) throw notFound("Notification");
+      n.isRead = true;
+      return n;
+    },
+  ],
+  [
+    "DELETE",
+    /^\/notifications\/([^/]+)$/,
+    ({ db, params: [id] }) => {
+      const i = db.notifications.findIndex((x) => x._id === id);
+      if (i < 0) throw notFound("Notification");
+      return db.notifications.splice(i, 1)[0];
+    },
+  ],
 ];
 
 export async function mockRequest(

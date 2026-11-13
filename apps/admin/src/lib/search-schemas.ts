@@ -80,11 +80,20 @@ export const contactSearchSchema = tableSearchSchema.extend({
 });
 export type ContactSearch = z.infer<typeof contactSearchSchema>;
 
+/** `GET /audit-logs` has no free-text search; filters map to server params. */
 export const auditLogSearchSchema = tableSearchSchema.extend({
-  actor: optionalString,
   action: optionalString,
+  resourceType: optionalString,
+  from: day,
+  to: day,
 });
 export type AuditLogSearch = z.infer<typeof auditLogSearchSchema>;
+
+/** `search` maps to the API's `title` filter. */
+export const notificationsSearchSchema = tableSearchSchema.extend({
+  status: z.enum(["unread", "read"]).optional().catch(undefined),
+});
+export type NotificationsSearch = z.infer<typeof notificationsSearchSchema>;
 
 export const overviewSearchSchema = z.object({
   startDate: day,

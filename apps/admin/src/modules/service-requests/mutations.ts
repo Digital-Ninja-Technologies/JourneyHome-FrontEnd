@@ -77,6 +77,43 @@ export function useOpenDocumentMutation(id: string) {
   });
 }
 
+/**
+ * Approves the request, first approving any documents still pending.
+ * Documents go one at a time so a failure stops before the request is approved.
+ */
+export function useApproveRequestMutation(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      pendingDocumentIds,
+      reason,
+    }: {
+      pendingDocumentIds: string[];
+      reason?: string;
+    }) => {
+      for (const documentId of pendingDocumentIds) {
+        await verifyDocument(id, documentId, {
+          verificationStatus: "Approved",
+        });
+      }
+      return updateServiceRequestStatus(id, { status: "Approved", reason });
+    },
+    onSuccess: (_request, { pendingDocumentIds }) => {
+      toast.add({
+        type: "success",
+        title: "Request approved",
+        description:
+          pendingDocumentIds.length > 0
+            ? `${pendingDocumentIds.length} pending document${pendingDocumentIds.length === 1 ? " was" : "s were"} approved too. The customer has been notified.`
+            : "The customer has been notified.",
+      });
+    },
+    onError: onError("Couldn't approve the request"),
+    // Refetch even on failure: some documents may have been approved already.
+    onSettled: () => invalidate(queryClient),
+  });
+}
+
 export function useAssignPhotographerMutation(id: string) {
   const queryClient = useQueryClient();
   return useMutation({

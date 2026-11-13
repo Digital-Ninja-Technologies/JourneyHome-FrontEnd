@@ -206,6 +206,12 @@ export function ServiceRequestDetailView() {
           {req.photographerName && (
             <Detail label="Photographer" value={req.photographerName} />
           )}
+          {req.photographerPhoneNo && (
+            <Detail
+              label="Photographer's phone"
+              value={req.photographerPhoneNo}
+            />
+          )}
           {req.additionalInformation && (
             <Detail
               label="Additional information"

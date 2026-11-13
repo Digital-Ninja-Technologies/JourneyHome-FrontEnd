@@ -105,11 +105,13 @@ test.describe("navigation", () => {
       ["Service requests", /Service requests/],
       ["Payments", /Payments/],
       ["Contact messages", /Contact messages/],
+      ["Notifications", /Notifications/],
       ["Audit log", /Audit log/],
       ["Settings", /Settings/],
     ];
     for (const [link, title] of pages) {
-      await page.getByRole("link", { name: link, exact: true }).click();
+      // Prefix match: the Notifications link also carries its unread count.
+      await page.getByRole("link", { name: new RegExp(`^${link}`) }).first().click();
       await expect(heading(page)).toContainText(title);
     }
   });
@@ -208,10 +210,73 @@ test.describe("details & mutations", () => {
     await page.getByRole("button", { name: "Assign photographer" }).click();
     await page.getByRole("button", { name: "Assign and close" }).click();
     await expect(page.getByText("Enter the photographer's full name")).toBeVisible();
+    await expect(page.getByText("Enter the photographer's phone number")).toBeVisible();
 
     await page.getByLabel("Photographer's full name").fill("Femi Bello");
+    await page.getByLabel("Photographer's phone number").fill("abc");
+    await page.getByRole("button", { name: "Assign and close" }).click();
+    await expect(page.getByText("Enter a valid phone number")).toBeVisible();
+
+    await page.getByLabel("Photographer's phone number").fill("0803 123 4567");
     await page.getByRole("button", { name: "Assign and close" }).click();
     await expect(page.getByText("Photographer assigned").first()).toBeVisible();
+    await expect(page.getByText("0803 123 4567").first()).toBeVisible();
+  });
+
+  test("approving with pending documents confirms, then approves them too", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/service-requests/req_2");
+    await page.getByRole("button", { name: "Approve request" }).click();
+
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText("Approving the request will approve it as well");
+    await expect(dialog).toContainText("Valid ID of the deceased");
+    await dialog.getByRole("button", { name: "Approve documents and request" }).click();
+
+    await expect(page.getByText("1 pending document was approved too.", { exact: false })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Assign photographer" })).toBeVisible();
+  });
+
+  test("approval is blocked while a document awaits a new copy", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/service-requests/req_3");
+    await expect(page.getByRole("button", { name: "Approve request" })).toBeDisabled();
+    await expect(
+      page.getByText("Can’t approve yet: A document is waiting for a new copy from the customer."),
+    ).toBeVisible();
+  });
+
+  test("audit log filters server-side and deletes an entry", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/audit-log");
+    await expect(page.getByText(/of\s*\d+\s*events/)).toBeVisible();
+
+    await chooseFilter(page, "Action", "Request approved");
+    await expect(page).toHaveURL(/action=service_request\.approved/);
+    await expect(page.getByText(/of\s*1\s*event$/)).toBeVisible();
+
+    await page.getByRole("button", { name: "Delete audit entry" }).click();
+    await page.getByRole("button", { name: "Delete entry" }).click();
+    await expect(page.getByText("Audit entry deleted")).toBeVisible();
+    await expect(page.getByText("No events match your filters.")).toBeVisible();
+  });
+
+  test("admin notifications can be marked read and deleted", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/notifications");
+    await expect(heading(page)).toContainText("Notifications");
+    await expect(page.getByText("New service request")).toBeVisible();
+
+    await chooseFilter(page, "Show", "Unread");
+    await expect(page).toHaveURL(/status=unread/);
+    await expect(page.getByText(/of\s*2\s*notifications/)).toBeVisible();
+
+    await page.getByRole("button", { name: "Mark read" }).first().click();
+    await expect(page.getByText(/of\s*1\s*notification$/)).toBeVisible();
+
+    await page.getByRole("button", { name: "Delete notification" }).click();
+    await expect(page.getByText("Notification removed")).toBeVisible();
+    await expect(page.getByText("No notifications match your search and filters.")).toBeVisible();
   });
 
   test("contact message opens in a linkable sheet", async ({ page }) => {

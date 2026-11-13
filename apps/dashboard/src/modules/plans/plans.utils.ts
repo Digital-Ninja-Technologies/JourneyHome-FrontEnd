@@ -75,6 +75,11 @@ export function planNotice(p: Plan): Notice | null {
       };
     case "Service_Scheduled":
       return { tone: "review", text: "Your service has been scheduled." };
+    case "Completed":
+      return {
+        tone: "neutral",
+        text: "This service is complete. Thank you for trusting us with it.",
+      };
     default:
       return null;
   }

@@ -53,6 +53,7 @@ export const serviceRequestBaseSchema = z.object({
   reviewedBy: z.string().optional(),
   approvedAt: z.string().optional(),
   photographerName: z.string().optional(),
+  photographerPhoneNo: z.string().optional(),
   photographerAssignedAt: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -209,5 +210,10 @@ export const assignPhotographerSchema = z.object({
     .string()
     .trim()
     .min(2, "Enter the photographer's full name"),
+  photographerPhoneNo: z
+    .string()
+    .trim()
+    .min(1, "Enter the photographer's phone number")
+    .regex(/^\+?[\d\s()-]{7,20}$/, "Enter a valid phone number"),
 });
 export type AssignPhotographerInput = z.infer<typeof assignPhotographerSchema>;
